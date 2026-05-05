@@ -597,7 +597,7 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
   </div>
   <div class="card" style="border-color:rgba(239,68,68,.2)">
     <div class="ct" style="color:var(--er)"><div class="ctb" style="background:var(--er)"></div>מחיקה</div>
-    <button class="gbtn d" onclick="clearAll()">🗑️ מחק את כל הנתונים</button>
+    <button class="gbtn d" onclick="clearAllCloud()">🗑️ מחק את כל הנתונים</button>
   </div>
 </div>
 
@@ -910,8 +910,20 @@ function delRec(id,e){
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
 function clearAll(){
-  if(!confirm('למחוק את כל הרשומות?'))return;
+  if(!confirm('למחוק את כל הרשומות המקומיות?'))return;
   recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
+}
+async function clearAllCloud(){
+  if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
+  recs=[];LS.set('ev4_recs',recs);renderAll();
+  if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  try{
+    await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
+      method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+    gdDataFileId=null;
+    if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    toast('🗑️ נמחק מקומית ומהענן');
+  }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
 }
 function recalc(){
   let c=0;
