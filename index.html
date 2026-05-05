@@ -1,0 +1,2709 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>⚡ עלות חשמל רכב</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e14;--sf:#131820;--sf2:#1c2330;--sf3:#242d3b;
+  --bd:#2a3547;--ac:#00c896;--ac2:#3b82f6;--ac3:#f59e0b;
+  --ac4:#ec4899;--tx:#e2eaf4;--tx2:#8899b0;--tx3:#5c6e84;
+  --er:#ef4444;--ok:#22c55e;--r:14px;--rs:9px;--fn:'Heebo',sans-serif;
+  --bnav-h:64px;
+}
+body.light{
+  --bg:#f0f4f8;--sf:#ffffff;--sf2:#e8eef5;--sf3:#dde5ee;
+  --bd:#c8d5e3;--tx:#1a2332;--tx2:#4a5e74;--tx3:#7a92a8;
+  --er:#dc2626;--ok:#16a34a;
+}
+body.light input,body.light select{color-scheme:light;}
+body.light select option{background:#e8eef5;}
+body.light .hdr{background:linear-gradient(160deg,#e8eef5,#f0f4f8);}
+body.light .modal{background:var(--sf);}
+body.light .tip-popup{background:var(--sf2);}
+body.light canvas{filter:none;}
+/* light mode canvas text will be handled via JS color vars */
+body.light .hdr{background:linear-gradient(160deg,#dde5ee,#e8eef5)!important;border-bottom-color:var(--bd);}
+body.light .tab{color:var(--tx3);}
+body.light .tab.active{color:var(--ac);}
+body.light .menu-item{background:var(--sf2);border-color:var(--bd);color:var(--tx2);}
+body.light tbody tr:hover{background:rgba(0,200,150,.06);}
+body.light .kpi{background:var(--sf);}
+body.light .card{background:var(--sf);}
+body.light .cob{background:var(--sf2);border-color:var(--bd);}
+body.light .gbtn{border-color:var(--bd);color:var(--tx2);}
+body.light .bnav{background:var(--sf);border-top-color:var(--bd);}
+body.light .settings-panel,body.light .menu-panel{background:var(--sf);}
+body.light .theme-opt{background:var(--sf2);border-color:var(--bd);color:var(--tx2);}
+body.light input[type=date]{color-scheme:light;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;font-size:15px;}
+
+/* ═══ BOTTOM NAV (mobile only) ═══ */
+.bnav{display:none;}
+@media(max-width:899px){
+  .bnav{
+    display:flex;align-items:center;justify-content:space-around;
+    position:fixed;bottom:0;left:0;right:0;height:var(--bnav-h);
+    background:var(--sf);border-top:1px solid var(--bd);
+    z-index:250;padding:0 8px;padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  /* hide desktop tabs on mobile */
+  .hdr .tabs{display:none;}
+  /* push content above bottom nav */
+  .wrap{padding-bottom:calc(var(--bnav-h) + 20px)!important;}
+  /* toast above bottom nav */
+  .toast{bottom:calc(var(--bnav-h) + 10px);}
+}
+.bnav-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;flex:1;background:none;border:none;cursor:pointer;
+  color:var(--tx3);font-family:var(--fn);font-size:.6rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;padding:8px 4px;
+  transition:color .18s;
+}
+.bnav-btn:active{opacity:.7;}
+.bnav-btn.active{color:var(--ac);}
+.bnav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+/* Plus button — pops up */
+.bnav-plus{
+  flex:0 0 60px;width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--ac),#00a37a);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(0,200,150,.45);
+  margin-bottom:12px;transform:translateY(-6px);
+  transition:transform .15s,box-shadow .15s;
+  color:#061410;
+}
+.bnav-plus:active{transform:translateY(-4px) scale(.95);box-shadow:0 2px 10px rgba(0,200,150,.3);}
+.bnav-plus svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ═══ MENU DRAWER (mobile) ═══ */
+.menu-drawer{
+  position:fixed;inset:0;z-index:400;display:none;align-items:flex-end;justify-content:center;
+}
+.menu-drawer.open{display:flex;}
+.menu-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);}
+.menu-panel{
+  position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);
+  border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;
+  padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));
+  animation:su .25s ease;
+}
+.menu-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);margin-bottom:12px;text-align:center;}
+.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.menu-item{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--r);
+  padding:14px 8px;cursor:pointer;font-family:var(--fn);
+  font-size:.78rem;font-weight:700;color:var(--tx2);
+  transition:all .18s;border:none;
+}
+.menu-item:active{transform:scale(.97);}
+.menu-item.active-tab{background:rgba(0,200,150,.1);color:var(--ac);border-color:var(--ac)!important;border:1.5px solid var(--ac);}
+.menu-item-icon{font-size:1.5rem;line-height:1;}
+
+/* ═══ SETTINGS DRAWER (mobile) ═══ */
+.settings-drawer{
+  position:fixed;inset:0;z-index:400;display:none;align-items:flex-end;justify-content:center;
+}
+.settings-drawer.open{display:flex;}
+.settings-panel{
+  position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);
+  border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;
+  padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));
+  animation:su .25s ease;
+}
+.settings-title{font-size:1rem;font-weight:800;margin-bottom:16px;}
+.theme-row{display:flex;gap:10px;margin-bottom:4px;}
+.theme-opt{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 8px;border-radius:var(--rs);border:1.5px solid var(--bd);
+  background:var(--sf2);cursor:pointer;font-family:var(--fn);
+  font-size:.82rem;font-weight:700;color:var(--tx2);transition:all .18s;
+}
+.theme-opt.active{border-color:var(--ac);color:var(--ac);background:rgba(0,200,150,.1);}
+.theme-opt:active{transform:scale(.97);}
+.hdr{background:linear-gradient(160deg,#0d1522,#131820);border-bottom:1px solid var(--bd);padding:18px 16px 0;position:sticky;top:0;z-index:200;}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.hdr-t{font-size:1.25rem;font-weight:900;letter-spacing:-0.5px;}
+.hdr-t span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-s{font-size:0.7rem;color:var(--tx3);margin-top:1px;}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-family:var(--fn);font-size:0.85rem;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;}
+.tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s;}
+.tab.active{color:var(--ac);}.tab.active::after{transform:scaleX(1);}
+.wrap{max-width:560px;margin:0 auto;padding:14px;}
+@media(min-width:900px){
+  .wrap{max-width:1100px;padding:20px 24px;}
+  .tw table,.tw{min-width:100%!important;}
+  table{min-width:100%!important;}
+  .fr{grid-template-columns:1fr 1fr 1fr;}
+  .sg{grid-template-columns:repeat(4,1fr);}
+  .rd-grid{grid-template-columns:repeat(4,1fr);}
+  .cog{grid-template-columns:repeat(5,1fr);}
+  .hdr{padding:18px 24px 0;}
+}
+.tc{display:none;}.tc.active{display:block;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.ct{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx2);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.ctb{width:3px;height:12px;background:var(--ac);border-radius:2px;flex-shrink:0;}
+.f{margin-bottom:12px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.f label{display:block;font-size:.85rem;font-weight:700;color:var(--tx);margin-bottom:5px;}
+.hint{font-size:.72rem;color:var(--tx2);margin-top:3px;}
+input,select{width:100%;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-family:var(--fn);font-size:1.05rem;font-weight:500;padding:12px 13px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,200,150,.1);}
+input[type=date]{color-scheme:dark;}
+select option{background:#1c2330;}
+.btn{width:100%;background:linear-gradient(135deg,var(--ac),#00a37a);border:none;border-radius:var(--r);color:#061410;font-family:var(--fn);font-size:.95rem;font-weight:800;padding:14px;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btn:active{transform:scale(.98);opacity:.9;}
+.gbtn{background:transparent;border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.75rem;font-weight:600;padding:7px 13px;cursor:pointer;transition:all .2s;width:auto;}
+.gbtn:hover{border-color:var(--ac2);color:var(--ac2);}
+.gbtn.d:hover{border-color:var(--er);color:var(--er);}
+.gbtn.g:hover{border-color:var(--ac);color:var(--ac);}
+/* company chips */
+.cog{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.cob{background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.73rem;font-weight:600;padding:9px 5px;cursor:pointer;transition:all .2s;text-align:center;width:100%;}
+.cob.on{background:rgba(0,200,150,.1);border-color:var(--ac);color:var(--ac);}
+.cor{display:block;font-size:.62rem;color:var(--tx3);margin-top:2px;}
+.cob.on .cor{color:rgba(0,200,150,.75);}
+.rate-field{border-color:rgba(245,158,11,.45)!important;}
+.rate-auto{font-size:.68rem;color:var(--tx3);font-weight:400;}
+.rate-manual{font-size:.68rem;color:var(--ac3);font-weight:600;}
+/* mini stats */
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
+@media(min-width:480px){.sg{grid-template-columns:repeat(4,1fr);}}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px;}
+.sv{font-size:1.35rem;font-weight:900;color:var(--ac);line-height:1.1;}
+.sv.b{color:var(--ac2);}.sv.g{color:var(--ac3);}
+.sl{font-size:.75rem;color:var(--tx2);margin-top:3px;font-weight:500;}
+/* table */
+.ta{display:flex;gap:7px;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.ta-right{display:flex;gap:7px;}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--rs);border:1px solid var(--bd);max-height:65vh;overflow-y:auto;}
+thead th{position:sticky;top:0;z-index:10;background:var(--sf2);}
+table{width:100%;min-width:640px;border-collapse:collapse;font-size:.72rem;}
+thead tr{background:var(--sf2);}
+thead th{padding:9px 10px;text-align:right;font-weight:700;color:var(--tx3);font-size:.67rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--bd);}
+tbody tr{border-bottom:1px solid rgba(42,53,71,.5);transition:background .12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(0,200,150,.04);}
+tbody td{padding:9px 10px;vertical-align:middle;white-space:nowrap;}
+.cd{color:var(--tx3);font-size:.67rem;}.ckm{color:var(--ac);font-weight:700;}
+.cq{color:var(--ac2);font-weight:600;}.cc{color:var(--ac3);font-weight:600;}
+.cr{color:var(--tx3);font-size:.68rem;}
+.badge{display:inline-block;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:20px;background:rgba(59,130,246,.12);color:var(--ac2);}
+.badge.h{background:rgba(0,200,150,.1);color:var(--ac);}
+.bdl{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.9rem;padding:3px 7px;border-radius:4px;transition:all .15s;}
+.bdl:hover{color:var(--er);background:rgba(239,68,68,.1);}
+.mpty{text-align:center;padding:36px 20px;color:var(--tx3);}
+.mpty-i{font-size:2.5rem;margin-bottom:10px;opacity:.35;}
+.rcnt{font-size:.72rem;background:rgba(0,200,150,.1);color:var(--ac);border-radius:20px;padding:2px 9px;font-weight:700;}
+/* search bar */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-wrap input{padding-right:36px;background:var(--sf2);}
+.search-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:.9rem;pointer-events:none;}
+.search-clear{position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.9rem;display:none;}
+/* row detail panel */
+.row-detail{background:var(--sf2);border:1px solid var(--bd);border-top:none;padding:12px 14px;}
+.rd-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.rd-item{text-align:center;}
+.rd-lbl{font-size:.62rem;color:var(--tx3);}
+.rd-val{font-size:.82rem;font-weight:700;color:var(--tx);}
+.rd-val.g{color:var(--ac);}.rd-val.b{color:var(--ac2);}.rd-val.y{color:var(--ac3);}
+/* companies list */
+.col{display:flex;flex-direction:column;gap:8px;}
+.coi{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:13px 14px;display:flex;align-items:center;justify-content:space-between;}
+.coi.def{border-color:var(--ac);}
+.coin{font-size:.88rem;font-weight:700;}
+.coit{font-size:.7rem;color:var(--tx3);margin-top:2px;}
+.coir{font-size:1rem;font-weight:900;color:var(--ac3);}
+.coirl{font-size:.62rem;color:var(--tx3);}
+.tdef{font-size:.6rem;font-weight:700;background:rgba(0,200,150,.15);color:var(--ac);border-radius:20px;padding:2px 7px;margin-left:5px;}
+.bico{background:none;border:none;font-size:1rem;cursor:pointer;padding:5px;color:var(--tx3);transition:color .15s;}
+.bico:hover{color:var(--er);}.bico.ed:hover{color:var(--ac2);}
+/* rate history */
+.rh{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;}
+.ri{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
+.rd2{font-size:.75rem;font-weight:600;color:var(--tx2);}
+.rvs{display:flex;gap:14px;align-items:center;}
+.rv{text-align:center;}.rv-l{font-size:.6rem;color:var(--tx3);}.rv-n{font-size:.85rem;font-weight:700;color:var(--ac);}
+/* home rate card */
+.mrc{background:linear-gradient(135deg,rgba(0,200,150,.08),rgba(59,130,246,.08));border:1px solid rgba(0,200,150,.25);border-radius:var(--r);padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.mrl .mr-lb{font-size:.7rem;color:var(--tx3);}
+.mrl .mr-v{font-size:1.6rem;font-weight:900;color:var(--ac);}
+.mrl .mr-s{font-size:.67rem;color:var(--tx2);margin-top:1px;}
+/* toggle */
+.trow{display:flex;align-items:center;justify-content:space-between;padding:4px 0;}
+.tgl{position:relative;width:42px;height:24px;flex-shrink:0;}
+.tgl input{opacity:0;width:0;height:0;}
+.tsl{position:absolute;inset:0;background:var(--bd);border-radius:24px;cursor:pointer;transition:.2s;}
+.tsl::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:var(--tx3);border-radius:50%;transition:.2s;}
+.tgl input:checked+.tsl{background:var(--ac);}
+.tgl input:checked+.tsl::before{transform:translateX(18px);background:#061410;}
+/* modal */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.mov.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:560px;padding:20px;animation:su .28s ease;max-height:90vh;overflow-y:auto;}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mt{font-size:1rem;font-weight:800;margin-bottom:16px;}
+.mbs{display:flex;gap:8px;margin-top:14px;}
+.mbs .btn{flex:1;}
+.mcan{flex:0 0 auto;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--r);color:var(--tx2);font-family:var(--fn);font-size:.9rem;font-weight:700;padding:14px 20px;cursor:pointer;}
+.divl{height:1px;background:var(--bd);margin:12px 0;}
+.lrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-size:.72rem;font-weight:600;color:var(--tx2);margin-bottom:6px;margin-left:4px;}
+.impbar{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;margin-top:8px;display:none;}
+.impbar.open{display:block;}
+.prog{height:6px;background:var(--bd);border-radius:3px;margin-top:8px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:3px;transition:width .3s;}
+/* stats */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(42,53,71,.4);}
+.stat-row:last-child{border-bottom:none;}
+.stat-lbl{font-size:.88rem;color:var(--tx);display:flex;align-items:center;gap:5px;}
+.tip-btn{background:rgba(42,53,71,.7);border:1px solid var(--bd);border-radius:50%;width:18px;height:18px;font-size:.68rem;color:var(--tx2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.tip-btn:hover{background:var(--ac2);color:#fff;border-color:var(--ac2);}
+body.light .tip-btn{background:var(--ac2);color:#fff;border-color:var(--ac2);}
+body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
+.tip-popup{position:fixed;z-index:500;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 14px;max-width:280px;font-size:.8rem;color:var(--tx);line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.4);direction:rtl;}
+.stat-val{font-size:.95rem;font-weight:700;color:var(--tx);}
+.stat-val.g{color:var(--ac);}.stat-val.b{color:var(--ac2);}.stat-val.y{color:var(--ac3);}.stat-val.r{color:var(--er);}
+.sect-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);margin:14px 0 8px;display:flex;align-items:center;gap:6px;}
+.sect-title::before{content:'';width:3px;height:11px;background:var(--ac3);border-radius:2px;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.nr td{animation:fi .35s ease forwards;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sf);border:1px solid var(--ok);border-radius:var(--r);color:var(--ok);font-size:.82rem;font-weight:600;padding:11px 22px;z-index:999;transition:transform .28s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.e{border-color:var(--er);color:var(--er);}
+.toast.w{border-color:var(--ac3);color:var(--ac3);}
+.rd-sect{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);padding:8px 14px 4px;background:var(--sf3);}
+.rd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);}
+.rd-item{background:var(--sf2);padding:8px 10px;}
+.rd-lbl{font-size:.62rem;color:var(--tx3);}
+.rd-val{font-size:.82rem;font-weight:700;color:var(--tx);}
+.rd-val.g{color:var(--ac);}.rd-val.b{color:var(--ac2);}.rd-val.y{color:var(--ac3);}.rd-val.r{color:var(--er);}
+
+/* ═══ DASHBOARD ═══ */
+.dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
+@media(min-width:480px){.dash-kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px 14px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;}
+.kpi.green::before{background:var(--ac);}
+.kpi.blue::before{background:var(--ac2);}
+.kpi.yellow::before{background:var(--ac3);}
+.kpi.red::before{background:var(--er);}
+.kpi.ok::before{background:var(--ok);}
+.kpi-label{font-size:.67rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.kpi-value{font-size:1.4rem;font-weight:900;line-height:1.1;color:var(--tx);}
+.kpi-value.green{color:var(--ac);}
+.kpi-value.blue{color:var(--ac2);}
+.kpi-value.yellow{color:var(--ac3);}
+.kpi-value.red{color:var(--er);}
+.kpi-value.ok{color:var(--ok);}
+.kpi-sub{font-size:.65rem;color:var(--tx3);margin-top:3px;}
+.kpi-delta{display:inline-flex;align-items:center;font-size:.65rem;font-weight:700;margin-top:4px;padding:2px 6px;border-radius:20px;}
+.kpi-delta.up{background:rgba(34,197,94,.12);color:var(--ok);}
+.kpi-delta.dn{background:rgba(239,68,68,.12);color:var(--er);}
+.dash-row{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px;}
+@media(min-width:640px){.dash-row{grid-template-columns:1fr 1fr;}}
+.dash-card{margin-bottom:0!important;}
+.dash-card canvas{width:100%!important;display:block;}
+/* gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 4px;}
+.gauge-svg{overflow:visible;}
+.gauge-label{font-size:1.6rem;font-weight:900;margin-top:-8px;}
+.gauge-sub{font-size:.7rem;color:var(--tx3);margin-top:2px;}
+/* bottom info strip */
+.info-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media(min-width:480px){.info-strip{grid-template-columns:repeat(5,1fr);}}
+.is-item{text-align:center;}
+.is-lbl{font-size:.6rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.is-val{font-size:.88rem;font-weight:700;color:var(--tx);margin-top:2px;}
+</style>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-t">⚡ <span>עלות חשמל רכב</span></div>
+      <div class="hdr-s" id="hSub">טוען...</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw('data',this)">📊 מבט כללי</button>
+    <button class="tab" onclick="sw('add',this)">➕ הוספה</button>
+    <button class="tab" onclick="sw('log',this)">📋 היסטוריה</button>
+    <button class="tab" onclick="sw('stats',this)">📈 סטטיסטיקה</button>
+    <button class="tab" onclick="sw('rates',this)">⚡ תעריפים</button>
+    <button class="tab" onclick="sw('cos',this)">🏢 חברות</button>
+    <button class="tab" onclick="sw('set',this)">⚙️ הגדרות</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ═══ נתונים ═══ -->
+<div class="tc active" id="tab-data">
+  <!-- כרטיסי KPI -->
+  <div class="dash-kpis" id="dashKpis"></div>
+  <!-- שורה: גרף חיסכון מצטבר + מד יעילות -->
+  <div class="dash-row">
+    <div class="card dash-card" id="dashSavingCard">
+      <div class="ct"><div class="ctb" style="background:var(--ok)"></div>חיסכון מצטבר מדלק</div>
+      <canvas id="cSaving" height="150"></canvas>
+    </div>
+    <div class="card dash-card" id="dashGaugeCard">
+      <div class="ct"><div class="ctb" style="background:var(--ac3)"></div>יעילות ביחס למוצהר</div>
+      <div id="dashGauge"></div>
+    </div>
+  </div>
+  <!-- גרף ק"מ חודשי עם scroll -->
+  <div class="card" id="dashKmCard">
+    <div class="ct"><div class="ctb" style="background:var(--ac)"></div>ק"מ חודשי
+      <span style="margin-right:auto;display:flex;gap:6px">
+        <button class="gbtn" id="kmScrollL" onclick="kmScroll(-1)" style="padding:3px 9px;font-size:.8rem">‹</button>
+        <button class="gbtn" id="kmScrollR" onclick="kmScroll(1)" style="padding:3px 9px;font-size:.8rem">›</button>
+      </span>
+    </div>
+    <canvas id="cKm" height="130"></canvas>
+  </div>
+  <!-- רצועת מידע תחתית -->
+  <div class="card" id="dashBottom"></div>
+</div>
+
+<!-- ═══ הוספה ═══ -->
+<div class="tc" id="tab-add">
+  <div class="card">
+    <div class="ct"><div class="ctb"></div>הזנת טעינה חדשה</div>
+    <div class="fr">
+      <div class="f"><label>📅 תאריך</label><input type="date" id="inDate"></div>
+      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="inKmLeft" placeholder="150" inputmode="numeric"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>🛣️ אודומטר</label><input type="number" id="inKmTotal" placeholder="15430" inputmode="numeric"><div class="hint">ק"מ מצטבר ברכב</div></div>
+      <div class="f"><label>⚡ קו"ש שנטענו</label><input type="number" id="inKwh" placeholder="45.2" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="f">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <label style="margin:0">🏢 חברה</label>
+        <button class="gbtn" id="coBtnsToggle" onclick="togCoBtns()" style="font-size:.7rem;padding:4px 10px">▾ הסתר</button>
+      </div>
+      <div class="cog" id="coBtns"></div>
+    </div>
+    <div class="f">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <label style="margin:0">💰 תעריף ₪/קו"ש</label>
+        <span id="rateTag" class="rate-auto">ברירת מחדל מהחברה</span>
+      </div>
+      <input type="number" id="inRate" class="rate-field" step="0.001" inputmode="decimal" oninput="onRateInput(this.value)">
+    </div>
+    <div id="addF" style="display:none">
+      <div class="fr">
+        <div class="f"><label>➕ קו"ש נוספים</label><input type="number" id="inAddKwh" placeholder="0" step="0.01" inputmode="decimal"></div>
+        <div class="f"><label>🏢 חברה נוספת</label><select id="inAddCo"></select></div>
+      </div>
+      <div class="f">
+        <label>💰 תעריף נוסף <span id="rateTag2" class="rate-auto">ברירת מחדל</span></label>
+        <input type="number" id="inRate2" class="rate-field" step="0.001" inputmode="decimal" oninput="onRateInput2(this.value)">
+      </div>
+    </div>
+    <div class="f"><label>📝 הערה</label><input type="text" id="inNote" placeholder="טעינה בדרך לעבודה..."></div>
+    <button class="btn" onclick="saveRec()">✅ שמור טעינה</button>
+  </div>
+</div>
+
+<!-- ═══ היסטוריה ═══ -->
+<div class="tc" id="tab-log">
+  <div class="card">
+    <div class="lrow">
+      <div class="ct" style="margin-bottom:0"><div class="ctb"></div>היסטוריה</div>
+      <span class="rcnt" id="rcnt">0</span>
+    </div>
+    <!-- חיפוש -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchQ" placeholder="חיפוש: תאריך, חברה, הערה, קו&quot;ש, עלות..." oninput="renderTable()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="ta">
+      <div style="font-size:.7rem;color:var(--tx3)" id="searchInfo">לחץ על שורה לפרטים</div>
+      <div class="ta-right">
+        <button class="gbtn g" onclick="expCSV()">📤 CSV</button>
+        <button class="gbtn d" onclick="clearAll()">🗑️ נקה</button>
+      </div>
+    </div>
+    <div class="tw">
+      <table id="mainTbl">
+        <thead><tr>
+          <th>#</th><th>תאריך</th><th>נסע</th><th>נשאר</th>
+          <th>קו"ש</th><th id="thCost">עלות</th><th>אודו׳</th>
+          <th>קו"ש מצטבר</th><th>חברה</th><th></th>
+        </tr></thead>
+        <tbody id="mainBody"></tbody>
+      </table>
+    </div>
+    <div class="mpty" id="emptyState"><div class="mpty-i">⚡</div><p>אין טעינות<br>הזן נתונים בלשונית הוספה</p></div>
+  </div>
+</div>
+
+<!-- ═══ סטטיסטיקה ═══ -->
+<div class="tc" id="tab-stats">
+  <div class="card"><div class="ct"><div class="ctb"></div>סיכום כולל</div><div id="stMain"></div></div>
+  <div class="card"><div class="ct"><div class="ctb"></div>לפי חברה</div><div id="stCo"></div></div>
+  <div class="card"><div class="ct"><div class="ctb"></div>מדדי יעילות ונסיעה</div><div id="stKm"></div></div>
+  <div class="card"><div class="ct"><div class="ctb"></div>חיסכון מול דלק</div><div id="stFuel"></div></div>
+  <div class="card"><div class="ct"><div class="ctb" style="background:var(--ac3)"></div>פילוח חודשי — חשמל ודלק</div><div id="stMonthly"></div></div>
+</div>
+
+<!-- ═══ תעריפים ═══ -->
+<div class="tc" id="tab-rates">
+  <div class="mrc" style="flex-direction:column;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+      <div style="font-size:.7rem;color:var(--tx3)" id="mrSub">—</div>
+      <button class="gbtn g" onclick="openUpdateRates()">✏️ עדכן</button>
+    </div>
+    <div style="display:flex;gap:0;width:100%">
+      <div class="mrl" style="flex:1;border-left:1px solid rgba(0,200,150,.2);padding-left:16px">
+        <div class="mr-lb">⚡ חשמל (₪/קו"ש)</div>
+        <div class="mr-v" id="mrDisp">—</div>
+      </div>
+      <div class="mrl" style="flex:1;padding-right:16px">
+        <div class="mr-lb">⛽ דלק (₪/ליטר)</div>
+        <div class="mr-v" id="mrFuelDisp" style="color:var(--ac3)">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lrow"><div class="ct" style="margin-bottom:0"><div class="ctb"></div>היסטוריית תעריף חשמל</div><button class="gbtn g" onclick="openUpdateRates()">+ הוסף</button></div>
+    <div class="rh" id="rateHist"></div>
+    <div class="mpty" id="ratesEmpty" style="display:none"><div class="mpty-i">📅</div><p>הוסף תעריף ביתי חודשי</p></div>
+  </div>
+  <!-- מחיר דלק -->
+  <div class="card">
+    <div class="lrow"><div class="ct" style="margin-bottom:0"><div class="ctb" style="background:var(--ac3)"></div>היסטוריית מחיר דלק</div><button class="gbtn g" onclick="openUpdateRates()">+ הוסף</button></div>
+    <div class="rh" id="fuelHist"></div>
+    <div class="mpty" id="fuelEmpty" style="display:none"><div class="mpty-i">⛽</div><p>הוסף מחיר דלק חודשי</p></div>
+  </div>
+</div>
+
+<!-- ═══ חברות ═══ -->
+<div class="tc" id="tab-cos">
+  <div class="card">
+    <div class="lrow"><div class="ct" style="margin-bottom:0"><div class="ctb"></div>חברות</div><button class="gbtn g" onclick="openAddCo()">+ הוסף</button></div>
+    <div class="col" id="coList"></div>
+  </div>
+  <div class="card" style="background:rgba(0,200,150,.04);border-color:rgba(0,200,150,.2)">
+    <div class="ct" style="color:var(--ac)"><div class="ctb"></div>הסבר סוגי חברות</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--sf2);border-radius:var(--rs);padding:12px 14px;border-right:3px solid var(--ac)">
+        <div style="font-size:.88rem;font-weight:700;color:var(--ac);margin-bottom:4px">🏠 ביתי</div>
+        <div style="font-size:.8rem;color:var(--tx2);line-height:1.6">
+          תעריף חשמל נלקח <strong>אוטומטית לפי חודש התאריך</strong>.<br>
+          מתעדכן כל חודש בהתאם לטבלת תעריפי חשמל בלשונית "תעריפים".
+        </div>
+      </div>
+      <div style="background:var(--sf2);border-radius:var(--rs);padding:12px 14px;border-right:3px solid var(--ac2)">
+        <div style="font-size:.88rem;font-weight:700;color:var(--ac2);margin-bottom:4px">🏢 חברה (ציבורי)</div>
+        <div style="font-size:.8rem;color:var(--tx2);line-height:1.6">
+          תעריף <strong>קבוע</strong> שהוגדר לחברה — מוחל כברירת מחדל על כל טעינה.<br>
+          ניתן <strong>לשנות ידנית</strong> את התעריף בכל טעינה בודדת בלשונית "יומן".
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ הגדרות ═══ -->
+<div class="tc" id="tab-set">
+  <div class="card">
+    <div class="ct"><div class="ctb"></div>נתוני רכב מוצהרים</div>
+    <div class="f"><label>🚗 שם הרכב</label><input type="text" id="sCarName" placeholder="Geely Geometry C" oninput="saveSt()"></div>
+    <div class="fr">
+      <div class="f"><label>🔋 קיבולת סוללה (קו"ש)</label><input type="number" id="sBatt" placeholder="70" oninput="saveSt()"></div>
+      <div class="f"><label>🛣️ טווח מוצהר (ק"מ)</label><input type="number" id="sRange" placeholder="485" oninput="saveSt()"></div>
+    </div>
+    <div class="f">
+      <label>⚡ קו"ש טעינה בפועל <span style="font-size:.68rem;color:var(--tx3);font-weight:400">(ברירת מחדל: כמו קיבולת סוללה)</span></label>
+      <input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()">
+      <div class="hint">לדוגמה: סוללה 70 קו"ש אך בטעינה מלאה מגיע ל-80 קו"ש — הזן 80</div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>⚡ קו"ש ל-100 ק"מ (מוצהר)</label><input type="number" id="sDeclKwh100" placeholder="14.43" step="0.01" inputmode="decimal" oninput="saveSt()"><div class="hint" id="sDeclKwhCalc"></div></div>
+      <div class="f"><label>🏎️ כ"ס</label><input type="number" id="sKw" placeholder="204" oninput="saveSt()"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>⛽ ק"מ לליטר (שקילות)</label><input type="number" id="sKpl" placeholder="12.125" step="0.001" oninput="saveSt()"></div>
+      <div class="f">
+        <label>💰 מחיר ליטר דלק</label>
+        <input type="number" id="sFuel" placeholder="7.20" step="0.01" oninput="saveSt()">
+        <div class="hint" id="sFuelHint" style="cursor:pointer;color:var(--ac)" onclick="setAvgFuel()">⟳ חשב ממוצע מהיסטוריה</div>
+      </div>
+    </div>
+    <div id="sDeclared" style="margin-top:10px;background:var(--sf2);border-radius:var(--rs);padding:10px;font-size:.75rem;display:none">
+      <div style="color:var(--tx3);font-size:.65rem;font-weight:700;text-transform:uppercase;margin-bottom:6px">נתונים מוצהרים מחושבים</div>
+      <div id="sDeclCalc"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ctb"></div>תצוגה</div>
+    <div class="trow">
+      <div><div style="font-size:.82rem;font-weight:600">הצג עמודות עלות ותעריף</div></div>
+      <label class="tgl"><input type="checkbox" id="sShowCost" checked onchange="saveSt();renderTable()"><div class="tsl"></div></label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ctb"></div>ייבוא / ייצוא</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="gbtn g" onclick="expAll()">📦 ייצוא גיבוי JSON</button>
+      <button class="gbtn" onclick="$('impJSON').click()">📥 ייבוא JSON</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="gbtn g" onclick="$('impXLSM').click()" style="border-color:rgba(0,200,150,.4)">📊 ייבוא Excel / XLSM</button>
+      <button class="gbtn g" onclick="$('impCSV').click()" style="border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 ייבוא CSV</button>
+    </div>
+    <input type="file" id="impJSON" accept=".json" style="display:none" onchange="impJSON(event)">
+    <input type="file" id="impXLSM" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="impXLSM(event)">
+    <input type="file" id="impCSV" accept=".csv" style="display:none" onchange="impCSV(event)">
+    <div class="impbar" id="impBar">
+      <div style="font-size:.75rem;color:var(--tx2)" id="impMsg">מייבא...</div>
+      <div class="prog"><div class="prog-fill" id="impProg" style="width:0%"></div></div>
+    </div>
+    <div class="hint" style="margin-top:8px">
+      <strong>Excel/XLSM:</strong> מייבא מגיליון "יומי"<br>
+      <strong>CSV:</strong> ייצוא קודם מהאפליקציה<br>
+      <strong>JSON:</strong> גיבוי מלא
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(239,68,68,.2)">
+    <div class="ct" style="color:var(--er)"><div class="ctb" style="background:var(--er)"></div>מחיקה</div>
+    <button class="gbtn d" onclick="clearAll()">🗑️ מחק את כל הנתונים</button>
+  </div>
+  <div class="card" style="border-color:rgba(59,130,246,.3)">
+    <div class="ct" style="color:var(--ac2)"><div class="ctb" style="background:var(--ac2)"></div>עדכון אפליקציה</div>
+    <div class="hint" style="margin-bottom:10px">בחר את הקובץ החדש שקיבלת — יועלה אוטומטית ל-GitHub</div>
+    <input type="file" id="updateFile" accept=".html" style="display:none" onchange="uploadToGithub(event)">
+    <button class="gbtn" style="border-color:rgba(59,130,246,.4);color:var(--ac2)" onclick="$('updateFile').click()">🚀 עדכן אפליקציה</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- MODAL: חברה -->
+<div class="mov" id="mCo">
+  <div class="modal">
+    <div class="mt" id="mCoT">הוסף חברה</div>
+    <div class="f"><label>שם</label><input type="text" id="mcN" placeholder="ON / EDGE / GNRGY"></div>
+    <div class="f"><label>סוג</label>
+      <select id="mcType" onchange="$('mcRF').style.display=this.value==='fixed'?'block':'none'">
+        <option value="home">ביתי (תעריף חודשי)</option>
+        <option value="fixed">חברה (תעריף קבוע ברירת מחדל)</option>
+      </select>
+    </div>
+    <div class="f" id="mcRF">
+      <label>תעריף ברירת מחדל ₪/קו"ש <span style="font-size:.68rem;color:var(--tx3);font-weight:400">(ניתן לשנות בכל טעינה)</span></label>
+      <input type="number" id="mcR" placeholder="1.20" step="0.001" inputmode="decimal">
+    </div>
+    <div class="f"><div class="trow"><div><div style="font-size:.82rem;font-weight:600">ברירת מחדל</div></div><label class="tgl"><input type="checkbox" id="mcD"><div class="tsl"></div></label></div></div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mCo')">ביטול</div><button class="btn" onclick="saveCo()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: תעריף ביתי + דלק -->
+<div class="mov" id="mHR">
+  <div class="modal">
+    <div class="mt">עדכן תעריפים</div>
+    <div class="f"><label>📅 תאריך תחולה</label><input type="date" id="hrDate"></div>
+    <div class="fr">
+      <div class="f"><label>⚡ תעריף חשמל ₪/קו"ש</label><input type="number" id="hrRate" placeholder="0.643" step="0.001" inputmode="decimal"></div>
+      <div class="f"><label>⛽ מחיר דלק ₪/ליטר</label><input type="number" id="hrFuelPrice" placeholder="7.20" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="hint">יחולו על כל הרשומות הביתיות מתאריך זה</div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mHR')">ביטול</div><button class="btn" onclick="saveHRBoth()">שמור</button></div>
+  </div>
+</div>
+
+
+<!-- MODAL: עריכת רשומה -->
+<div class="mov" id="mEdit">
+  <div class="modal">
+    <div class="mt">✏️ עריכת טעינה</div>
+    <input type="hidden" id="editId">
+    <div class="fr">
+      <div class="f"><label>📅 תאריך</label><input type="date" id="editDate"></div>
+      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="editKmLeft" inputmode="numeric"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>🛣️ אודומטר</label><input type="number" id="editKmTotal" inputmode="numeric"></div>
+      <div class="f"><label>⚡ קו"ש</label><input type="number" id="editKwh" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="f">
+      <label>💰 תעריף ₪/קו"ש</label>
+      <input type="number" id="editRate" step="0.001" inputmode="decimal">
+    </div>
+    <div class="f"><label>🏢 חברה</label><select id="editCo"></select></div>
+    <div class="f"><label>📝 הערה</label><input type="text" id="editNote"></div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mEdit')">ביטול</div><button class="btn" onclick="saveEdit()">שמור שינויים</button></div>
+  </div>
+</div>
+<!-- MODAL: פרטי חברה -->
+<div class="mov" id="mCoDetail">
+  <div class="modal">
+    <div class="mt" id="mCoDetailTitle">טעינות</div>
+    <div id="mCoDetailBody" style="max-height:60vh;overflow-y:auto"></div>
+    <div class="mbs"><div class="mcan" style="width:100%;text-align:center" onclick="closeModal('mCoDetail')">סגור</div></div>
+  </div>
+</div>
+
+<!-- MODAL: עריכת רשומה -->
+<div class="mov" id="mEdit">
+  <div class="modal">
+    <div class="mt">✎ עריכת טעינה</div>
+    <input type="hidden" id="editId">
+    <div class="fr">
+      <div class="f"><label>📅 תאריך</label><input type="date" id="editDate"></div>
+      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="editKmLeft" inputmode="numeric"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>🛣️ אודומטר</label><input type="number" id="editKmTotal" inputmode="numeric"></div>
+      <div class="f"><label>⚡ קו"ש</label><input type="number" id="editKwh" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="f"><label>💰 תעריף ₪/קו"ש</label><input type="number" id="editRate" step="0.001" inputmode="decimal"></div>
+    <div class="f"><label>🏢 חברה</label><select id="editCo"></select></div>
+    <div class="f"><label>📝 הערה</label><input type="text" id="editNote"></div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mEdit')">ביטול</div><button class="btn" onclick="saveEdit()">שמור שינויים</button></div>
+  </div>
+</div>
+<!-- ═══ BOTTOM NAV (mobile) ═══ -->
+<div class="bnav">
+  <!-- ימין: תפריט -->
+  <button class="bnav-btn" id="bnavMenu" onclick="openMenuDrawer()">
+    <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    תפריט
+  </button>
+  <!-- אמצע: פלוס -->
+  <button class="bnav-plus" onclick="openAddEntry()" title="הוסף טעינה">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <!-- שמאל: הגדרות -->
+  <button class="bnav-btn" id="bnavSettings" onclick="openSettingsDrawer()">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    הגדרות
+  </button>
+</div>
+
+<!-- ═══ MENU DRAWER ═══ -->
+<div class="menu-drawer" id="menuDrawer">
+  <div class="menu-overlay" onclick="closeMenuDrawer()"></div>
+  <div class="menu-panel">
+    <div class="menu-title">ניווט</div>
+    <div class="menu-grid">
+      <button class="menu-item active-tab" id="mi-data" onclick="swMobile('data')"><span class="menu-item-icon">📊</span>מבט כללי</button>
+      <button class="menu-item" id="mi-log" onclick="swMobile('log')"><span class="menu-item-icon">📋</span>היסטוריה</button>
+      <button class="menu-item" id="mi-stats" onclick="swMobile('stats')"><span class="menu-item-icon">📈</span>סטטיסטיקה</button>
+      <button class="menu-item" id="mi-rates" onclick="swMobile('rates')"><span class="menu-item-icon">⚡</span>תעריפים</button>
+      <button class="menu-item" id="mi-cos" onclick="swMobile('cos')"><span class="menu-item-icon">🏢</span>חברות</button>
+      <button class="menu-item" id="mi-set" onclick="swMobile('set')"><span class="menu-item-icon">⚙️</span>הגדרות</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS DRAWER ═══ -->
+<div class="settings-drawer" id="settingsDrawer">
+  <div class="menu-overlay" onclick="closeSettingsDrawer()"></div>
+  <div class="settings-panel">
+    <div class="settings-title">⚙️ הגדרות תצוגה</div>
+    <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">מצב תצוגה</div>
+    <div class="theme-row">
+      <button class="theme-opt" id="themeLight" onclick="setTheme('light')">☀️ בהיר</button>
+      <button class="theme-opt active" id="themeDark" onclick="setTheme('dark')">🌙 כהה</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- סרגל סטטוס Google Drive -->
+<div id="gdBar" style="position:fixed;top:0;left:0;right:0;z-index:998;background:var(--sf2);border-bottom:1px solid var(--bd);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--tx2);transform:translateY(-60px);transition:transform .3s ease;">
+  <span id="gdStatus">☁️ לא מחובר</span>
+  <button id="gdBtn" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:.72rem;cursor:pointer;font-family:var(--fn)">התחבר ל-Google</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// STORAGE & STATE
+// ══════════════════════════════════════════
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const $=id=>document.getElementById(id);
+
+let cos=LS.get('ev4_cos',[
+  {id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},
+  {id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false},
+]);
+let homeRates=LS.get('ev4_hr',[]);
+const MONTHLY_RATES=[{"date":"2023-08-01","fuelPrice":6.86,"elecRate":0.625},{"date":"2023-09-01","fuelPrice":6.94,"elecRate":0.625},{"date":"2023-10-01","fuelPrice":6.94,"elecRate":0.625},{"date":"2023-11-01","fuelPrice":6.94,"elecRate":0.625},{"date":"2023-12-01","fuelPrice":6.94,"elecRate":0.625},{"date":"2024-01-01","fuelPrice":7.22,"elecRate":0.6145},{"date":"2024-02-01","fuelPrice":7.38,"elecRate":0.6145},{"date":"2024-03-01","fuelPrice":7.51,"elecRate":0.6145},{"date":"2024-04-01","fuelPrice":7.72,"elecRate":0.6145},{"date":"2024-05-01","fuelPrice":7.9,"elecRate":0.6145},{"date":"2024-06-01","fuelPrice":7.52,"elecRate":0.6145},{"date":"2024-07-01","fuelPrice":7.56,"elecRate":0.6145},{"date":"2024-08-01","fuelPrice":7.48,"elecRate":0.6145},{"date":"2024-09-01","fuelPrice":7.29,"elecRate":0.6145},{"date":"2024-10-01","fuelPrice":7.16,"elecRate":0.6145},{"date":"2024-11-01","fuelPrice":7.2,"elecRate":0.6145},{"date":"2024-12-01","fuelPrice":7.12,"elecRate":0.6145},{"date":"2025-01-01","fuelPrice":7.2,"elecRate":0.6402},{"date":"2025-02-01","fuelPrice":7.31,"elecRate":0.6402},{"date":"2025-03-01","fuelPrice":7.23,"elecRate":0.6402},{"date":"2025-04-01","fuelPrice":7.31,"elecRate":0.6402},{"date":"2025-05-01","fuelPrice":7.13,"elecRate":0.6402},{"date":"2025-06-01","fuelPrice":7.14,"elecRate":0.6402},{"date":"2025-07-01","fuelPrice":7.15,"elecRate":0.6402},{"date":"2025-08-01","fuelPrice":7.07,"elecRate":0.6402},{"date":"2025-09-01","fuelPrice":7.16,"elecRate":0.6402},{"date":"2025-10-01","fuelPrice":7.23,"elecRate":0.6402},{"date":"2025-11-01","fuelPrice":7.07,"elecRate":0.6402},{"date":"2025-12-01","fuelPrice":7.11,"elecRate":0.6402},{"date":"2026-01-01","fuelPrice":6.85,"elecRate":0.6432},{"date":"2026-02-01","fuelPrice":6.88,"elecRate":0.6432},{"date":"2026-03-01","fuelPrice":7.02,"elecRate":0.6432},{"date":"2026-04-01","fuelPrice":8.05,"elecRate":0.6432}];
+// מאתחל homeRates ו-fuelRates מהנתונים המובנים אם ריקים
+function initMonthlyRates(){
+  if(LS.get('ev4_hr_init',false)) return;
+  homeRates=MONTHLY_RATES.map(m=>({'date':m.date,'rate':m.elecRate}));
+  homeRates=homeRates.filter((h,i,a)=>i===0||a[i-1].rate!==h.rate||true);
+  fuelRates=MONTHLY_RATES.map(m=>({'date':m.date,'price':m.fuelPrice}));
+  LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);LS.set('ev4_hr_init',true);
+}
+let fuelRates=LS.get('ev4_fuel',[]);
+let recs=LS.get('ev4_recs',[]);
+let st=LS.get('ev4_st',{carName:'',batt:70,range:485,kpl:12.125,fuel:7.2,showCost:true});
+let editCoIdx=null;
+let selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
+let expandedRow=null; // id of expanded row
+let tblExpandY=LS.get('ev4_tblY',{}),tblExpandM=LS.get('ev4_tblM',{}); // מצב קיפול טבלה ראשית
+
+// ══════════════════════════════════════════
+// FORMAT HELPERS
+// ══════════════════════════════════════════
+
+// פורמט מספר עם פסיקי אלפים
+function fmtNum(n, dec=1) {
+  if(n==null||isNaN(n)) return '—';
+  const val = Math.abs(+n).toFixed(dec);
+  const parts = val.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const result = dec===0 ? parts[0] : parts.join('.');
+  return (+n)<0 ? result+'-' : result;
+}
+
+// פורמט שקלים עם פסיק אלפים — מינוס מצד שמאל (RTL)
+function fmtILS(n, dec=2) {
+  if(n==null||isNaN(n)) return '—';
+  const neg = (+n) < 0;
+  const absVal = Math.abs(+n).toFixed(dec);
+  const parts = absVal.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const str = dec===0 ? parts[0] : parts.join('.');
+  return neg ? `₪${str}-` : `₪${str}`;
+}
+
+// פורמט קו"ש
+function fmtKwh(n, dec=1) { return n==null?'—': fmtNum(n,dec)+' קו"ש'; }
+
+// פורמט ק"מ
+function fmtKm(n, dec=0) { return n==null?'—': fmtNum(n,dec)+' ק"מ'; }
+
+function fd(iso){return iso?iso.split('-').reverse().join('/'):''}
+function today(){return new Date().toISOString().slice(0,10)}
+function dl(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+
+// ══════════════════════════════════════════
+// RATE LOOKUPS
+// ══════════════════════════════════════════
+function homeRate(ds){
+  const s=[...homeRates].sort((a,b)=>a.date.localeCompare(b.date));
+  let r=s[0]?.rate||0.625;
+  for(const h of s){if(h.date<=ds)r=h.rate;else break;}
+  return r;
+}
+function coRate(cid,ds){
+  const c=cos.find(x=>x.id===cid);
+  if(!c)return 0;
+  return c.type==='home'?homeRate(ds):(c.rate||0);
+}
+function fuelPrice(ds) {
+  const s=[...fuelRates].sort((a,b)=>a.date.localeCompare(b.date));
+  let p=s[0]?.price||st.fuel||7.2;
+  for(const h of s){if(h.date<=ds)p=h.price;else break;}
+  return p;
+}
+
+// ══════════════════════════════════════════
+// RATE FIELD UX
+// ══════════════════════════════════════════
+function updateRatePlaceholder(){
+  const def=coRate(selCo,today());
+  const ri=$('inRate');
+  if(ri&&!ri.value) ri.placeholder=def.toFixed(3);
+  const ac=$('inAddCo');
+  if(ac){const def2=coRate(ac.value,today());const ri2=$('inRate2');if(ri2&&!ri2.value)ri2.placeholder=def2.toFixed(3);}
+}
+function onRateInput(v){
+  const tag=$('rateTag');
+  if(v&&parseFloat(v)>0){tag.className='rate-manual';tag.textContent='מחיר ידני ✎';}
+  else{tag.className='rate-auto';tag.textContent='ברירת מחדל מהחברה';$('inRate').placeholder=coRate(selCo,today()).toFixed(3);}
+}
+function onRateInput2(v){
+  const tag=$('rateTag2');
+  if(v&&parseFloat(v)>0){tag.className='rate-manual';tag.textContent='מחיר ידני ✎';}
+  else{tag.className='rate-auto';tag.textContent='ברירת מחדל';const ac=$('inAddCo');$('inRate2').placeholder=coRate(ac?.value||'home',today()).toFixed(3);}
+}
+
+function lastCoRate(cid){
+  // תעריף אחרון שהוזן ביומן לחברה זו
+  const coRecs=recs.filter(r=>r.companyId===cid&&r.rate>0).sort((a,b)=>b.date.localeCompare(a.date));
+  if(coRecs.length>0) return coRecs[0].rate;
+  const c=cos.find(x=>x.id===cid);
+  if(!c) return 0;
+  return c.type==='home'?homeRate(today()):(c.rate||0);
+}
+
+// ══════════════════════════════════════════
+// COMPANY BUTTONS
+// ══════════════════════════════════════════
+function renderCoBtns(){
+  const g=$('coBtns'),ac=$('inAddCo');
+  if(g){
+    if(!selCo||!cos.find(c=>c.id===selCo)) selCo=(cos.find(c=>c.isDefault)||cos[0])?.id||'';
+    g.innerHTML=cos.map(c=>{
+      const rStr=lastCoRate(c.id).toFixed(3);
+      return `<button class="cob ${c.id===selCo?'on':''}" onclick="selCo='${c.id}';renderCoBtns()">
+        ${c.name}<span class="cor">${rStr} ₪</span></button>`;
+    }).join('');
+  }
+  if(ac) ac.innerHTML=cos.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  updateRatePlaceholder();
+}
+
+// ══════════════════════════════════════════
+// SAVE RECORD
+// ══════════════════════════════════════════
+function saveRec(){
+  const ds=$('inDate').value,kl=parseFloat($('inKmLeft').value),kt=parseFloat($('inKmTotal').value),kw=parseFloat($('inKwh').value),note=$('inNote').value.trim();
+  if(!ds||isNaN(kl)||isNaN(kt)||isNaN(kw)){toast('⚠️ יש למלא תאריך, ק"מ נשאר, אודומטר וקו"ש','e');return;}
+  if(kw<=0){toast('⚠️ קו"ש חייב להיות חיובי','e');return;}
+  if(recs.length>0&&ds<recs[recs.length-1].date){toast('⚠️ התאריך מוקדם מהרשומה האחרונה','e');return;}
+  const manR=parseFloat($('inRate').value);
+  const r1=(!isNaN(manR)&&manR>0)?manR:coRate(selCo,ds);
+  const hasA=!!($('hasAdd')?.checked);
+  const kwa=hasA?(parseFloat($('inAddKwh').value)||0):0;
+  const addCid=hasA?$('inAddCo').value:null;
+  const manR2=hasA?parseFloat($('inRate2').value):NaN;
+  const r2=(kwa>0&&addCid&&!isNaN(manR2)&&manR2>0)?manR2:(kwa>0&&addCid?coRate(addCid,ds):0);
+  const kmD=recs.length>0?kt-recs[recs.length-1].kmTotal:null;
+  const kwhC=(recs.length>0?recs[recs.length-1].kwhCumul:0)+kw+kwa;
+  const cost=kw*r1+kwa*r2;
+  recs.push({id:Date.now(),date:ds,kmLeft:kl,kmTotal:kt,kmDriven:kmD,kwh:kw,kwhAdd:kwa,kwhCumul:kwhC,companyId:selCo,addCoId:addCid,rate:r1,rateAdd:r2,cost,note,companyName:cos.find(c=>c.id===selCo)?.name||selCo});
+  LS.set('ev4_recs',recs);
+  ['inKmLeft','inKmTotal','inKwh','inNote','inAddKwh','inRate','inRate2'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  onRateInput('');onRateInput2('');
+  if($('hasAdd')){$('hasAdd').checked=false;$('addF').style.display='none';}
+  kmOffsetDirty=false;
+  renderAll(true);toast('✅ הטעינה נשמרה');gdAutoSave();
+  // עבור להיסטוריה אחרי שמירה
+  sw('log', null);
+}
+
+function delRec(id,e){
+  e.stopPropagation();
+  if(!confirm('למחוק?'))return;
+  recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
+}
+function clearAll(){
+  if(!confirm('למחוק את כל הרשומות?'))return;
+  recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
+}
+function recalc(){
+  let c=0;
+  for(let i=0;i<recs.length;i++){
+    // kwh = סה"כ קו"ש לטעינה זו (כולל תוספת אם יש)
+    // kwhAdd = קו"ש מחברה נוספת — כבר כלול ב-kwh בקובץ המקור
+    c+=(recs[i].kwh||0);
+    recs[i].kwhCumul=c;
+    recs[i].kmDriven=i===0?null:recs[i].kmTotal-recs[i-1].kmTotal;
+  }
+}
+function togAdd(){$('addF').style.display=$('hasAdd').checked?'block':'none';if($('hasAdd').checked)updateRatePlaceholder();}
+let coBtnsOpen=true;
+function togCoBtns(){coBtnsOpen=!coBtnsOpen;$('coBtns').style.display=coBtnsOpen?'':'none';$('coBtnsToggle').textContent=coBtnsOpen?'▾ הסתר':'▸ הצג';}
+
+// ══════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════
+function getSearchQ(){return ($('searchQ').value||'').trim().toLowerCase();}
+function clearSearch(){$('searchQ').value='';$('searchClear').style.display='none';renderTable();}
+function filterRecs(){
+  const q=getSearchQ();
+  if(!q) return [...recs].reverse();
+  $('searchClear').style.display='block';
+  return [...recs].reverse().filter(r=>{
+    const co=cos.find(c=>c.id===r.companyId)?.name||r.companyName||'';
+    const kw=(r.kwh||0);
+    return (
+      fd(r.date).includes(q)||
+      r.date.includes(q)||
+      co.toLowerCase().includes(q)||
+      (r.note||'').toLowerCase().includes(q)||
+      String(kw.toFixed(1)).includes(q)||
+      String((r.cost||0).toFixed(2)).includes(q)||
+      String(r.kmTotal||0).includes(q)||
+      String(r.kmLeft||0).includes(q)
+    );
+  });
+}
+
+// ══════════════════════════════════════════
+// RENDER TABLE — עם פרטים בלחיצה
+// ══════════════════════════════════════════
+function renderTable(hl=false){
+  const tb=$('mainTbl'),em=$('emptyState'),cn=$('rcnt');
+  const sc=st.showCost!==false;
+  $('thCost').style.display=sc?'':'none';
+  cn.textContent=`${fmtNum(recs.length,0)} חיבורים`;
+  if(!recs.length){tb.style.display='none';em.style.display='block';return;}
+  tb.style.display='table';em.style.display='none';
+  const filtered=filterRecs();
+  $('searchInfo').textContent=getSearchQ()?`${filtered.length} תוצאות מתוך ${recs.length}`:' לחץ על שורה לפרטים';
+  const colSpan=sc?10:9;
+
+  function buildRow(r,co,kw,isNew,num){
+    return `<tr class="${isNew?'nr':''}" onclick="toggleRow(${r.id})">
+      <td class="cd" style="color:var(--tx3);font-size:.65rem">${num}</td>
+      <td class="cd">${fd(r.date)}</td>
+      <td class="ckm">${r.kmDriven!=null?fmtNum(r.kmDriven,0):'—'}</td>
+      <td>${fmtNum(r.kmLeft,0)}</td>
+      <td class="cq">${fmtNum(kw,1)}</td>
+      ${sc?`<td class="cc">${fmtILS(r.cost,2)}</td>`:''}
+      <td>${fmtNum(r.kmTotal,0)}</td>
+      <td class="cq">${fmtNum(r.kwhCumul,1)}</td>
+      <td><span class="badge ${r.companyId==='home'?'h':''}">${co.name}</span></td>
+      <td style="white-space:nowrap"><button class="bdl" style="color:var(--ac2)" onclick="openEdit(${r.id},event)">✎</button><button class="bdl" onclick="delRec(${r.id},event)">✕</button></td>
+    </tr>`;
+  }
+
+  // בחיפוש — תצוגה ישירה
+  if(getSearchQ()){
+    let html='';
+    for(let i=0;i<filtered.length;i++){
+      const r=filtered[i];const co=cos.find(c=>c.id===r.companyId)||{name:r.companyName||'?'};const kw=r.kwh||0;const isExp=expandedRow===r.id;
+      html+=buildRow(r,co,kw,hl&&i===0,recs.length-recs.findIndex(x=>x.id===r.id));
+      if(isExp)html+=`<tr><td colspan="${colSpan}" style="padding:0">${buildDetail(r)}</td></tr>`;
+    }
+    $('mainBody').innerHTML=html;return;
+  }
+
+  // קיפול לפי שנה > חודש > ימים
+  const byYear={};
+  for(const r of filtered){
+    const y=r.date.slice(0,4);const ym=r.date.slice(0,7);
+    if(!byYear[y])byYear[y]={kwh:0,cost:0,km:0,months:{}};
+    if(!byYear[y].months[ym])byYear[y].months[ym]={kwh:0,cost:0,km:0,days:{}};
+    if(!byYear[y].months[ym].days[r.date])byYear[y].months[ym].days[r.date]={recs:[]};
+    byYear[y].months[ym].days[r.date].recs.push(r);
+    byYear[y].kwh+=(r.kwh||0);byYear[y].cost+=(r.cost||0);byYear[y].km+=(r.kmDriven>0?r.kmDriven:0);
+    byYear[y].months[ym].kwh+=(r.kwh||0);byYear[y].months[ym].cost+=(r.cost||0);byYear[y].months[ym].km+=(r.kmDriven>0?r.kmDriven:0);
+  }
+  const years=Object.keys(byYear).sort().reverse();
+  let html='';
+  for(const y of years){
+    const yd=byYear[y];const nM=Object.keys(yd.months).length;
+    const yOpen=tblExpandY[y]!==false;
+    html+=`<tr style="background:rgba(59,130,246,.1);cursor:pointer;border-bottom:1px solid rgba(59,130,246,.3)" onclick="tblToggleYear('${y}')">
+      <td style="padding:7px 10px;font-weight:700;color:var(--ac2)" colspan="2">
+        <span id="tya_${y}" style="margin-left:5px">${yOpen?'▾':'▸'}</span>${y}
+        <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nM} חודשים</span>
+      </td>
+      <td style="padding:7px 10px;color:var(--ac);font-weight:700">${fmtNum(yd.km,0)}</td>
+      <td></td><td style="padding:7px 10px;color:var(--ac2);font-weight:700">${fmtNum(yd.kwh,1)}</td>
+      ${sc?`<td style="padding:7px 10px;color:var(--ac3);font-weight:700">${fmtILS(yd.cost,0)}</td>`:''}
+      <td></td><td></td><td colspan="2"></td>
+    </tr>`;
+    if(!yOpen)continue;
+    const months=Object.keys(yd.months).sort().reverse();
+    for(const ym of months){
+      const md=yd.months[ym];const [,mo]=ym.split('-');const mLabel=mo+'/'+y;
+      const nD=Object.keys(md.days).length;const mKey=ym.replace('-','_');const mOpen=tblExpandM[ym]!==false;
+      html+=`<tr style="background:rgba(42,53,71,.45);cursor:pointer;border-bottom:1px solid rgba(42,53,71,.5)" onclick="tblToggleMonth('${ym}')">
+        <td style="padding:6px 10px;padding-right:22px;font-weight:600;color:var(--tx2)" colspan="2">
+          <span id="tma_${mKey}" style="margin-left:5px">${mOpen?'▾':'▸'}</span>${mLabel}
+          <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nD} ימים</span>
+        </td>
+        <td style="padding:6px 10px;color:var(--ac)">${fmtNum(md.km,0)}</td>
+        <td></td><td style="padding:6px 10px;color:var(--ac2)">${fmtNum(md.kwh,1)}</td>
+        ${sc?`<td style="padding:6px 10px;color:var(--ac3)">${fmtILS(md.cost,0)}</td>`:''}
+        <td></td><td></td><td colspan="2"></td>
+      </tr>`;
+      if(!mOpen)continue;
+      const days=Object.keys(md.days).sort().reverse();
+      for(const dd of days){
+        for(const r of md.days[dd].recs){
+          const co=cos.find(c=>c.id===r.companyId)||{name:r.companyName||'?'};const kw=r.kwh||0;const isExp=expandedRow===r.id;
+          html+=buildRow(r,co,kw,false,recs.length-recs.findIndex(x=>x.id===r.id));
+          if(isExp)html+=`<tr><td colspan="${colSpan}" style="padding:0">${buildDetail(r)}</td></tr>`;
+        }
+      }
+    }
+  }
+  $('mainBody').innerHTML=html;
+}
+function toggleRow(id){expandedRow=expandedRow===id?null:id;renderTable();}
+function tblToggleYear(y){tblExpandY[y]=tblExpandY[y]===false?true:false;LS.set('ev4_tblY',tblExpandY);renderTable();}
+function tblToggleMonth(ym){tblExpandM[ym]=tblExpandM[ym]===false?true:false;LS.set('ev4_tblM',tblExpandM);renderTable();}
+
+function toggleRow(id){
+  expandedRow=expandedRow===id?null:id;
+  renderTable();
+}
+
+// בניית פאנל פרטים מורחב לכל טעינה
+function buildDetail(r){
+  const kw=(r.kwh||0);
+  const fp=fuelPrice(r.date);
+  const kwhPerKm=r.kmDriven>0?kw/r.kmDriven:null;
+  const kwhPer100=kwhPerKm?kwhPerKm*100:null;
+  const costPerKm=r.kmDriven>0?r.cost/r.kmDriven:null;
+  const fuelCostKm=fp/(st.kpl||12.125);
+  const saved=r.kmDriven>0?(fuelCostKm-costPerKm)*r.kmDriven:null;
+  // 1 ל-100: כמה קו"ש לכל 100 ק"מ (כמו בקובץ)
+  // 1 ל-100: (ק"מ/קו"ש) × (מחיר דלק לליטר / תעריף חשמל לקו"ש)
+  const elecRateRow = r.rate||homeRate(r.date);
+  const fuelLiterRow = fuelPrice(r.date);
+  const per100 = kwhPerKm!=null && elecRateRow>0 ?
+    (1/kwhPerKm) * (fuelLiterRow / elecRateRow) : null;
+
+  function item(l,v,cls=''){
+    return `<div class="rd-item"><div class="rd-lbl">${l}</div><div class="rd-val ${cls}">${v}</div></div>`;
+  }
+
+  let g='<div class="row-detail">';
+
+  // שורה 1: נתוני טעינה
+  g+='<div class="rd-sect">⚡ טעינה</div><div class="rd-grid">';
+  g+=item('קו"ש שנטענו',fmtNum(kw,2),'g');
+  g+=item('תעריף',(r.rate||0).toFixed(3)+' ₪','y');
+  g+=item('עלות טעינה',fmtILS(r.cost,2),'y');
+  g+='</div>';
+
+  // שורה 2: נסיעה
+  if(r.kmDriven!=null){
+    g+='<div class="rd-sect">🛣️ נסיעה</div><div class="rd-grid">';
+    g+=item('ק"מ נסע',fmtKm(r.kmDriven,0),'b');
+    g+=item('קו"ש/100ק"מ (צריכת חשמל)',kwhPerKm?(kwhPerKm*100).toFixed(2):'—','b');
+    g+=item('1 ל-100 (שקילות)',per100?fmtNum(per100,1):'—','b');
+    g+=item('עלות ₪/ק"מ',costPerKm?fmtILS(costPerKm,4):'—','y');
+    g+=item('חיסכון מדלק',saved!=null?fmtILS(saved,2):'—',saved!=null&&saved>=0?'g':'r');
+    g+=item('מחיר דלק לק"מ',fmtILS(fuelCostKm,4),'');
+    g+='</div>';
+  }
+
+  // שורה 3: מצב סוללה
+  g+='<div class="rd-sect">🔋 סוללה</div><div class="rd-grid">';
+  const battCapRow=st.batt||70;
+  const chargeCapRow=st.chargeKwh||battCapRow;
+  const declRangeRow=st.range||485;
+  const kmLeftActual=r.kmLeft||0;
+
+  // אחוז ניצול = (ק"מ נסע + ק"מ נשאר בפועל) / טווח מוצהר
+  const battUsedPct=(r.kmDriven>0&&declRangeRow>0)
+    ?(r.kmDriven+kmLeftActual)/declRangeRow*100
+    :(kw>0&&chargeCapRow>0?Math.min(kw/chargeCapRow*100,100):null);
+  g+=item('אחוז ניצול סוללה',battUsedPct!=null?fmtNum(battUsedPct,1)+'%':'—','b');
+
+  // מחיר מלא = ק"מ נסע × מחיר דלק לק"מ
+  const fp2=fuelPrice(r.date);
+  const fullCost=r.kmDriven>0?r.kmDriven*(fp2/(st.kpl||12.125)):null;
+  g+=item('מחיר מלא (שקילות דלק)',fullCost!=null?fmtILS(fullCost,2):'—','y');
+
+  // טעינה בפועל = קו"ש + ק"מ נשאר × קיבולת / טווח
+  const chargeActual=kw+kmLeftActual*chargeCapRow/declRangeRow;
+  g+=item('טעינה בפועל',fmtNum(chargeActual,2)+' קו"ש','g');
+
+  // חוסר בק"מ = טווח מוצהר − ק"מ נסע − ק"מ נשאר בפועל
+  const missingKm=r.kmDriven!=null?Math.max(0,declRangeRow-r.kmDriven-kmLeftActual):null;
+  g+=item('חוסר בק"מ',missingKm!=null?fmtKm(missingKm,0):'—','');
+
+  // ק"מ נשאר % = ק"מ נשאר בפועל / טווח מוצהר
+  const kmLeftPct=declRangeRow>0?(kmLeftActual/declRangeRow*100):null;
+  g+=item('ק"מ נשאר %',kmLeftPct!=null?fmtNum(kmLeftPct,1)+'%':'—','g');
+
+  g+=item('ק"מ נשאר',fmtNum(kmLeftActual,0),'');
+  g+=item('קו"ש מצטבר',fmtNum(r.kwhCumul,1),'g');
+  g+=item('אודומטר',fmtNum(r.kmTotal,0),'');
+  const coName2=cos.find(c=>c.id===r.companyId)?.name||r.companyName||'';
+  if(coName2) g+=item('חברה',coName2,'b');
+  g+='</div>';
+
+  if(r.note) g+=`<div class="rd-sect">📝 ${r.note}</div>`;
+  g+='</div>';
+  return g;
+}
+
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// MONTHLY BREAKDOWN
+// ══════════════════════════════════════════
+function renderMonthly(){
+  const el=$('stMonthly');
+  if(!el||recs.length<2){if(el)el.innerHTML='<p style="color:var(--tx3);font-size:.8rem">נדרשות לפחות 2 רשומות</p>';return;}
+
+  const byYear={};
+  for(const r of recs){
+    const y=r.date.slice(0,4),ym=r.date.slice(0,7);
+    if(!byYear[y])byYear[y]={kwh:0,cost:0,km:0,fuelCost:0,months:{}};
+    if(!byYear[y].months[ym])byYear[y].months[ym]={kwh:0,cost:0,km:0,fuelCost:0,days:{}};
+    if(!byYear[y].months[ym].days[r.date])byYear[y].months[ym].days[r.date]={kwh:0,cost:0,km:0,fuelCost:0};
+    const km=r.kmDriven>0?r.kmDriven:0,fc=km*(fuelPrice(r.date)/(st.kpl||12.125));
+    byYear[y].kwh+=(r.kwh||0);byYear[y].cost+=(r.cost||0);byYear[y].km+=km;byYear[y].fuelCost+=fc;
+    byYear[y].months[ym].kwh+=(r.kwh||0);byYear[y].months[ym].cost+=(r.cost||0);byYear[y].months[ym].km+=km;byYear[y].months[ym].fuelCost+=fc;
+    byYear[y].months[ym].days[r.date].kwh+=(r.kwh||0);byYear[y].months[ym].days[r.date].cost+=(r.cost||0);byYear[y].months[ym].days[r.date].km+=km;byYear[y].months[ym].days[r.date].fuelCost+=fc;
+  }
+
+  const totKwh=recs.reduce((s,r)=>s+(r.kwh||0),0);
+  const totCost=recs.reduce((s,r)=>s+(r.cost||0),0);
+  const totKm=recs.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
+  let totFuel=0;for(const r of recs){if(r.kmDriven>0)totFuel+=r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125));}
+  const years=Object.keys(byYear).sort().reverse();
+
+  // ── Single flat table, all rows share the same columns ──
+  // padding per indent level: year=12, month=22, day=32, sum=22
+  const P='padding:7px 12px;';
+  const tdNum=(v,c,fw,fs)=>`<td style="${P}color:${c};font-weight:${fw||600};font-size:${fs||'.8rem'};text-align:right;white-space:nowrap">${v}</td>`;
+
+  function flatRow(label,d,ds,type,extraAttrs=''){
+    const saved=d.fuelCost-d.cost;
+    const er=homeRate(ds),fkm=fuelPrice(ds)/(st.kpl||12.125);
+    let bg,lc,fw,fs,pl;
+    if(type==='year') {bg='rgba(59,130,246,.13)';lc='var(--ac2)';fw=700;fs='.86rem';pl='12px';}
+    else if(type==='month'){bg='rgba(42,53,71,.55)'; lc='var(--tx2)';fw=600;fs='.8rem'; pl='22px';}
+    else if(type==='sum') {bg='rgba(0,200,150,.08)'; lc='var(--ac)'; fw=700;fs='.8rem'; pl='22px';}
+    else                   {bg='transparent';          lc='var(--tx3)';fw=400;fs='.78rem';pl='32px';}
+    return `<tr ${extraAttrs} style="border-bottom:1px solid rgba(42,53,71,.35);background:${bg}">
+      <td style="${P}padding-right:${pl};font-weight:${fw};font-size:${fs};color:${lc};white-space:nowrap">${label}</td>
+      ${tdNum(fmtNum(d.kwh,1),'var(--ac2)',fw,fs)}
+      ${tdNum(fmtILS(d.cost,0),'var(--ac3)',fw,fs)}
+      ${tdNum(d.km>0?fmtNum(d.km,0):'—','var(--ac)',fw,fs)}
+      ${tdNum(d.fuelCost>0?fmtILS(d.fuelCost,0):'—','var(--er)',fw,fs)}
+      ${tdNum(d.fuelCost>0?fmtILS(saved,0):'—',saved>=0?'var(--ok)':'var(--er)',700,fs)}
+      ${tdNum(er.toFixed(3),'var(--tx3)',400,'.74rem')}
+      ${tdNum(fkm.toFixed(4),'var(--tx3)',400,'.74rem')}
+    </tr>`;
+  }
+
+  const thS=`padding:8px 12px;text-align:right;color:var(--tx3);font-size:.72rem;font-weight:700;border-bottom:2px solid var(--bd);white-space:nowrap;background:var(--sf2);`;
+  let rows='';
+
+  for(const y of years){
+    const yd=byYear[y];
+    const months=Object.keys(yd.months).sort().reverse();
+    const yLabel=`<span id="yarrow_${y}" style="margin-left:6px">▸</span>${y} <span style="font-size:.68rem;color:var(--tx3);font-weight:400">${months.length} חודשים</span>`;
+    // year row — always visible, clickable
+    rows+=flatRow(yLabel,yd,y+'-01','year',`id="yr_${y}" onclick="toggleYear('${y}');" style="cursor:pointer;"`);
+
+    for(const ym of months){
+      const md=yd.months[ym];const[,mo]=ym.split('-');const mLabel2=`${mo}/${y}`;const ds=ym+'-01';
+      const days=Object.keys(md.days).sort().reverse();
+      const mLabel=`<span id="marrow_${ym}" style="margin-left:6px">▸</span>${mLabel2} <span style="font-size:.65rem;color:var(--tx3);font-weight:400">${days.length} ימים</span>`;
+      // month row — hidden by default, shown when year expanded
+      rows+=flatRow(mLabel,md,ds,'month',`class="yr_${y}" onclick="toggleMonth('${ym}');" style="display:none;cursor:pointer;"`);
+
+      // day rows — hidden until month expanded
+      for(const dd of days){
+        const dd2=md.days[dd];const[,dmo,dday]=dd.split('-');
+        rows+=flatRow(`${dday}/${dmo}`,dd2,dd,'day',`class="yr_${y} ym_${ym.replace('-','_')}" style="display:none;"`);
+      }
+      // month sum row — hidden until month expanded
+      rows+=flatRow('סה"כ '+mLabel2,md,ds,'sum',`class="yr_${y} ym_${ym.replace('-','_')}" style="display:none;"`);
+    }
+  }
+
+  const summary=`<div style="background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <span style="font-size:.8rem;font-weight:700;color:var(--ac)">📊 סה"כ כולל — ${years.length} שנים, ${recs.length} חיבורים</span>
+    <div style="display:flex;gap:12px;font-size:.78rem;flex-wrap:wrap">
+      <span style="color:var(--ac2)">⚡ ${fmtNum(totKwh,1)} קו"ש</span>
+      <span style="color:var(--ac3)">💰 ${fmtILS(totCost,0)}</span>
+      <span style="color:var(--ac)">🛣️ ${fmtNum(totKm,0)} ק"מ</span>
+      <span style="color:var(--ok)">💚 ${fmtILS(totFuel-totCost,0)} חיסכון</span>
+    </div>
+  </div>`;
+
+  el.innerHTML=summary+`<div style="overflow-x:auto;border:1px solid var(--bd);border-radius:var(--rs)">
+    <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+      <thead><tr>
+        <th style="${thS}min-width:110px">📅 תקופה</th>
+        <th style="${thS}">⚡ קו"ש</th>
+        <th style="${thS}">💰 עלות</th>
+        <th style="${thS}">🛣️ ק"מ</th>
+        <th style="${thS}">⛽ דלק שקילה</th>
+        <th style="${thS}">💚 חיסכון</th>
+        <th style="${thS}">₪/קו"ש</th>
+        <th style="${thS}">⛽ ₪/ק"מ</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  // שחזור מצב סגירות שנים וחודשים
+  const openYears=LS.get('ev4_openYears',{});
+  const openMonths=LS.get('ev4_openMonths',{});
+  for(const y of years){
+    if(openYears[y]){
+      // פתח שנה
+      const arrow=document.getElementById('yarrow_'+y);
+      if(arrow)arrow.textContent='▾';
+      document.querySelectorAll(`tr.yr_${y}`).forEach(tr=>{
+        const isMonth=[...tr.classList].some(c=>c.startsWith('ym_'));
+        if(!isMonth)tr.style.display='';
+      });
+      // פתח חודשים
+      const months2=Object.keys(byYear[y].months).sort().reverse();
+      for(const ym of months2){
+        if(openMonths[ym]){
+          const key=ym.replace('-','_');
+          const arrow2=document.getElementById('marrow_'+ym);
+          if(arrow2)arrow2.textContent='▾';
+          document.querySelectorAll(`tr.ym_${key}`).forEach(tr=>tr.style.display='');
+        }
+      }
+    }
+  }
+}
+
+function toggleYear(y){
+  const arrow=document.getElementById('yarrow_'+y);
+  const rows=document.querySelectorAll(`tr.yr_${y}`);
+  const opening=arrow&&arrow.textContent==='▸';
+  if(arrow)arrow.textContent=opening?'▾':'▸';
+  rows.forEach(tr=>{
+    const isMonth=[...tr.classList].some(c=>c.startsWith('ym_'));
+    if(!isMonth) tr.style.display=opening?'':'none';
+    else tr.style.display='none';
+  });
+  if(!opening){
+    document.querySelectorAll(`tr.yr_${y}`).forEach(tr=>{
+      const cls=[...tr.classList].find(c=>c.startsWith('ym_'));
+      if(cls){const ym=cls.replace('ym_','').replace('_','-');const a=document.getElementById('marrow_'+ym);if(a)a.textContent='▸';}
+    });
+  }
+  // שמור מצב שנה
+  const openYears=LS.get('ev4_openYears',{});
+  openYears[y]=opening;LS.set('ev4_openYears',openYears);
+  // אם סוגרים — מחק חודשים פתוחים של השנה הזאת
+  if(!opening){const openMonths=LS.get('ev4_openMonths',{});Object.keys(openMonths).filter(k=>k.startsWith(y+'-')).forEach(k=>delete openMonths[k]);LS.set('ev4_openMonths',openMonths);}
+}
+function toggleMonth(ym){
+  const key=ym.replace('-','_');
+  const arrow=document.getElementById('marrow_'+ym);
+  const rows=document.querySelectorAll(`tr.ym_${key}`);
+  const opening=arrow&&arrow.textContent==='▸';
+  if(arrow)arrow.textContent=opening?'▾':'▸';
+  rows.forEach(tr=>tr.style.display=opening?'':'none');
+  // שמור מצב חודש
+  const openMonths=LS.get('ev4_openMonths',{});
+  openMonths[ym]=opening;LS.set('ev4_openMonths',openMonths);
+}
+
+// ══════════════════════════════════════════
+// EDIT RECORD
+// ══════════════════════════════════════════
+
+function toggleCoDetail(cid){
+  const tr=document.getElementById('codetail_'+cid);
+  const arrow=document.getElementById('coarrow_'+cid);
+  if(!tr)return;
+  if(tr.style.display!=='none'){
+    tr.style.display='none';if(arrow)arrow.textContent='▸';
+    const openCos=LS.get('ev4_openCos',{});delete openCos[cid];LS.set('ev4_openCos',openCos);
+    return;
+  }
+  if(arrow)arrow.textContent='▾';
+  const openCos=LS.get('ev4_openCos',{});openCos[cid]=true;LS.set('ev4_openCos',openCos);
+  const coRecs=recs.filter(r=>r.companyId===cid).sort((a,b)=>b.date.localeCompare(a.date));
+  const th=t=>`<th style="padding:7px 10px;text-align:right;color:var(--tx3);font-size:.68rem;font-weight:700;border-bottom:1px solid var(--bd);background:var(--sf3);white-space:nowrap">${t}</th>`;
+  let t=`<div style="overflow-x:auto;padding:10px 12px">
+    <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+    <thead><tr>${th('תאריך')}${th('קו"ש')}${th('תעריף')}${th('עלות')}${th('ק"מ')}${th('דלק שקילה')}${th('💚 חיסכון')}</tr></thead><tbody>`;
+  let totKwh=0,totCost=0,totFuelCo=0;
+  for(const r of coRecs){
+    totKwh+=r.kwh||0;totCost+=r.cost||0;
+    const fuelKm=r.kmDriven>0?r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125)):0;
+    totFuelCo+=fuelKm;
+    const rowSaved=fuelKm-r.cost;
+    t+=`<tr style="border-bottom:1px solid rgba(42,53,71,.3)">
+      <td style="padding:7px 10px;color:var(--tx3)">${fd(r.date)}</td>
+      <td style="padding:7px 10px;color:var(--ac2);font-weight:600">${fmtNum(r.kwh,2)}</td>
+      <td style="padding:7px 10px;color:var(--tx3)">${(r.rate||0).toFixed(3)}</td>
+      <td style="padding:7px 10px;color:var(--ac3);font-weight:600">${fmtILS(r.cost,2)}</td>
+      <td style="padding:7px 10px;color:var(--ac)">${r.kmDriven>0?fmtNum(r.kmDriven,0):'—'}</td>
+      <td style="padding:7px 10px;color:var(--er)">${fuelKm>0?fmtILS(fuelKm,2):'—'}</td>
+      <td style="padding:7px 10px;font-weight:700;color:${rowSaved>=0?'var(--ok)':'var(--er)'}">${fuelKm>0?fmtILS(rowSaved,2):'—'}</td>
+    </tr>`;
+  }
+  const totSaved=totFuelCo-totCost;
+  t+=`<tr style="background:rgba(0,200,150,.07);font-weight:700;border-top:1px solid var(--bd)">
+    <td style="padding:7px 10px;color:var(--ac)">סה"כ</td>
+    <td style="padding:7px 10px;color:var(--ac2)">${fmtNum(totKwh,1)}</td>
+    <td></td>
+    <td style="padding:7px 10px;color:var(--ac3)">${fmtILS(totCost,0)}</td>
+    <td></td>
+    <td style="padding:7px 10px;color:var(--er)">${totFuelCo>0?fmtILS(totFuelCo,0):'—'}</td>
+    <td style="padding:7px 10px;font-weight:700;color:${totSaved>=0?'var(--ok)':'var(--er)'}">${totFuelCo>0?fmtILS(totSaved,0):'—'}</td>
+  </tr></tbody></table></div>`;
+  tr.querySelector('td').innerHTML=t;tr.style.display='';
+}
+function editRec(id,e){
+  e.stopPropagation();
+  const r=recs.find(x=>x.id===id);
+  if(!r)return;
+  $('editId').value=id;
+  $('editDate').value=r.date;
+  $('editKmLeft').value=r.kmLeft;
+  $('editKmTotal').value=r.kmTotal;
+  $('editKwh').value=r.kwh;
+  $('editRate').value=r.rate||'';
+  $('editNote').value=r.note||'';
+  $('editCo').innerHTML=cos.map(c=>`<option value="${c.id}" ${c.id===r.companyId?'selected':''}>${c.name}</option>`).join('');
+  openModal('mEdit');
+}
+function saveEdit(){
+  const id=parseInt($('editId').value);
+  const idx=recs.findIndex(r=>r.id===id);
+  if(idx<0)return;
+  const r=recs[idx];
+  const ds=$('editDate').value;
+  const kl=parseFloat($('editKmLeft').value)||r.kmLeft;
+  const kt=parseFloat($('editKmTotal').value)||r.kmTotal;
+  const kw=parseFloat($('editKwh').value)||r.kwh;
+  const rate=parseFloat($('editRate').value)||r.rate;
+  const cid=$('editCo').value;
+  const note=$('editNote').value.trim();
+  recs[idx]={...r,date:ds,kmLeft:kl,kmTotal:kt,kwh:kw,rate:rate,
+    cost:kw*rate,companyId:cid,companyName:cos.find(c=>c.id===cid)?.name||cid,note};
+  recalc();
+  LS.set('ev4_recs',recs);
+  closeModal('mEdit');
+  renderAll();
+  toast('✅ הרשומה עודכנה');
+}
+
+function renderAll(hl=false){renderMini();renderTable(hl);renderStats();renderMonthly();renderCoBtns();renderCoList();renderRates();renderFuelHist();renderHdr();loadSt();}
+
+function renderHdr(){
+  if(!recs.length){$('hSub').textContent='אין טעינות';return;}
+  const last=recs[recs.length-1];
+  const km=recs.filter(r=>r.kmDriven!=null&&r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
+  const tkwhHdr=recs.reduce((s,r)=>s+(r.kwh||0),0);
+  $('hSub').textContent=`${fmtNum(recs.length,0)} טעינות · ${fmtKm(km,0)} · ${fmtNum(tkwhHdr,1)} קו"ש`;
+}
+
+function renderMini(){ renderDashboard(); }
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+let kmOffset=0;
+let kmOffsetDirty=false; // true = המשתמש גלל ידנית
+
+function renderDashboard(){
+  const kpiEl=$('dashKpis');
+  const savCardEl=$('dashSavingCard');
+  const gauCardEl=$('dashGaugeCard');
+  const kmCardEl=$('dashKmCard');
+  const botEl=$('dashBottom');
+
+  if(!recs.length){
+    kpiEl.innerHTML='<div class="mpty" style="grid-column:1/-1"><div class="mpty-i">⚡</div><p>אין טעינות עדיין<br>הזן נתונים ביומן</p></div>';
+    [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='none';});
+    return;
+  }
+  [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='';});
+
+  // ─── חישובים ───
+  const dr=recs.filter(r=>r.kmDriven!=null&&r.kmDriven>0);
+  const tkw=recs.reduce((s,r)=>s+(r.kwh||0),0);
+  const tco=recs.reduce((s,r)=>s+(r.cost||0),0);
+  const tkm=dr.reduce((s,r)=>s+r.kmDriven,0);
+  const ckm=tkm>0?tco/tkm:0;
+  const qkm=tkm>0?tkw/tkm:0;
+  let fuelTotal=0;for(const r of dr)fuelTotal+=r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125));
+  const saved=fuelTotal-tco;
+  const chargeCap=st.chargeKwh||st.batt||70;
+  const avgRange=tkm>0&&tkw>0?(tkm/tkw)*chargeCap:0;
+  const effPct=st.range>0&&avgRange>0?(avgRange/st.range*100):null;
+  const avgRate=tkw>0?tco/tkw:0;
+  const curFuel=fuelPrice(today());
+  const curElec=homeRate(today());
+  // נוסחא מקורית מדויקת — זהה ל-renderMini המקורי
+  const curFuelMini=curFuel;
+  const avgElecMini=tkw>0?tco/tkw:homeRate(today());
+  const per100fuel=tkm>0&&tkw>0?(1/(tkw/tkm))*(curFuelMini/avgElecMini):null;
+
+  // ─── KPI cards ───
+  function kpi(label,value,sub,colorClass,extraClass=''){
+    return `<div class="kpi ${colorClass} ${extraClass}">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value ${colorClass}">${value}</div>
+      ${sub?`<div class="kpi-sub">${sub}</div>`:''}
+    </div>`;
+  }
+  const savedColor=saved>=0?'ok':'red';
+  kpiEl.innerHTML=
+    kpi('סה"כ עלות חשמל',fmtILS(tco,0),'מתחילת המעקב','red')+
+    kpi('חיסכון מדלק',fuelTotal>0?fmtILS(saved,0):'—','לעומת דלק שקילה',savedColor)+
+    kpi('₪ לק"מ',ckm>0?fmtILS(ckm,4):'—',curFuel>0?`דלק: ${fmtILS(curFuel/(st.kpl||12.125),4)}/ק"מ`:'','yellow')+
+    kpi('סה"כ ק"מ',fmtNum(tkm,0),'שנסעו ברכב','blue')+
+    kpi('סה"כ קו"ש',fmtNum(tkw,1),'שנטענו','green')+
+    kpi('1 ל-100 שקילות',per100fuel!=null?fmtNum(per100fuel,1):'—','שקילות לרכב דלק','yellow')+
+    kpi('צריכת חשמל ל-100 ק"מ',qkm>0?fmtNum(qkm*100,2)+' קו"ש':'—','','blue')+
+    kpi('טווח ממוצע מחושב',avgRange>0?Math.round(avgRange)+' ק"מ':'—',st.range?`מוצהר: ${st.range} ק"מ`:'','green')+
+    kpi('תעריף ממוצע',avgRate>0?avgRate.toFixed(3)+' ₪':'—','₪ לקו"ש','green')+
+    kpi('חיבורים',fmtNum(recs.length,0),'סה"כ טעינות','blue');
+
+  drawSavingChart();
+  drawGauge(effPct);
+  drawKmChart();
+
+  // ─── רצועת מידע תחתית ───
+  botEl.innerHTML=`
+    <div class="ct"><div class="ctb" style="background:var(--tx3)"></div>מצב נוכחי</div>
+    <div class="info-strip">
+      <div class="is-item"><div class="is-lbl">תעריף ביתי</div><div class="is-val">${curElec.toFixed(3)} ₪</div></div>
+      <div class="is-item"><div class="is-lbl">דלק עכשיו</div><div class="is-val">${fmtILS(curFuel,2)}</div></div>
+      <div class="is-item"><div class="is-lbl">טעינות מלאות</div><div class="is-val">${(tkw/chargeCap).toFixed(1)}</div></div>
+      <div class="is-item"><div class="is-lbl">ממוצע קו"ש/טעינה</div><div class="is-val">${(tkw/recs.length).toFixed(1)}</div></div>
+      <div class="is-item"><div class="is-lbl">ממוצע ₪/טעינה</div><div class="is-val">${fmtILS(tco/recs.length,2)}</div></div>
+    </div>`;
+}
+
+function kmScroll(dir){
+  const byM={};
+  for(const r of recs){const ym=r.date.slice(0,7);if(!byM[ym])byM[ym]=0;byM[ym]+=(r.kmDriven>0?r.kmDriven:0);}
+  const keys=Object.keys(byM).sort();
+  const PAGE=6;
+  const maxOff=Math.max(0,keys.length-PAGE);
+  kmOffsetDirty=true;
+  const step=Math.ceil(PAGE/2);
+  if(dir<0) kmOffset=Math.min(maxOff, kmOffset+step);
+  else       kmOffset=Math.max(0,      kmOffset-step);
+  drawKmChart();
+}
+
+function cssVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||getComputedStyle(document.body).getPropertyValue(v).trim();}
+function isLight(){return document.body.classList.contains('light');}
+function chartGridColor(){return isLight()?'rgba(180,195,210,.5)':'rgba(42,53,71,.4)';}
+function chartLabelColor(){return isLight()?'rgba(80,100,120,.75)':'rgba(140,153,176,.75)';}
+function chartLabelColor2(){return isLight()?'rgba(80,100,120,.6)':'rgba(140,153,176,.6)';}
+
+function getCanvasSize(id,h){
+  const c=$(id);if(!c)return null;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.max(c.parentElement.offsetWidth-32,200);
+  c.width=W*dpr;c.height=h*dpr;
+  c.style.width=W+'px';c.style.height=h+'px';
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  // clear with card background
+  ctx.clearRect(0,0,W,h);
+  return {c,ctx,W,H:h,dpr};
+}
+
+function drawSavingChart(){
+  const g=getCanvasSize('cSaving',155);if(!g)return;
+  const {ctx,W,H}=g;
+
+  // נתונים: חיסכון מצטבר וחשמל מצטבר
+  const sorted=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
+  const pts=[];let cumSaved=0,cumElec=0;
+  for(const r of sorted){
+    if(r.kmDriven>0){
+      const fc=r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125));
+      cumSaved+=fc-(r.cost||0);
+      cumElec+=(r.cost||0);
+      pts.push({x:r.date,saved:cumSaved,elec:cumElec});
+    }
+  }
+  if(pts.length<2){$('dashSavingCard').style.display='none';return;}
+  $('dashSavingCard').style.display='';
+
+  // ─── מקרא מעל הגרף ─── שני פריטים: ריבוע + רווח + טקסט, משמאל לימין
+  const LEGEND_H=18;
+  const BOX_W=10, BOX_H=8, BOX_TOP=3, GAP=5, ITEM_GAP=20;
+  ctx.font='bold 9.5px Heebo,sans-serif';
+  const scCol=pts[pts.length-1].saved>=0?'rgba(34,197,94,.95)':'rgba(239,68,68,.95)';
+  const textY=BOX_TOP+BOX_H; // baseline מיושר עם תחתית הריבוע
+  const legendTextCol=chartLabelColor();
+
+  // פריט 1: עלות חשמל — מתחיל מ-PAD.l
+  let curX=56; // מיושר עם שמאל הגרף
+  ctx.fillStyle='rgba(59,130,246,.95)';
+  ctx.fillRect(curX, BOX_TOP, BOX_W, BOX_H);
+  curX+=BOX_W+GAP;
+  ctx.fillStyle=legendTextCol;ctx.textAlign='left';
+  ctx.fillText('עלות חשמל', curX, textY);
+  curX+=ctx.measureText('עלות חשמל').width+ITEM_GAP;
+
+  // פריט 2: חיסכון מדלק
+  ctx.fillStyle=scCol;
+  ctx.fillRect(curX, BOX_TOP, BOX_W, BOX_H);
+  curX+=BOX_W+GAP;
+  ctx.fillStyle=legendTextCol;
+  ctx.fillText('חיסכון מדלק', curX, textY);
+
+  const PAD={t:LEGEND_H+6,r:10,b:28,l:56};
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const allVals=[...pts.map(p=>p.saved),...pts.map(p=>p.elec),0];
+  const minY=Math.min(...allVals);
+  const maxY=Math.max(...allVals);
+  const rangeY=maxY-minY||1;
+  const px=i=>PAD.l+i*(cw/(pts.length-1));
+  const py=v=>PAD.t+ch-((v-minY)/rangeY)*ch;
+
+  // grid lines
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){
+    const y=PAD.t+(ch/4)*i;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // zero line
+  if(minY<0){
+    ctx.beginPath();ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=1;
+    ctx.moveTo(PAD.l,py(0));ctx.lineTo(PAD.l+cw,py(0));ctx.stroke();
+  }
+
+  function drawArea(series,col){
+    const grad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+ch);
+    grad.addColorStop(0,col.replace('1)','0.22)'));
+    grad.addColorStop(1,col.replace('1)','0.02)'));
+    ctx.beginPath();ctx.moveTo(px(0),py(series[0]));
+    for(let i=1;i<series.length;i++)ctx.lineTo(px(i),py(series[i]));
+    ctx.lineTo(px(series.length-1),py(minY<0?0:PAD.t+ch));
+    ctx.lineTo(px(0),py(minY<0?0:PAD.t+ch));
+    ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';
+    ctx.moveTo(px(0),py(series[0]));
+    for(let i=1;i<series.length;i++)ctx.lineTo(px(i),py(series[i]));
+    ctx.stroke();
+  }
+
+  drawArea(pts.map(p=>p.elec),'rgba(59,130,246,1)');
+  drawArea(pts.map(p=>p.saved),pts[pts.length-1].saved>=0?'rgba(34,197,94,1)':'rgba(239,68,68,1)');
+
+  // Y labels
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v=minY+(rangeY/3)*i;
+    const lbl=Math.abs(v)>=1000?`${v<0?'-':''}₪${(Math.abs(v)/1000).toFixed(1)}k`:`${v<0?'-₪':'₪'}${Math.abs(v).toFixed(0)}`;
+    ctx.fillText(lbl,PAD.l-4,py(v)+4);
+  }
+
+  // X labels — תאריך התחלה ותאריך סוף, שניהם בתוך המסגרת
+  ctx.font='9px Heebo,sans-serif';ctx.fillStyle=chartLabelColor2();
+  ctx.textAlign='left';
+  ctx.fillText(fd(pts[0].x), PAD.l, H-6);
+  ctx.textAlign='right';
+  ctx.fillText(fd(pts[pts.length-1].x), PAD.l+cw, H-6);
+}
+
+function drawGauge(pct){
+  const el=$('dashGauge');if(!el)return;
+  if(pct==null){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:.8rem">הגדר טווח מוצהר בהגדרות</div>';
+    return;
+  }
+  // סקאלה 0–100. מעל 100 = מוצג כ-100 על המד
+  const disp=Math.min(pct,100);
+  const angle=disp/100*180;
+
+  // פונקציה: החזר צבע interpolated לפי ערך 0–100
+  // 0→אדום, 50→כתום, 70→צהוב, 85→ירוק, 95→סגול
+  function gaugeColor(v){
+    const stops=[
+      [0,  [239,68,68]],
+      [50, [245,158,11]],
+      [70, [234,179,8]],
+      [85, [34,197,94]],
+      [95, [168,85,247]],
+      [100,[168,85,247]],
+    ];
+    v=Math.max(0,Math.min(100,v));
+    for(let i=0;i<stops.length-1;i++){
+      const [v0,c0]=stops[i];
+      const [v1,c1]=stops[i+1];
+      if(v<=v1){
+        const t=(v-v0)/(v1-v0);
+        const r=Math.round(c0[0]+(c1[0]-c0[0])*t);
+        const g=Math.round(c0[1]+(c1[1]-c0[1])*t);
+        const b=Math.round(c0[2]+(c1[2]-c0[2])*t);
+        return `rgb(${r},${g},${b})`;
+      }
+    }
+    return `rgb(168,85,247)`;
+  }
+
+  const cx=90,cy=80,r=58;
+  function pt(deg,rr){
+    const rad=(deg-180)*Math.PI/180;
+    return [+(cx+rr*Math.cos(rad)).toFixed(2),+(cy+rr*Math.sin(rad)).toFixed(2)];
+  }
+
+  // קשת רקע
+  function arcPath(a1,a2,rr,col,sw){
+    if(a2<=a1)return '';
+    const [x1,y1]=pt(a1,rr);const [x2,y2]=pt(a2,rr);
+    return `<path d="M${x1},${y1} A${rr},${rr} 0 ${a2-a1>90?1:0} 1 ${x2},${y2}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
+  }
+  const bg=arcPath(0,180,r,'rgba(42,53,71,.6)',10);
+
+  // קשת gradient — מחולקת ל-60 קטעים קטנים לאפקט מעבר הדרגתי
+  let coloredArc='';
+  const STEPS=60;
+  for(let i=0;i<STEPS;i++){
+    const v0=i/STEPS*100,v1=(i+1)/STEPS*100;
+    const a0=v0/100*180,a1=v1/100*180;
+    if(a1>angle)break;
+    const col=gaugeColor((v0+v1)/2);
+    coloredArc+=arcPath(a0,a1,r,col,11);
+  }
+
+  // ticks ותוויות
+  let ticks='';
+  for(const v of [0,25,50,75,100]){
+    const a=v/100*180;
+    const [ox,oy]=pt(a,r+8);const [ix,iy]=pt(a,r+1);
+    ticks+=`<line x1="${ox}" y1="${oy}" x2="${ix}" y2="${iy}" stroke="rgba(90,110,132,.8)" stroke-width="1.5"/>`;
+    const [lx,ly]=pt(a,r+19);
+    ticks+=`<text x="${lx}" y="${ly+3}" text-anchor="middle" font-size="7.5" fill="rgba(140,153,176,.7)" font-family="Heebo,sans-serif">${v}%</text>`;
+  }
+
+  const needleColor=gaugeColor(disp);
+  const [nx,ny]=pt(angle,r-11);
+  const needle=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${needleColor}" stroke-width="3" stroke-linecap="round"/>`;
+
+  const svg=`<svg viewBox="0 0 180 106" width="100%" style="max-width:230px;display:block;margin:0 auto;overflow:visible">
+    ${ticks}${bg}${coloredArc}${needle}
+    <circle cx="${cx}" cy="${cy}" r="5" fill="${needleColor}"/>
+    <circle cx="${cx}" cy="${cy}" r="2.5" fill="var(--sf)"/>
+    <text x="${cx}" y="${cy+20}" text-anchor="middle" font-size="15" font-weight="900" fill="${needleColor}" font-family="Heebo,sans-serif">${pct.toFixed(1)}%</text>
+  </svg>`;
+
+  const label=disp>=95?'מצוין 🎉':disp>=85?'טוב מאוד 👍':disp>=70?'טוב':disp>=50?'בינוני':'מתחת למוצהר ⚠️';
+  const avg=st.range>0&&pct>0?Math.round(st.range*pct/100):0;
+  el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;padding:4px 0 8px">
+    ${svg}
+    <div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${label} — מוצהר: ${st.range||'—'} ק"מ, ממוצע: ${avg||'—'} ק"מ</div>
+  </div>`;
+}
+
+function drawKmChart(){
+  const g=getCanvasSize('cKm',145);if(!g)return;
+  const {ctx,W,H}=g;
+
+  // צבור ק"מ לפי חודש
+  const byM={};
+  for(const r of recs){
+    const ym=r.date.slice(0,7);
+    if(!byM[ym])byM[ym]=0;
+    byM[ym]+=(r.kmDriven>0?r.kmDriven:0);
+  }
+  const allKeys=Object.keys(byM).sort();
+  if(!allKeys.length){$('dashKmCard').style.display='none';return;}
+  $('dashKmCard').style.display='';
+
+  const PAGE=6;
+  const maxOff=Math.max(0,allKeys.length-PAGE);
+  // אם המשתמש לא גלל ידנית — תמיד הצג חודשים אחרונים
+  if(!kmOffsetDirty)kmOffset=maxOff;
+  kmOffset=Math.max(0,Math.min(maxOff,kmOffset));
+  const keys=allKeys.slice(kmOffset,kmOffset+PAGE);
+
+  // עדכן כפתורי scroll
+  const lBtn=$('kmScrollL'),rBtn=$('kmScrollR');
+  if(lBtn)lBtn.style.opacity=kmOffset<maxOff?'1':'0.3';
+  if(rBtn)rBtn.style.opacity=kmOffset>0?'1':'0.3';
+
+  // ─── מקרא מעל הגרף ─── (גובה 20px)
+  const LEGEND_H=20;
+  ctx.font='bold 9.5px Heebo,sans-serif';
+  const legendTextCol=chartLabelColor();
+
+  // פריט: ריבוע ירוק + "ק"מ חודשי" — מימין
+  const lText='ק"מ חודשי';
+  ctx.fillStyle='rgba(0,200,150,.95)';
+  ctx.fillRect(W-13, 3, 10, 8);
+  ctx.fillStyle=legendTextCol;
+  ctx.textAlign='right';
+  ctx.fillText(lText, W-27, 11);
+
+  // "סך X חודשים מתוך Y" — משמאל (מידע טווח)
+  const rangeLabel=allKeys.length>PAGE
+    ? `${kmOffset+1}–${Math.min(kmOffset+PAGE,allKeys.length)} מתוך ${allKeys.length} חודשים`
+    : `${allKeys.length} חודשים`;
+  ctx.fillStyle=chartLabelColor2();ctx.font='8.5px Heebo,sans-serif';ctx.textAlign='left';
+  ctx.fillText(rangeLabel, 48, 11);
+
+  const PAD={t:LEGEND_H+6,r:10,b:28,l:48};
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const vals=keys.map(k=>byM[k]);
+  const maxV=Math.max(...vals)||1;
+  const bw=Math.max(8,Math.floor((cw/keys.length)*0.7));
+  const spacing=cw/keys.length;
+
+  // grid
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){
+    const y=PAD.t+(ch/3)*(3-i);
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  keys.forEach((k,i)=>{
+    const v=byM[k];
+    const bh=Math.max(2,(v/maxV)*ch);
+    const x=PAD.l+spacing*i+(spacing-bw)/2;
+    const y=PAD.t+ch-bh;
+    const grad=ctx.createLinearGradient(0,y,0,PAD.t+ch);
+    grad.addColorStop(0,'rgba(0,200,150,.95)');
+    grad.addColorStop(1,'rgba(0,200,150,.3)');
+    ctx.fillStyle=grad;
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,bh,3);ctx.fill();}
+    else{ctx.fillRect(x,y,bw,bh);}
+    if(bh>18){
+      ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='bold 8px Heebo,sans-serif';ctx.textAlign='center';
+      ctx.fillText(Math.round(v),x+bw/2,y+12);
+    }
+    const [,mo]=k.split('-');
+    ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
+    ctx.fillText(mo+'/'+k.slice(2,4),x+bw/2,H-6);
+  });
+
+  // Y labels
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v=(maxV/3)*i;
+    const lbl=v>=1000?`${(v/1000).toFixed(1)}k`:`${Math.round(v)}`;
+    ctx.fillText(lbl,PAD.l-3,PAD.t+ch-(ch/3)*i+4);
+  }
+}
+
+// ══════════════════════════════════════════
+// STATISTICS — חישוב מדויק
+// ══════════════════════════════════════════
+function renderStats(){
+  const sm=$('stMain'),sc=$('stCo'),sk=$('stKm'),sf=$('stFuel');
+  const noData='<p style="color:var(--tx3);font-size:.8rem">נדרשות לפחות 2 רשומות</p>';
+  if(recs.length<2){sm.innerHTML=sk.innerHTML=sc.innerHTML=sf.innerHTML=noData;return;}
+
+  const tkw   = recs.reduce((s,r)=>s+(r.kwh||0),0);
+  const tco   = recs.reduce((s,r)=>s+(r.cost||0),0);
+  const dr    = recs.filter(r=>r.kmDriven!=null&&r.kmDriven>0);
+  const tkm   = dr.reduce((s,r)=>s+r.kmDriven,0);
+  const ckm   = tkm>0?tco/tkm:0;
+  const qkm   = tkm>0?tkw/tkm:0;
+  const avgRate = tkw>0?tco/tkw:0;
+  // טווח ממוצע = 80 × אודומטר / קו"ש ביתי (נוסחת הקובץ: כללי[קו"ש] = ביתי בלבד)
+  // טווח ממוצע = סה"כ ק"מ / סה"כ קו"ש × קיבולת טעינה — מאומת מהקובץ
+  const battCap = st.batt||70;
+  const chargeCapacity = st.chargeKwh||battCap;
+  const chargeCapacityForRange = chargeCapacity;
+  const avgRange = tkm>0&&tkw>0?(tkm/tkw)*chargeCapacityForRange:0;
+  const per100  = qkm>0?(()=>{const avgElec=tkw>0?tco/tkw:homeRate(today());const curFuelLiter=fuelPrice(today());return(1/qkm)*(curFuelLiter/avgElec);})():0;
+  const fullCharges = tkw / chargeCapacity;
+  const fullChargesPct = 0; // לא רלוונטי כאן
+  const homeTot  = recs.filter(r=>r.companyId==='home').reduce((s,r)=>s+(r.kwh||0),0);
+  const pubTot   = tkw - homeTot;
+  const homeCost = recs.filter(r=>r.companyId==='home').reduce((s,r)=>s+(r.cost||0),0);
+  const pubCost  = tco - homeCost;
+  const nHome = recs.filter(r=>r.companyId==='home').length;
+  const nPub  = recs.length - nHome;
+  const avgChargeKm = dr.length>0?tkm/dr.length:0;
+  const avgKwhPerCharge = recs.length>0?tkw/recs.length:0;
+  const avgBattUsed = battCap>0?avgKwhPerCharge/battCap*100:0;
+
+  function srow(l,v,cls='',tip=''){
+    const safeTip=tip.replace(/\\/g,'\\\\').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    const btn=tip?`<button class="tip-btn" onclick="showTip(event,'${safeTip}')">?</button>`:'';
+    return `<div class="stat-row"><span class="stat-lbl">${l}${btn}</span><span class="stat-val ${cls}">${v}</span></div>`;
+  }
+
+  sm.innerHTML=
+    `<div class="sect-title">נפחי טעינה</div>`+
+    srow('סה"כ קו"ש שנטענו',fmtNum(tkw,3)+' קו"ש','g')+
+    srow('מספר חיבורים',fmtNum(recs.length,0))+
+    srow('טעינות מלאות שקולות',fmtNum(fullCharges,1),'','סה"כ קו"ש חלקי קיבולת טעינה. כמה פעמים הסוללה התמלאה לחלוטין')+
+    srow('חיבורים ביתיות / ציבוריות',`${nHome} / ${nPub}`)+
+    srow('קו"ש ביתי / ציבורי',`${fmtNum(homeTot,1)} / ${fmtNum(pubTot,1)}`)+
+    srow('ממוצע קו"ש לחיבור',fmtNum(avgKwhPerCharge,2)+' קו"ש')+
+    srow('ממוצע ניצול סוללה לחיבור',fmtNum(avgBattUsed,1)+'%','','ממוצע קו"ש לחיבור חלקי קיבולת סוללה × 100')+
+    `<div class="sect-title">עלויות</div>`+
+    srow('סה"כ עלות חשמל',fmtILS(tco,2),'y')+
+    srow('עלות ביתי / ציבורי',`${fmtILS(homeCost,0)} / ${fmtILS(pubCost,0)}`)+
+    srow('תעריף ממוצע ₪/קו"ש',avgRate.toFixed(4)+' ₪','','סה"כ עלות חלקי סה"כ קו"ש. ממוצע משוקלל')+
+    srow('ממוצע עלות לחיבור',fmtILS(tco/recs.length,2))+
+    srow('עלות ₪ / ק"מ',fmtILS(ckm,4),'y','סה"כ עלות חלקי סה"כ ק"מ שנסעו')+
+    `<div class="sect-title">נסועה</div>`+
+    srow('סה"כ ק"מ שנסעו',fmtNum(tkm,0)+' ק"מ','b')+
+    srow('ממוצע ק"מ לחיבור',fmtNum(avgChargeKm,1)+' ק"מ')+
+    srow('ממוצע ק"מ לחיבור ביתי',fmtNum(tkm/Math.max(nHome,1),1)+' ק"מ');
+
+  // לפי חברה — חישוב חיסכון לכל חברה
+  const bm={};
+  for(const r of recs){
+    const cid=r.companyId||'home';
+    if(!bm[cid])bm[cid]={kwh:0,cost:0,n:0,fuelCost:0,name:cos.find(c=>c.id===cid)?.name||r.companyName||cid};
+    bm[cid].kwh+=(r.kwh||0);bm[cid].cost+=(r.cost||0);bm[cid].n++;
+    const dr2=recs.filter(rx=>rx.companyId===cid&&rx.kmDriven>0);
+    // fuelCost computed below per row
+  }
+  // recompute fuelCost per company
+  for(const r of recs){
+    const cid=r.companyId||'home';
+    if(r.kmDriven>0) bm[cid].fuelCost+=(r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125)));
+  }
+
+  const coList=Object.values(bm).sort((a,b)=>b.kwh-a.kwh);
+
+  const thCo=t=>`<th style="padding:7px 10px;text-align:right;color:var(--tx3);font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);background:var(--sf3);white-space:nowrap">${t}</th>`;
+
+  const coRows=coList.map((d,idx)=>{
+    const cid=Object.keys(bm).find(k=>bm[k]===d);
+    const avg=d.kwh>0?d.cost/d.kwh:0;
+    const saved=d.fuelCost-d.cost;
+    const tdS=`padding:8px 10px;font-size:.8rem;font-weight:600;text-align:right;white-space:nowrap;`;
+    return `<tr onclick="toggleCoDetail('${cid}')" style="cursor:pointer;border-bottom:1px solid rgba(42,53,71,.35);transition:background .12s;" onmouseover="this.style.background='rgba(0,200,150,.04)'" onmouseout="this.style.background=''">
+      <td style="${tdS}font-weight:700;color:var(--tx)">${d.name}</td>
+      <td style="${tdS}color:var(--tx3);font-size:.76rem">${d.n}</td>
+      <td style="${tdS}color:var(--ac2)">${fmtNum(d.kwh,1)}</td>
+      <td style="${tdS}color:var(--ac3)">${fmtILS(d.cost,0)}</td>
+      <td style="${tdS}color:var(--tx2)">${avg.toFixed(3)}</td>
+      <td style="${tdS}color:var(--tx2)">${tkw>0?(d.kwh/tkw*100).toFixed(1):0}%</td>
+      <td style="${tdS}color:var(--er)">${d.fuelCost>0?fmtILS(d.fuelCost,0):'—'}</td>
+      <td style="${tdS}font-weight:700;color:${saved>=0?'var(--ok)':'var(--er)'}">${d.fuelCost>0?fmtILS(saved,0):'—'}</td>
+      <td style="${tdS}color:var(--tx3);font-size:.85rem;text-align:center"><span id="coarrow_${cid}">▸</span></td>
+    </tr>
+    <tr id="codetail_${cid}" style="display:none"><td colspan="9" style="padding:0;border-bottom:1px solid rgba(42,53,71,.35)"></td></tr>`;
+  }).join('');
+
+  const coTable=`<div style="overflow-x:auto;border:1px solid var(--bd);border-radius:var(--rs)">
+    <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+      <thead><tr>${thCo('שם')}${thCo('חיבורים')}${thCo('קו"ש')}${thCo('עלות')}${thCo('₪/קו"ש')}${thCo('% מסה"כ')}${thCo('דלק שקילה')}${thCo('💚 חיסכון')}${thCo('')}</tr></thead>
+      <tbody>${coRows}</tbody>
+    </table>
+  </div>`;
+
+  sc.innerHTML=(coList.length?coTable:noData);
+  // שחזור מצב פתיחת חברות (ללא כתיבה חוזרת ל-LS)
+  if(coList.length){
+    const openCos=LS.get('ev4_openCos',{});
+    for(const cid of Object.keys(openCos)){
+      if(!openCos[cid])continue;
+      const tr2=document.getElementById('codetail_'+cid);
+      const arrow2=document.getElementById('coarrow_'+cid);
+      if(!tr2)continue;
+      if(arrow2)arrow2.textContent='▾';
+      // בנה תוכן
+      const coRecs2=recs.filter(r=>r.companyId===cid).sort((a,b)=>b.date.localeCompare(a.date));
+      const th2=t=>`<th style="padding:7px 10px;text-align:right;color:var(--tx3);font-size:.68rem;font-weight:700;border-bottom:1px solid var(--bd);background:var(--sf3);white-space:nowrap">${t}</th>`;
+      let t2=`<div style="overflow-x:auto;padding:10px 12px"><table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr>${th2('תאריך')}${th2('קו"ש')}${th2('תעריף')}${th2('עלות')}${th2('ק"מ')}${th2('דלק שקילה')}${th2('💚 חיסכון')}</tr></thead><tbody>`;
+      let totKwh2=0,totCost2=0,totFuelCo2=0;
+      for(const r of coRecs2){
+        totKwh2+=r.kwh||0;totCost2+=r.cost||0;
+        const fk=r.kmDriven>0?r.kmDriven*(fuelPrice(r.date)/(st.kpl||12.125)):0;
+        totFuelCo2+=fk;const rs2=fk-r.cost;
+        t2+=`<tr style="border-bottom:1px solid rgba(42,53,71,.3)"><td style="padding:7px 10px;color:var(--tx3)">${fd(r.date)}</td><td style="padding:7px 10px;color:var(--ac2);font-weight:600">${fmtNum(r.kwh,2)}</td><td style="padding:7px 10px;color:var(--tx3)">${(r.rate||0).toFixed(3)}</td><td style="padding:7px 10px;color:var(--ac3);font-weight:600">${fmtILS(r.cost,2)}</td><td style="padding:7px 10px;color:var(--ac)">${r.kmDriven>0?fmtNum(r.kmDriven,0):'—'}</td><td style="padding:7px 10px;color:var(--er)">${fk>0?fmtILS(fk,2):'—'}</td><td style="padding:7px 10px;font-weight:700;color:${rs2>=0?'var(--ok)':'var(--er)'}">${fk>0?fmtILS(rs2,2):'—'}</td></tr>`;
+      }
+      const totSaved2=totFuelCo2-totCost2;
+      t2+=`<tr style="background:rgba(0,200,150,.07);font-weight:700;border-top:1px solid var(--bd)"><td style="padding:7px 10px;color:var(--ac)">סה"כ</td><td style="padding:7px 10px;color:var(--ac2)">${fmtNum(totKwh2,1)}</td><td></td><td style="padding:7px 10px;color:var(--ac3)">${fmtILS(totCost2,0)}</td><td></td><td style="padding:7px 10px;color:var(--er)">${totFuelCo2>0?fmtILS(totFuelCo2,0):'—'}</td><td style="padding:7px 10px;font-weight:700;color:${totSaved2>=0?'var(--ok)':'var(--er)'}">${totFuelCo2>0?fmtILS(totSaved2,0):'—'}</td></tr></tbody></table></div>`;
+      tr2.querySelector('td').innerHTML=t2;tr2.style.display='';
+    }
+  }
+
+  // מדדי יעילות
+  let totalFuelCost=0;
+  for(const r of dr){const fp=fuelPrice(r.date);totalFuelCost+=r.kmDriven*(fp/(st.kpl||12.125));}
+  const saved=totalFuelCost-tco;
+  const curFuel=fuelPrice(today());
+  const curFuelKm=curFuel/(st.kpl||12.125);
+  const fuelPct = tco>0?(totalFuelCost/tco)*100:0; // דלק יקר פי X% מחשמל
+
+  if(dr.length>0){
+    sk.innerHTML=
+      `<div class="sect-title">יעילות אנרגטית</div>`+
+      srow('קו"ש לק"מ',fmtNum(qkm,4),'b','סה"כ קו"ש חלקי סה"כ ק"מ. צריכת אנרגיה ממוצעת לק"מ')+
+      srow('ק"מ לקו"ש',fmtNum(1/qkm,2),'b')+
+      srow('צריכת חשמל (קו"ש / 100 ק"מ)',fmtNum(qkm*100,2),'b','קו"ש לק"מ × 100. כמה קו"ש צורכים לכל 100 ק"מ')+
+      srow('1 ל-100 (שקילות דלק)',fmtNum(per100,1),'b','(ק"מ/קו"ש) × (מחיר דלק ÷ מחיר חשמל). שקילות לרכב דלק')+
+      srow('עלות ₪ / ק"מ',fmtILS(ckm,4),'y')+
+      `<div class="sect-title">טווח וסוללה</div>`+
+      srow('טווח ממוצע מחושב',fmtNum(avgRange,0)+' ק"מ','','סה"כ ק"מ ÷ סה"כ קו"ש × קיבולת טעינה')+
+      srow('טווח מוצהר WLTP',fmtNum(st.range,0)+' ק"מ')+
+      srow('יעילות ביחס למוצהר',st.range>0?(avgRange/st.range*100).toFixed(1)+'%':'—','','טווח ממוצע מחושב ÷ טווח מוצהר. מעל 100% = טוב ממפרט')+
+      srow('ניצול סוללה ממוצע לחיבור',fmtNum(avgBattUsed,1)+'%')+
+      `<div class="sect-title">ממוצעים</div>`+
+      srow('1 ל-100 ממוצע',fmtNum(per100,1),'b')+
+      srow('טווח ממוצע מחושב',fmtNum(avgRange,0)+' ק"מ')+
+      srow('ממוצע ק"מ לחיבור',fmtNum(avgChargeKm,1)+' ק"מ')+
+      srow('ממוצע קו"ש לחיבור',fmtNum(avgKwhPerCharge,2)+' קו"ש')+
+      srow('ממוצע עלות לחיבור',fmtILS(tco/recs.length,2));
+  } else sk.innerHTML=noData;
+
+  sf.innerHTML=
+    `<div class="sect-title">השוואה לדלק</div>`+
+    srow('עלות דלק שקילה (לפי תאריך)',fmtILS(totalFuelCost,0),'r','כמה היה עולה לנסוע אותם ק"מ ברכב דלק, לפי מחיר בכל תאריך')+
+    srow('סה"כ שילמת על חשמל',fmtILS(tco,0),'y')+
+    srow('סה"כ חיסכון',fmtILS(saved,0),saved>=0?'g':'r','עלות דלק שקילה פחות עלות החשמל בפועל')+
+    srow('פער באחוזים (דלק יקר פי...)',fmtNum(fuelPct,1)+'%','g','עלות דלק שקילה חלקי עלות חשמל × 100. דלק יקר פי X% מחשמל')+
+    `<div class="sect-title">לפי ק"מ (תעריף נוכחי)</div>`+
+    srow('עלות דלק לק"מ',fmtILS(curFuelKm,4),'r')+
+    srow('עלות חשמל לק"מ',fmtILS(ckm,4),'g')+
+    srow('חיסכון לק"מ',fmtILS(curFuelKm-ckm,4),(curFuelKm-ckm)>=0?'g':'r')+
+    srow('חיסכון לכל 100 ק"מ',fmtILS((curFuelKm-ckm)*100,2),(curFuelKm-ckm)>=0?'g':'r','(עלות דלק לק"מ − עלות חשמל לק"מ) × 100');
+}
+function renderRates(){
+  const el=$('rateHist'),em=$('ratesEmpty');
+  const cur=homeRate(today());
+  $('mrDisp').textContent='₪'+cur.toFixed(3);
+  const sortedHR=[...homeRates].sort((a,b)=>b.date.localeCompare(a.date));
+  // דלק
+  const curFuel=fuelPrice(today());
+  if($('mrFuelDisp'))$('mrFuelDisp').textContent=fmtILS(curFuel,2);
+  const sortedFuel=[...fuelRates].sort((a,b)=>b.date.localeCompare(a.date));
+  // בתוקף — תאריך האחרון מבין השניים
+  const hrDate=sortedHR[0]?.date||'';const fuDate=sortedFuel[0]?.date||'';
+  const latestDate=hrDate>fuDate?hrDate:fuDate;
+  if($('mrSub'))$('mrSub').textContent=latestDate?`בתוקף מ-${fd(latestDate)}`:'—';
+  if(!homeRates.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  const byYearHR={};
+  for(const h of sortedHR){const y=h.date.slice(0,4);if(!byYearHR[y])byYearHR[y]=[];byYearHR[y].push(h);}
+  const yearsHR=Object.keys(byYearHR).sort().reverse();
+  el.innerHTML=yearsHR.map(y=>{
+    const items=byYearHR[y].map(h=>`<div class="ri rhy_${y}" style="display:none">
+      <div class="rd2">מ-${fd(h.date)}</div>
+      <div class="rvs">
+        <div class="rv"><div class="rv-l">תעריף חשמל</div><div class="rv-n">${h.rate.toFixed(3)} ₪</div></div>
+        <div class="rv"><button class="bico" onclick="delHR('${h.date}')">🗑</button></div>
+      </div></div>`).join('');
+    return `<div class="ri" style="cursor:pointer;background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)" onclick="toggleRY('${y}')">
+      <div class="rd2" style="font-weight:700;color:var(--ac2)"><span id="rharrow_${y}">▸</span> ${y} <span style="font-size:.65rem;color:var(--tx3);font-weight:400">${byYearHR[y].length} תעריפים</span></div>
+      <div class="rvs"><div class="rv"><div class="rv-l">ממוצע</div><div class="rv-n">${(byYearHR[y].reduce((s,h)=>s+h.rate,0)/byYearHR[y].length).toFixed(3)} ₪</div></div></div>
+    </div>${items}`;
+  }).join('');
+}
+function openUpdateRates(){
+  $('hrDate').value=today();
+  // מלא ברירות מחדל לפי הערכים הנוכחיים
+  $('hrRate').value=homeRate(today()).toFixed(3);
+  $('hrFuelPrice').value=fuelPrice(today()).toFixed(2);
+  openModal('mHR');
+}
+function saveHRBoth(){
+  const d=$('hrDate').value;
+  const r=parseFloat($('hrRate').value);
+  const fp=parseFloat($('hrFuelPrice').value);
+  if(!d){toast('⚠️ נא למלא תאריך','e');return;}
+  let saved=false;
+  if(!isNaN(r)&&r>0){
+    homeRates=homeRates.filter(h=>h.date!==d);homeRates.push({date:d,rate:r});
+    homeRates.sort((a,b)=>a.date.localeCompare(b.date));
+    LS.set('ev4_hr',homeRates);saved=true;
+  }
+  if(!isNaN(fp)&&fp>0){
+    fuelRates=fuelRates.filter(h=>h.date!==d);fuelRates.push({date:d,price:fp});
+    fuelRates.sort((a,b)=>a.date.localeCompare(b.date));
+    LS.set('ev4_fuel',fuelRates);saved=true;
+  }
+  if(!saved){toast('⚠️ נא למלא לפחות תעריף אחד','e');return;}
+  closeModal('mHR');renderRates();renderFuelHist();toast('✅ תעריפים עודכנו');gdAutoSave();
+}
+function saveHR(){saveHRBoth();}
+function toggleRY(y){
+  const rows=document.querySelectorAll('.rhy_'+y);
+  const arrow=$('rharrow_'+y);
+  const open=arrow&&arrow.textContent==='▸';
+  if(arrow)arrow.textContent=open?'▾':'▸';
+  rows.forEach(r=>r.style.display=open?'':'none');
+}
+
+
+// ══════════════════════════════════════════
+// FUEL RATES
+// ══════════════════════════════════════════
+function renderFuelHist(){
+  const el=$('fuelHist'),em=$('fuelEmpty');
+  if(!fuelRates.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  const sorted=[...fuelRates].sort((a,b)=>b.date.localeCompare(a.date));
+  const byYearFR={};
+  for(const h of sorted){const y=h.date.slice(0,4);if(!byYearFR[y])byYearFR[y]=[];byYearFR[y].push(h);}
+  const yearsFR=Object.keys(byYearFR).sort().reverse();
+  el.innerHTML=yearsFR.map(y=>{
+    const items=byYearFR[y].map(h=>`<div class="ri rfy_${y}" style="display:none">
+      <div class="rd2">מ-${fd(h.date)}</div>
+      <div class="rvs">
+        <div class="rv"><div class="rv-l">מחיר דלק</div><div class="rv-n" style="color:var(--ac3)">${fmtILS(h.price,2)}</div></div>
+        <div class="rv"><button class="bico" onclick="delFuel('${h.date}')">🗑</button></div>
+      </div></div>`).join('');
+    return `<div class="ri" style="cursor:pointer;background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3)" onclick="toggleFY('${y}')">
+      <div class="rd2" style="font-weight:700;color:var(--ac3)"><span id="fharrow_${y}">▸</span> ${y} <span style="font-size:.65rem;color:var(--tx3);font-weight:400">${byYearFR[y].length} עדכונים</span></div>
+      <div class="rvs"><div class="rv"><div class="rv-l">ממוצע</div><div class="rv-n" style="color:var(--ac3)">${fmtILS(byYearFR[y].reduce((s,h)=>s+h.price,0)/byYearFR[y].length,2)}</div></div></div>
+    </div>${items}`;
+  }).join('');
+}
+function toggleFY(y){
+  const rows=document.querySelectorAll('.rfy_'+y);
+  const arrow=$('fharrow_'+y);
+  const open=arrow&&arrow.textContent==='▸';
+  if(arrow)arrow.textContent=open?'▾':'▸';
+  rows.forEach(r=>r.style.display=open?'':'none');
+}
+function saveFuel(){
+  const d=$('fuDate').value,p=parseFloat($('fuPrice').value);
+  if(!d||isNaN(p)||p<=0){toast('⚠️ נא למלא','e');return;}
+  fuelRates=fuelRates.filter(h=>h.date!==d);fuelRates.push({date:d,price:p});
+  fuelRates.sort((a,b)=>a.date.localeCompare(b.date));
+  LS.set('ev4_fuel',fuelRates);closeModal('mFuel');renderFuelHist();toast('✅ מחיר דלק עודכן');
+}
+function delFuel(d){if(!confirm('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
+
+// ══════════════════════════════════════════
+// COMPANIES
+// ══════════════════════════════════════════
+function renderCoList(){
+  $('coList').innerHTML=cos.map((c,i)=>{
+    const rs=`${lastCoRate(c.id).toFixed(3)} ₪`;
+    return `<div class="coi ${c.isDefault?'def':''}">
+      <div style="min-width:0"><div class="coin" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="vertical-align:middle">${c.name}</span>${c.isDefault?'<span class="tdef" style="display:inline-block;white-space:nowrap;vertical-align:middle;margin-right:5px">ברירת מחדל</span>':''}</div>
+      <div class="coit">${c.type==='home'?'ביתי':'ציבורי / חברה'}</div></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div><div class="coir">${rs}</div><div class="coirl">לקו"ש</div></div>
+        <button class="bico ed" onclick="editCo(${i})">✏️</button>
+        ${cos.length>1?`<button class="bico" onclick="rmCo(${i})">🗑</button>`:''}
+      </div></div>`;
+  }).join('');
+}
+function openAddCo(){editCoIdx=null;$('mCoT').textContent='הוסף חברה';['mcN','mcR'].forEach(id=>$(id).value='');$('mcType').value='fixed';$('mcRF').style.display='block';$('mcD').checked=false;openModal('mCo');}
+function editCo(i){editCoIdx=i;const c=cos[i];$('mCoT').textContent='ערוך חברה';$('mcN').value=c.name;$('mcType').value=c.type;$('mcR').value=c.rate||'';$('mcD').checked=c.isDefault;$('mcRF').style.display=c.type==='fixed'?'block':'none';openModal('mCo');}
+function saveCo(){
+  const name=$('mcN').value.trim(),type=$('mcType').value,rate=parseFloat($('mcR').value)||null,isDef=$('mcD').checked;
+  if(!name){toast('⚠️ שם חובה','e');return;}
+  if(type==='fixed'&&(!rate||rate<=0)){toast('⚠️ תעריף נדרש','e');return;}
+  if(isDef)cos.forEach(c=>c.isDefault=false);
+  if(editCoIdx!==null)cos[editCoIdx]={...cos[editCoIdx],name,type,rate,isDefault:isDef};
+  else{const id='c'+Date.now();cos.push({id,name,type,rate,isDefault:isDef});}
+  LS.set('ev4_cos',cos);closeModal('mCo');renderCoBtns();renderCoList();toast('✅ נשמר');gdAutoSave();
+}
+function rmCo(i){if(!confirm('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
+
+// ══════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════
+function calcAvgFuel(){
+  return fuelRates.length>0?fuelRates.reduce((s,r)=>s+r.price,0)/fuelRates.length:7.2;
+}
+function setAvgFuel(){
+  const avg=calcAvgFuel();
+  $('sFuel').value=avg.toFixed(2);
+  if($('sFuelHint'))$('sFuelHint').textContent=`⟳ ממוצע: ₪${avg.toFixed(2)} (${fuelRates.length} חודשים)`;
+  st.fuelManual=false;st.fuel=avg;
+  LS.set('ev4_st',st);
+  updateDeclared();
+}
+function loadSt(){
+  $('sCarName').value=st.carName||'';$('sBatt').value=st.batt||70;$('sRange').value=st.range||485;
+  $('sKpl').value=st.kpl||12.125;$('sShowCost').checked=st.showCost!==false;
+  if($('sDeclKwh100'))$('sDeclKwh100').value=st.declKwh100||'';
+  if($('sKw'))$('sKw').value=st.kw||'';
+  if($('sChargeKwh'))$('sChargeKwh').value=st.chargeKwh||'';
+  // מחיר דלק: אוטומטי מממוצע אם לא הוגדר ידנית
+  const avg=calcAvgFuel();
+  const fuel=st.fuelManual?st.fuel:avg;
+  $('sFuel').value=fuel.toFixed(2);
+  st.fuel=fuel;
+  if($('sFuelHint')){
+    $('sFuelHint').textContent=st.fuelManual
+      ?`ממוצע אוטומטי: ₪${avg.toFixed(2)} — לחץ לאיפוס`
+      :`⟳ ממוצע אוטומטי: ₪${avg.toFixed(2)} (${fuelRates.length} חודשים)`;
+  }
+  updateDeclared();
+}
+function updateDeclared(){
+  const batt=parseFloat($('sBatt').value)||70;
+  const range=parseFloat($('sRange').value)||485;
+  const kpl=parseFloat($('sKpl').value)||12.125;
+  const fuel=parseFloat($('sFuel').value)||7.2;
+  const declKwh100=batt/range*100;
+  if($('sDeclKwhCalc'))$('sDeclKwhCalc').textContent=`מחושב: ${declKwh100.toFixed(2)} קו"ש/100ק"מ`;
+  const declCalc=$('sDeclCalc');
+  if(!declCalc)return;
+  const decl=$('sDeclared');
+  if(decl)decl.style.display='block';
+  const kmPerKwh=range/batt;
+  const declared1to100=kmPerKwh*(fuel/kpl)/(fuel/kpl/kpl); // simplified
+  // Correct: 1/100 declared = (km/kwh) * (fuelPrice/elecRate_current)
+  const curElec=homeRate(today());
+  const d1to100=kmPerKwh*(fuel/kpl)/curElec; // wait no
+  // formula: (km/kwh)*(fuel_per_liter/elec_per_kwh)
+  // = (range/batt) * (fuel / curElec)  — but fuel here is price per liter
+  const d1to100correct=(range/batt)*(fuel/curElec);
+  declCalc.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      <div><div style="color:var(--tx3);font-size:.6rem">טווח</div><div style="font-weight:700;color:var(--ac)">${range} ק"מ</div></div>
+      <div><div style="color:var(--tx3);font-size:.6rem">קיבולת</div><div style="font-weight:700;color:var(--ac)">${batt} קו"ש</div></div>
+      <div><div style="color:var(--tx3);font-size:.6rem">קו"ש/100ק"מ</div><div style="font-weight:700;color:var(--ac2)">${declKwh100.toFixed(2)}</div></div>
+      <div><div style="color:var(--tx3);font-size:.6rem">ק"מ/קו"ש</div><div style="font-weight:700;color:var(--ac2)">${kmPerKwh.toFixed(3)}</div></div>
+      <div><div style="color:var(--tx3);font-size:.6rem">1 ל-100 (מוצהר)</div><div style="font-weight:700;color:var(--ac3)">${d1to100correct.toFixed(2)}</div></div>
+      <div><div style="color:var(--tx3);font-size:.6rem">ק"מ לליטר</div><div style="font-weight:700">${kpl}</div></div>
+    </div>`;
+}
+function setAvgFuel(){
+  if(!fuelRates.length){toast('⚠️ אין היסטוריית דלק','w');return;}
+  const avg=fuelRates.reduce((s,r)=>s+r.price,0)/fuelRates.length;
+  $('sFuel').value=avg.toFixed(2);
+  saveSt();
+  toast('✅ מחיר ממוצע: '+fmtILS(avg,2));
+}
+function saveSt(){
+  st.carName=$('sCarName').value;st.batt=parseFloat($('sBatt').value)||70;st.range=parseFloat($('sRange').value)||485;
+  st.kpl=parseFloat($('sKpl').value)||12.125;st.showCost=$('sShowCost').checked;
+  st.declKwh100=parseFloat($('sDeclKwh100')?.value)||null;
+  st.kw=parseFloat($('sKw')?.value)||null;
+  const _ckwh=parseFloat($('sChargeKwh')?.value)||null;
+  st.chargeKwh=_ckwh&&_ckwh>0?_ckwh:null;
+  const entered=parseFloat($('sFuel').value);
+  const avg=calcAvgFuel();
+  st.fuelManual=Math.abs(entered-avg)>0.02?entered:false;
+  st.fuel=entered||avg;
+  LS.set('ev4_st',st);
+  updateDeclared();
+  renderAll();
+}
+
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+function expCSV(){
+  if(!recs.length){toast('⚠️ אין נתונים','e');return;}
+  const bom='\uFEFF';
+  const h=['תאריך','ק"מ נשאר','אודומטר','ק"מ נסע','קו"ש','קו"ש מצטבר','חברה','תעריף','עלות','הערה'];
+  const rows=recs.map(r=>[r.date,r.kmLeft,r.kmTotal,r.kmDriven!=null?r.kmDriven.toFixed(1):'',(r.kwh||0).toFixed(2),(r.kwhCumul||0).toFixed(2),cos.find(c=>c.id===r.companyId)?.name||r.companyName||r.companyId||'',(r.rate||0).toFixed(3),(r.cost||0).toFixed(2),r.note||'']);
+  dl(new Blob([bom+[h,...rows].map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8;'}),`ev_${today()}.csv`);
+  toast('📤 CSV יוצא');
+}
+function expAll(){
+  dl(new Blob([JSON.stringify({recs,cos,homeRates,fuelRates,st},null,2)],{type:'application/json'}),`ev_backup_${today()}.json`);
+  toast('📦 גיבוי יוצא');
+}
+
+// ══════════════════════════════════════════
+// IMPORT JSON
+// ══════════════════════════════════════════
+function impJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.recs){recs=d.recs;LS.set('ev4_recs',recs);}
+      if(d.cos){cos=d.cos;LS.set('ev4_cos',cos);}
+      if(d.homeRates){homeRates=d.homeRates;LS.set('ev4_hr',homeRates);}
+      if(d.fuelRates){fuelRates=d.fuelRates;LS.set('ev4_fuel',fuelRates);}
+      if(d.st){st=d.st;LS.set('ev4_st',st);}
+      renderAll();toast('✅ ייבוא JSON הצליח');
+    }catch{toast('⚠️ קובץ לא תקין','e');}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+// ══════════════════════════════════════════
+// IMPORT CSV
+// ══════════════════════════════════════════
+function impCSV(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const lines=ev.target.result.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
+      const hdr=lines[0].split(',');
+      const ci=n=>hdr.findIndex(h=>h.trim().includes(n));
+      const iDate=ci('תאריך'),iKl=ci('נשאר'),iKt=ci('אודומטר'),iKd=ci('נסע'),iKwh=ci('קו"ש'),iKwa=ci('נוספים'),iKwC=ci('מצטבר'),iCo=ci('חברה'),iRate=ci('תעריף'),iCost=ci('עלות'),iNote=ci('הערה');
+      const imported=[];
+      for(let i=1;i<lines.length;i++){
+        const c=lines[i].split(',');
+        const ds=(c[iDate]||'').trim();
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(ds))continue;
+        const kw=parseFloat(c[iKwh])||0;if(kw<=0)continue;
+        const coName=(c[iCo]||'ביתי').trim();
+        let coId=cos.find(x=>x.name===coName)?.id;
+        if(!coId){coId='c'+Date.now()+i;cos.push({id:coId,name:coName,type:'fixed',rate:parseFloat(c[iRate])||1,isDefault:false});}
+        imported.push({id:Date.now()+i,date:ds,kmLeft:parseFloat(c[iKl])||0,kmTotal:parseFloat(c[iKt])||0,kmDriven:c[iKd]?parseFloat(c[iKd])||null:null,kwh:kw,kwhAdd:parseFloat(c[iKwa])||0,kwhCumul:parseFloat(c[iKwC])||0,companyId:coId,companyName:coName,rate:parseFloat(c[iRate])||0,cost:parseFloat(c[iCost])||0,note:(c[iNote]||'').trim()});
+      }
+      if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
+      if(confirm(`ייבוא ${imported.length} רשומות מ-CSV?\n(ימחקו הנתונים הקיימים)`)){
+        recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast('✅ יובאו '+imported.length+' רשומות');
+      }
+    }catch(err){toast('⚠️ שגיאה: '+err.message,'e');}
+  };
+  r.readAsText(f,'utf-8');e.target.value='';
+}
+
+// ══════════════════════════════════════════
+// IMPORT XLSM
+// ══════════════════════════════════════════
+function impXLSM(e){
+  const f=e.target.files[0];if(!f)return;
+  setImpBar(true,'טוען ספריית Excel...',10);
+  if(window.XLSX){_doXLSM(f);return;}
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload=()=>{setImpBar(true,'קורא קובץ...',30);_doXLSM(f);};
+  s.onerror=()=>{setImpBar(false);toast('⚠️ לא ניתן לטעון ספריית Excel. נסה CSV','e');};
+  document.head.appendChild(s);
+  e.target.value='';
+}
+
+function _doXLSM(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      setImpBar(true,'מנתח גיליון...',50);
+      const data=new Uint8Array(ev.target.result);
+      const wb=XLSX.read(data,{type:'array',cellDates:false});
+      const sn=wb.SheetNames.find(n=>n.trim()==='יומי')||wb.SheetNames[0];
+      const ws=wb.Sheets[sn];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+      function xlDate(v){
+        if(!v&&v!==0)return null;
+        if(typeof v==='string'){const s=v.trim().slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:null;}
+        if(typeof v==='number'){
+          const d=new Date(Math.round((v-25569)*86400000));
+          const y=d.getUTCFullYear(),m=d.getUTCMonth()+1,day=d.getUTCDate();
+          if(y<1990||y>2100)return null;
+          return y+'-'+String(m).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+        }
+        return null;
+      }
+      let hRow=-1;
+      for(let i=0;i<Math.min(6,rows.length);i++){if(rows[i]?.some(c=>String(c||'').includes('תאריך'))){hRow=i;break;}}
+      if(hRow<0){setImpBar(false);toast('⚠️ לא נמצאה שורת כותרות עם "תאריך"','e');return;}
+      const hdr=rows[hRow];
+      const ci=n=>{const nl=n.toLowerCase();return hdr.findIndex(h=>String(h||'').trim().toLowerCase()===nl);};
+      const cp=n=>{const nl=n.toLowerCase();return hdr.findIndex(h=>String(h||'').toLowerCase().includes(nl));};
+      const iNum=ci("מס'"),iDate=ci('תאריך'),iKl=cp('נשאר בפועל'),iKt=cp("קמ' מצטבר");
+      const iKwh=cp('כמות קו'),iKwa=cp('תוספת קו'),iKwC=cp('קו"ש מצטבר')>=0?cp('קו"ש מצטבר'):cp('קוש מצטבר');
+      const iKd=cp("כמות קמ'"),iRate=cp('מחיר קו'),iCost=cp('עלות נסיעה'),iCo=ci('חברה');
+      console.log('cols:',{iNum,iDate,iKl,iKt,iKwh,iKwa,iKwC,iKd,iRate,iCost,iCo});
+      if(iDate<0||iKt<0||iKwh<0){setImpBar(false);toast('⚠️ עמודות חסרות: תאריך='+iDate+' אודומטר='+iKt+' קו"ש='+iKwh,'e');return;}
+      const imported=[];
+      const total=rows.length-hRow-1;
+      for(let i=hRow+1;i<rows.length;i++){
+        const row=rows[i];
+        if(!row||row.every(v=>v==null||v===''))continue;
+        const ds=xlDate(row[iDate]);if(!ds)continue;
+        const kw=parseFloat(row[iKwh])||0;if(kw<=0)continue;
+        const coName=iCo>=0?String(row[iCo]||'ביתי').trim():'ביתי';
+        let coId=cos.find(x=>x.name.toLowerCase()===coName.toLowerCase())?.id;
+        if(!coId){
+          coId='xl_'+coName.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+          if(!cos.find(c=>c.id===coId))cos.push({id:coId,name:coName,type:'fixed',rate:parseFloat(row[iRate])||1,isDefault:false});
+        }
+        const num=parseInt(row[iNum])||imported.length+1;
+        imported.push({id:num*10000+i,date:ds,kmLeft:parseFloat(row[iKl])||0,kmTotal:parseFloat(row[iKt])||0,
+          kmDriven:iKd>=0&&row[iKd]?parseFloat(row[iKd])||null:null,kwh:kw,kwhAdd:parseFloat(row[iKwa])||0,
+          kwhCumul:parseFloat(row[iKwC])||0,companyId:coId,companyName:coName,
+          rate:parseFloat(row[iRate])||0,cost:parseFloat(row[iCost])||0,note:''});
+        if(i%100===0)setImpBar(true,`מעבד שורה ${i-hRow}/${total}...`,50+Math.round((i-hRow)/total*45));
+      }
+      setImpBar(false);
+      if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
+      if(confirm(`ייבוא ${imported.length} רשומות מ-Excel?\n(ימחקו הנתונים הקיימים)`)){
+        recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast(`✅ יובאו ${imported.length} רשומות מ-Excel`);
+      }
+    }catch(err){setImpBar(false);toast('⚠️ שגיאה: '+err.message,'e');console.error(err);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function setImpBar(show,msg='',pct=0){
+  $('impBar').className='impbar'+(show?' open':'');
+  if(show){$('impMsg').textContent=msg;$('impProg').style.width=pct+'%';}
+}
+
+// ══════════════════════════════════════════
+// COMPANY DETAIL MODAL
+// ══════════════════════════════════════════
+function showCoDetail(cid,name){
+  const coRecs=recs.filter(r=>r.companyId===cid);
+  $('mCoDetailTitle').textContent=`${name} — ${coRecs.length} טעינות`;
+  const totKwh=coRecs.reduce((s,r)=>s+(r.kwh||0),0);
+  const totCost=coRecs.reduce((s,r)=>s+(r.cost||0),0);
+  let html=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;padding:10px;background:var(--sf2);border-radius:var(--rs)">
+    <div style="text-align:center"><div style="font-size:.65rem;color:var(--tx3)">סה"כ קו"ש</div><div style="font-weight:700;color:var(--ac2)">${fmtNum(totKwh,1)}</div></div>
+    <div style="text-align:center"><div style="font-size:.65rem;color:var(--tx3)">סה"כ עלות</div><div style="font-weight:700;color:var(--ac3)">${fmtILS(totCost,0)}</div></div>
+    <div style="text-align:center"><div style="font-size:.65rem;color:var(--tx3)">ממוצע ₪/קו"ש</div><div style="font-weight:700;color:var(--tx)">${totKwh>0?(totCost/totKwh).toFixed(3):0}</div></div>
+  </div>`;
+  html+=`<table style="width:100%;border-collapse:collapse;font-size:.75rem">
+    <thead><tr style="background:var(--sf2)">
+      <th style="padding:7px 8px;text-align:right;color:var(--tx3);font-size:.65rem;border-bottom:1px solid var(--bd)">תאריך</th>
+      <th style="padding:7px 8px;text-align:right;color:var(--tx3);font-size:.65rem;border-bottom:1px solid var(--bd)">קו"ש</th>
+      <th style="padding:7px 8px;text-align:right;color:var(--tx3);font-size:.65rem;border-bottom:1px solid var(--bd)">תעריף</th>
+      <th style="padding:7px 8px;text-align:right;color:var(--tx3);font-size:.65rem;border-bottom:1px solid var(--bd)">עלות</th>
+    </tr></thead><tbody>`;
+  for(const r of [...coRecs].reverse()){
+    html+=`<tr style="border-bottom:1px solid rgba(42,53,71,.3)">
+      <td style="padding:7px 8px;color:var(--tx3);font-size:.7rem">${fd(r.date)}</td>
+      <td style="padding:7px 8px;color:var(--ac2);font-weight:600">${fmtNum(r.kwh,2)}</td>
+      <td style="padding:7px 8px;color:var(--tx3)">${(r.rate||0).toFixed(3)}</td>
+      <td style="padding:7px 8px;color:var(--ac3);font-weight:600">${fmtILS(r.cost,2)}</td>
+    </tr>`;
+  }
+  html+='</tbody></table>';
+  $('mCoDetailBody').innerHTML=html;
+  openModal('mCoDetail');
+}
+
+// ══════════════════════════════════════════
+// EDIT RECORD
+// ══════════════════════════════════════════
+function openEdit(id,e){
+  e.stopPropagation();
+  const r=recs.find(x=>x.id===id);if(!r)return;
+  $('editId').value=id;
+  $('editDate').value=r.date;
+  $('editKmLeft').value=r.kmLeft;
+  $('editKmTotal').value=r.kmTotal;
+  $('editKwh').value=r.kwh;
+  $('editRate').value=r.rate||'';
+  $('editNote').value=r.note||'';
+  $('editCo').innerHTML=cos.map(c=>`<option value="${c.id}" ${c.id===r.companyId?'selected':''}>${c.name}</option>`).join('');
+  openModal('mEdit');
+}
+function saveEdit(){
+  const id=parseInt($('editId').value);
+  const idx=recs.findIndex(x=>x.id===id);if(idx<0)return;
+  const ds=$('editDate').value;
+  const kl=parseFloat($('editKmLeft').value)||0;
+  const kt=parseFloat($('editKmTotal').value)||0;
+  const kw=parseFloat($('editKwh').value)||0;
+  const rate=parseFloat($('editRate').value)||coRate($('editCo').value,ds);
+  if(!ds||kw<=0){toast('⚠️ נא למלא שדות חובה','e');return;}
+  recs[idx]={...recs[idx],date:ds,kmLeft:kl,kmTotal:kt,kwh:kw,rate,
+    companyId:$('editCo').value,
+    companyName:cos.find(c=>c.id===$('editCo').value)?.name||'',
+    cost:kw*rate,note:$('editNote').value.trim()};
+  recalc();LS.set('ev4_recs',recs);
+  closeModal('mEdit');renderAll();toast('✅ רשומה עודכנה');
+}
+
+// ══════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════
+function openModal(id){$(id).classList.add('open');}
+function closeModal(id){$(id).classList.remove('open');}
+document.querySelectorAll('.mov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+let _curTab='data';
+function sw(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // also mark the matching desktop tab active by id
+  const desktopTab=document.querySelector(`.tab[onclick*="'${id}'"]`);
+  if(desktopTab) desktopTab.classList.add('active');
+  const tc=$('tab-'+id);if(tc) tc.classList.add('active');
+  _curTab=id;
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function toast(msg,type=''){
+  const el=$('toast');el.textContent=msg;el.className='toast '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+let tipTimer=null;
+function showTip(e,txt){
+  e.stopPropagation();
+  let pop=$('tipPopup');
+  if(!pop){pop=document.createElement('div');pop.id='tipPopup';pop.className='tip-popup';document.body.appendChild(pop);}
+  if(pop._txt===txt&&pop.style.display!=='none'){pop.style.display='none';pop._txt='';return;}
+  pop._txt=txt;pop.textContent=txt;pop.style.display='block';
+  const r=e.target.getBoundingClientRect(),pw=Math.min(260,window.innerWidth-20);
+  pop.style.maxWidth=pw+'px';
+  let left=r.left-pw-8;if(left<8)left=r.right+8;
+  let top=r.top-4;if(top+80>window.innerHeight)top=window.innerHeight-90;
+  pop.style.left=left+'px';pop.style.top=Math.max(8,top)+'px';
+  clearTimeout(tipTimer);tipTimer=setTimeout(()=>{pop.style.display='none';pop._txt='';},4500);
+}
+document.addEventListener('click',()=>{const p=$('tipPopup');if(p)p.style.display='none';});
+
+// ══════════════════════════════════════════
+// BOTTOM NAV & DRAWERS
+// ══════════════════════════════════════════
+
+function openMenuDrawer(){
+  $('menuDrawer').classList.add('open');
+  // sync active state
+  document.querySelectorAll('.menu-item').forEach(b=>b.classList.remove('active-tab'));
+  const mi=$('mi-'+_curTab);if(mi)mi.classList.add('active-tab');
+}
+function closeMenuDrawer(){$('menuDrawer').classList.remove('open');}
+
+function swMobile(id){
+  closeMenuDrawer();
+  sw(id, null);
+}
+
+function openAddEntry(){
+  swMobile('add');
+  setTimeout(()=>{const d=$('inDate');if(d)d.focus();},120);
+}
+
+function openSettingsDrawer(){
+  $('settingsDrawer').classList.add('open');
+  syncThemeBtns();
+}
+function closeSettingsDrawer(){$('settingsDrawer').classList.remove('open');}
+
+// ── Theme ──
+function setTheme(mode){
+  document.body.classList.toggle('light', mode==='light');
+  LS.set('ev4_theme', mode);
+  syncThemeBtns();
+  renderDashboard(); // redraw canvas charts with correct colors
+}
+function syncThemeBtns(){
+  const isLight=document.body.classList.contains('light');
+  const lBtn=$('themeLight'),dBtn=$('themeDark');
+  if(lBtn){lBtn.classList.toggle('active',isLight);}
+  if(dBtn){dBtn.classList.toggle('active',!isLight);}
+}
+// apply saved theme on load
+(function(){
+  const saved=LS.get('ev4_theme','dark');
+  if(saved==='light') document.body.classList.add('light');
+  syncThemeBtns();
+})();
+
+initMonthlyRates();
+$('inDate').value=today();
+$('hrDate').value=today();
+selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
+renderAll();
+
+// ══════════════════════════════════════════
+// GOOGLE DRIVE SYNC
+// ══════════════════════════════════════════
+const GD_CLIENT_ID='339596166863-fmdletmdvd5lm3uavrreltdhvjunt80p.apps.googleusercontent.com';
+const GD_SCOPE='https://www.googleapis.com/auth/drive.appdata';
+const GD_DATA_FILE='ev_data.json';
+const GD_HTML_FILE='עלות_חשמל_רכב.html';
+
+let gdToken=null;
+let gdDataFileId=LS.get('ev4_gd_data_fid',null);
+let gdHtmlFileId=LS.get('ev4_gd_html_fid',null);
+let gdSyncing=false;
+let gdAutoSaveTimer=null;
+
+function gdShowBar(){
+  const bar=$('gdBar');
+  if(bar)bar.style.transform='translateY(0)';
+  // דחוף תוכן מטה
+  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
+  if(wrap)wrap.style.paddingTop='38px';
+}
+function gdHideBar(){
+  const bar=$('gdBar');
+  if(bar)bar.style.transform='translateY(-60px)';
+  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
+  if(wrap)wrap.style.paddingTop='';
+}
+function gdSetStatus(txt,color){
+  const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx2)';}
+}
+function gdSetBtn(label,fn,color){
+  const b=$('gdBtn');if(!b)return;
+  b.textContent=label;b.onclick=fn;
+  b.style.background=color||'var(--ac2)';
+}
+
+function gdLogin(){
+  if(!window.google){toast('⚠️ Google לא נטען, נסה שוב','e');return;}
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:GD_CLIENT_ID,
+    scope:GD_SCOPE,
+    callback:(resp)=>{
+      if(resp.error){gdSetStatus('❌ שגיאת התחברות','var(--er)');return;}
+      gdToken=resp.access_token;
+      LS.set('ev4_gd_token',gdToken);
+      gdSetStatus('✅ מחובר','var(--ac)');
+      gdSetBtn('התנתק',gdLogout,'var(--er)');
+      gdSync();
+    }
+  });
+  client.requestAccessToken();
+}
+
+function gdLogout(){
+  gdToken=null;LS.set('ev4_gd_token',null);
+  gdSetStatus('☁️ לא מחובר','var(--tx2)');
+  gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+}
+
+// איסוף כל הנתונים
+function gdCollectData(){
+  return {recs,cos,homeRates,fuelRates,st,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
+}
+
+// שמירת JSON לדרייב
+async function gdSaveData(){
+  if(!gdToken||gdSyncing)return;
+  gdSyncing=true;
+  gdSetStatus('💾 שומר...','var(--ac3)');
+  try{
+    const body=JSON.stringify(gdCollectData(),null,2);
+    const blob=new Blob([body],{type:'application/json'});
+    if(gdDataFileId){
+      // עדכון קיים
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdDataFileId}?uploadType=media`,{
+        method:'PATCH',headers:{'Authorization':'Bearer '+gdToken,'Content-Type':'application/json'},body});
+    } else {
+      // יצירה חדשה ב-appDataFolder
+      const meta={name:GD_DATA_FILE,parents:['appDataFolder']};
+      const form=new FormData();
+      form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+      form.append('file',blob);
+      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+        method:'POST',headers:{'Authorization':'Bearer '+gdToken},body:form});
+      const j=await r.json();
+      gdDataFileId=j.id;LS.set('ev4_gd_data_fid',gdDataFileId);
+    }
+    // שמירת HTML
+    await gdSaveHTML();
+    const now=new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');
+  } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
+  gdSyncing=false;
+}
+
+// שמירת קובץ HTML לדרייב
+async function gdSaveHTML(){
+  if(!gdToken)return;
+  const htmlContent=document.documentElement.outerHTML;
+  const blob=new Blob([htmlContent],{type:'text/html'});
+  const meta={name:GD_HTML_FILE,parents:gdHtmlFileId?undefined:['appDataFolder']};
+  if(gdHtmlFileId){
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdHtmlFileId}?uploadType=media`,{
+      method:'PATCH',headers:{'Authorization':'Bearer '+gdToken,'Content-Type':'text/html'},body:blob});
+  } else {
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',blob);
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',headers:{'Authorization':'Bearer '+gdToken},body:form});
+    const j=await r.json();
+    gdHtmlFileId=j.id;LS.set('ev4_gd_html_fid',gdHtmlFileId);
+  }
+}
+
+// טעינת נתונים מדרייב
+async function gdLoadData(){
+  if(!gdToken||!gdDataFileId)return false;
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}?alt=media`,{
+      headers:{'Authorization':'Bearer '+gdToken}});
+    if(!r.ok)return false;
+    const d=await r.json();
+    // אם יש יותר נתונים מקומיים — שמור לענן במקום לטעון
+    const cloudRecs=(d.recs||[]).length;
+    const localRecs=recs.length;
+    if(localRecs>cloudRecs){
+      toast('☁️ נתונים מקומיים חדשים יותר — שומר לענן');
+      await gdSaveData();
+      return true;
+    }
+    if(d.recs)recs=d.recs;
+    if(d.cos)cos=d.cos;
+    if(d.homeRates)homeRates=d.homeRates;
+    if(d.fuelRates)fuelRates=d.fuelRates;
+    if(d.st){st=d.st;LS.set('ev4_st',st);}
+    if(d.carBattery)LS.set('ev4_bat',d.carBattery);
+    if(d.carEff)LS.set('ev4_eff',d.carEff);
+    if(d.theme){LS.set('ev4_theme',d.theme);if(d.theme==='light')document.body.classList.add('light');else document.body.classList.remove('light');}
+    LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);
+    renderAll();
+    return true;
+  } catch{return false;}
+}
+
+// חיפוש קובץ קיים ב-appDataFolder
+async function gdFindFile(name){
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${name}'&fields=files(id,name)`,{
+    headers:{'Authorization':'Bearer '+gdToken}});
+  const j=await r.json();
+  return j.files&&j.files.length?j.files[0].id:null;
+}
+
+// סנכרון ראשוני
+async function gdSync(){
+  if(!gdToken)return;
+  gdSetStatus('🔄 מסנכרן...','var(--ac2)');
+  try{
+    // מצא קבצים קיימים
+    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;LS.set('ev4_gd_data_fid',id);}}
+    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;LS.set('ev4_gd_html_fid',id);}}
+    if(gdDataFileId){
+      const loaded=await gdLoadData();
+      if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
+      else await gdSaveData();
+    } else {
+      await gdSaveData();
+      toast('☁️ גיבוי ראשון נשמר בענן');
+    }
+  } catch{gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
+}
+
+// שמירה אוטומטית — מופעלת אחרי כל שינוי
+function gdAutoSave(){
+  if(!gdToken)return;
+  clearTimeout(gdAutoSaveTimer);
+  gdAutoSaveTimer=setTimeout(gdSaveData,2000);
+}
+
+// ניסיון שחזור טוקן קיים בטעינה
+(function gdInit(){
+  gdShowBar();
+  const saved=LS.get('ev4_gd_token',null);
+  if(saved){
+    gdToken=saved;
+    gdSetStatus('🔄 מתחבר...','var(--ac2)');
+    gdSetBtn('התנתק',gdLogout,'var(--er)');
+    gdSync();
+  }
+})();
+
+let _resizeTimer=null;
+const _resizeObs=new ResizeObserver(()=>{
+  clearTimeout(_resizeTimer);
+  _resizeTimer=setTimeout(()=>{
+    drawSavingChart();
+    drawKmChart();
+  },80);
+});
+['dashSavingCard','dashKmCard','dashGaugeCard'].forEach(id=>{
+  const el=$(id);if(el)_resizeObs.observe(el);
+});
+async function uploadToGithub(event){
+  const file=event.target.files[0];if(!file)return;
+  let token=LS.get('ev4_gh_token',null);
+  if(!token){token=prompt('הכנס GitHub Token:');if(!token)return;LS.set('ev4_gh_token',token);}
+  toast('🚀 מעלה עדכון...');
+  try{
+    const owner='haggaiapp',repo='ev-tracker',path='index.html';
+    const r1=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{'Authorization':`token ${token}`,'User-Agent':'ev-tracker'}});
+    const info=await r1.json();const sha=info.sha;
+    const content=await new Promise(res=>{const fr=new FileReader();fr.onload=e=>res(btoa(unescape(encodeURIComponent(e.target.result))));fr.readAsText(file);});
+    const r2=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+      method:'PUT',headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','User-Agent':'ev-tracker'},
+      body:JSON.stringify({message:'Update app',content,sha})});
+    if(r2.ok){toast('✅ עדכון הועלה! האתר יתרענן תוך דקה');}
+    else{const e=await r2.json();toast('❌ שגיאה: '+e.message,'e');LS.set('ev4_gh_token',null);}
+  }catch(e){toast('❌ שגיאת רשת','e');}
+  event.target.value='';
+}
+</script>
+</body>
+</html>
