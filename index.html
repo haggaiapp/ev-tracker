@@ -1029,7 +1029,7 @@ function renderTable(hl=false){
     for(const ym of months){
       const md=yd.months[ym];const [,mo]=ym.split('-');const mLabel=mo+'/'+y;
       const nD=Object.keys(md.days).length;const mKey=ym.replace('-','_');const mOpen=tblExpandM[ym]!==false;
-      html+=`<tr style="background:rgba(42,53,71,.45);cursor:pointer;border-bottom:1px solid rgba(42,53,71,.5)" onclick="tblToggleMonth('${ym}')">
+      html+=`<tr style="background:var(--sf2);cursor:pointer;border-bottom:1px solid var(--bd)" onclick="tblToggleMonth('${ym}')">
         <td style="padding:6px 10px;padding-right:22px;font-weight:600;color:var(--tx2)" colspan="2">
           <span id="tma_${mKey}" style="margin-left:5px">${mOpen?'▾':'▸'}</span>${mLabel}
           <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nD} ימים</span>
@@ -2636,7 +2636,7 @@ async function gdLoadData(){
     if(d.st){st=d.st;LS.set('ev4_st',st);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
-    if(d.theme){LS.set('ev4_theme',d.theme);if(d.theme==='light')document.body.classList.add('light');else document.body.classList.remove('light');}
+    // theme — שמור את הבחירה המקומית, אל תדרוס
     LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);
     renderAll();
     return true;
