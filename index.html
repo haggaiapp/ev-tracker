@@ -3170,7 +3170,10 @@ function impJSONSel(e){
       if(doS&&d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
       if(doExp&&d.expenses){expenses=d.expenses;saveExpLS();}
       LS.set('ev4_savedAt',Date.now());
-      recalc();renderAll();toast('✅ ייבוא הושלם');gdAutoSave();
+      recalc();renderAll();toast('✅ ייבוא הושלם');
+      // שמירה מיידית לענן (לא debounced)
+      clearTimeout(gdAutoSaveTimer);
+      gdSaveData();
     }catch(err){toast('⚠️ קובץ לא תקין: '+err.message,'e');}
     e.target.value='';
   };
@@ -3510,7 +3513,12 @@ let expenses=LS.get('ev4_expenses',[
 
 const EXP_ICONS={ביטוח:'🛡️',טיפול:'🔧',צמיגים:'🔄',אגרה:'📋',איתורן:'📍',שטיפה:'🚿','תשלום חודשי':'💳',אחר:'📦'};
 
-function saveExpLS(){LS.set('ev4_expenses',expenses);gdAutoSave();}
+function saveExpLS(){
+  LS.set('ev4_expenses',expenses);
+  LS.set('ev4_savedAt',Date.now());
+  clearTimeout(gdAutoSaveTimer);
+  gdSaveData();
+}
 
 function renderExp(){
   renderExpTable();
