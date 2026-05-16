@@ -429,21 +429,6 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
 <div class="tc" id="tab-add">
   <div class="card">
     <div class="ct"><div class="ctb"></div>הזנת טעינה חדשה</div>
-    <!-- צילום/העלאת תמונה לקריאת נתונים -->
-    <div style="margin-bottom:10px">
-      <div style="font-size:.72rem;color:var(--tx3);margin-bottom:5px">📷 קרא נתונים מתמונה (אודומטר / ק"מ נשאר)</div>
-      <div style="display:flex;gap:8px">
-        <label class="gbtn g" style="cursor:pointer;font-size:.75rem;padding:6px 12px">
-          🖼️ העלה תמונה
-          <input type="file" id="ocrFileIn" accept="image/*" style="display:none" onchange="readOdomImg(this)">
-        </label>
-        <label class="gbtn g" style="cursor:pointer;font-size:.75rem;padding:6px 12px">
-          📷 צלם
-          <input type="file" id="ocrCamIn" accept="image/*" capture="environment" style="display:none" onchange="readOdomImg(this)">
-        </label>
-        <span id="ocrStatus" style="font-size:.7rem;color:var(--tx3);align-self:center"></span>
-      </div>
-    </div>
     <div class="fr">
       <div class="f"><label>📅 תאריך</label><input type="date" id="inDate"></div>
       <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="inKmLeft" placeholder="150" inputmode="numeric"></div>
@@ -629,11 +614,6 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
       <input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()">
       <div class="hint">לדוגמה: סוללה 70 קו"ש אך בטעינה מלאה מגיע ל-80 קו"ש — הזן 80</div>
     </div>
-    <div class="f">
-      <label>🤖 Proxy URL (לקריאת תמונות)</label>
-      <input type="url" id="sProxyUrl" placeholder="https://REGION-PROJECT.cloudfunctions.net/anthropicProxy" oninput="saveSt()">
-      <div class="hint">URL של ה-Google Cloud Function לקריאת אודומטר מתמונה</div>
-    </div>
     <div class="fr">
       <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="מחושב אוטומטית" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= קיבולת סוללה ÷ טווח × 100</div></div>
       <div class="f"><label>🏎️ כ"ס</label><input type="number" id="sKw" placeholder="204" oninput="saveSt()"></div>
@@ -685,6 +665,10 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('exp_st')"><div class="chk-box" id="exp_st" data-on="1"></div></div>
         </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
+          <span style="flex:1">הוצאות רכב</span>
+          <div class="chk-wrap" onclick="toggleChk('exp_exp')"><div class="chk-box" id="exp_exp" data-on="1"></div></div>
+        </label>
       </div>
       <div style="display:flex;gap:8px">
         <button class="gbtn g" onclick="expSelected('json')" style="flex:1;justify-content:center">📦 JSON</button>
@@ -710,6 +694,10 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('imp_st')"><div class="chk-box" id="imp_st" data-on="1"></div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
+          <span style="flex:1">הוצאות רכב</span>
+          <div class="chk-wrap" onclick="toggleChk('imp_exp')"><div class="chk-box" id="imp_exp" data-on="1"></div></div>
         </label>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -744,6 +732,10 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('del_st')"><div class="chk-box chk-red" id="del_st" data-on="0"></div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
+          <span style="flex:1">הוצאות רכב</span>
+          <div class="chk-wrap" onclick="toggleChk('del_exp')"><div class="chk-box chk-red" id="del_exp" data-on="0"></div></div>
         </label>
       </div>
       <div style="display:flex;gap:8px">
@@ -3150,14 +3142,15 @@ function toggleChk(id){
 function isChk(id){const el=$(id);return el&&el.dataset.on==='1';}
 
 function expSelected(fmt){
-  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st');
-  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
+  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st'),doExp=isChk('exp_exp');
+  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
   if(fmt==='csv'){expCSV();return;}
   const out={};
   if(doR)out.recs=recs;
   if(doC)out.cos=cos;
   if(doRt){out.homeRates=homeRates;out.fuelRates=fuelRates;}
   if(doS)out.st=st;
+  if(doExp)out.expenses=expenses;
   dl(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),`ev_export_${today()}.json`);
   toast('📦 ייצוא הושלם');
 }
@@ -3165,7 +3158,7 @@ function expAll(){expSelected('json');}
 
 function impJSONSel(e){
   const f=e.target.files[0];if(!f)return;
-  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st');
+  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st'),doExp=isChk('imp_exp');
   const r=new FileReader();
   r.onload=ev=>{
     try{
@@ -3175,6 +3168,7 @@ function impJSONSel(e){
       if(doRt&&d.homeRates){homeRates=d.homeRates;LS.set('ev4_hr',homeRates);}
       if(doRt&&d.fuelRates){fuelRates=d.fuelRates;LS.set('ev4_fuel',fuelRates);}
       if(doS&&d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
+      if(doExp&&d.expenses){expenses=d.expenses;saveExpLS();}
       recalc();renderAll();toast('✅ ייבוא הושלם');gdAutoSave();
     }catch(err){toast('⚠️ קובץ לא תקין: '+err.message,'e');}
     e.target.value='';
@@ -3183,14 +3177,15 @@ function impJSONSel(e){
 }
 
 async function delSelected(cloud){
-  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st');
-  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
-  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות'].filter(Boolean).join(', ');
+  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st'),doExp=isChk('del_exp');
+  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
+  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות',doExp&&'הוצאות'].filter(Boolean).join(', ');
   if(!confirm(`למחוק: ${items}${cloud?' + ענן':''}?\nלא ניתן לשחזר!`))return;
   if(doR){recs=[];LS.set('ev4_recs',recs);}
   if(doC){cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];LS.set('ev4_cos',cos);}
   if(doRt){homeRates=[];fuelRates=[];LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);}
   if(doS){st={showCost:true};LS.set('ev4_st',st);}
+  if(doExp){expenses=[];saveExpLS();}
   recalc();renderAll();
   if(cloud&&gdToken&&gdDataFileId){
     try{
@@ -3555,15 +3550,21 @@ function renderExpSummary(){
   // months of ownership: from first charging record to today
   const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
   const firstDate=sortedRecs[0]?.date||today();
-  const months=Math.max(1,Math.round((new Date(today())-new Date(firstDate))/(1000*60*60*24*30.44)));
+  const _mStart=new Date(firstDate.slice(0,7)+'-01');
+  const _mEnd=new Date(today().slice(0,7)+'-01');
+  let months=0;
+  for(let d=new Date(_mStart);d<=_mEnd;d.setMonth(d.getMonth()+1))months++;
+  months=Math.max(1,months);
   const totalPerMonth=grandTotal/months;
 
-  // calculate effective amounts for monthly-type expenses
+  // calculate effective amounts — תשלום חודשי רק מהגדרות
   function effectiveAmt(e){
-    if(e.cat==='תשלום חודשי'){const rate=st.monthly||e.amt;return rate*months;}
+    if(e.cat==='תשלום חודשי') return 0; // מחושב מ-st.monthly בנפרד
+    if(ANNUAL_CATS.has(e.cat)) return e.amt; // שנתי — כפי שהוזן
     return e.amt;
   }
-  const totalEffective=expenses.reduce((s,e)=>s+effectiveAmt(e),0);
+  const monthlyFromSettings=st.monthly?st.monthly*months:0;
+  const totalEffective=expenses.reduce((s,e)=>s+effectiveAmt(e),0)+monthlyFromSettings;
   const grandTotalEffective=totalEffective+elecTotal;
 
   // electricity per month
@@ -3732,31 +3733,47 @@ function _expTreeData(key){
   if(key==='totalExp'||key==='totalAll'){
     const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
     const firstDate=sortedRecs[0]?.date||today();
-    // כל חודשי הבעלות
     const allMonths=[];
     const start=new Date(firstDate.slice(0,7)+'-01');
     const end=new Date(today().slice(0,7)+'-01');
     for(let d=new Date(start);d<=end;d.setMonth(d.getMonth()+1))
       allMonths.push(d.toISOString().slice(0,7));
+    const months=allMonths.length;
+
+    // תשלום חודשי מהגדרות — מחולק שווה לכל ימי כל חודש
+    if(st.monthly){
+      for(const ym of allMonths){
+        const [y,mo]=ym.split('-');
+        const daysInMonth=new Date(+y,+mo,0).getDate();
+        const perDay=st.monthly/daysInMonth;
+        for(let day=1;day<=daysInMonth;day++){
+          addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
+        }
+      }
+    }
 
     for(const e of expenses){
-      if(e.cat==='תשלום חודשי'){
-        const rate=st.monthly||e.amt;
-        for(const ym of allMonths) addToDay(ym+'-01',0,rate);
-      } else if(ANNUAL_CATS.has(e.cat)){
+      if(e.cat==='תשלום חודשי') continue;
+      if(ANNUAL_CATS.has(e.cat)){
+        // מחולק ל-12 חודשים, כל חודש מחולק לימים שווים
         const monthly=e.amt/12;
         const base=new Date(e.date.slice(0,7)+'-01');
         for(let i=0;i<12;i++){
           const d=new Date(base);d.setMonth(d.getMonth()+i);
-          addToDay(d.toISOString().slice(0,10),0,monthly);
+          const ym=d.toISOString().slice(0,7);
+          const [y,mo]=ym.split('-');
+          const daysInMonth=new Date(+y,+mo,0).getDate();
+          const perDay=monthly/daysInMonth;
+          for(let day=1;day<=daysInMonth;day++){
+            addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
+          }
         }
       } else if((e.inst||1)>1){
-        // תשלומים חודשיים
-        const n=e.inst;const monthly=e.amt/n;
+        const n=e.inst;const perInst=e.amt/n;
         const base=new Date(e.date);
         for(let i=0;i<n;i++){
           const d=new Date(base);d.setMonth(d.getMonth()+i);
-          addToDay(d.toISOString().slice(0,10),0,monthly);
+          addToDay(d.toISOString().slice(0,10),0,perInst);
         }
       } else {
         addToDay(e.date,0,e.amt);
@@ -3798,6 +3815,7 @@ function _buildExpTreeChart(key){
   const byY=_expTreeData(key);
   const level=_expTreeLevel[key]||'years';
   let labels=[],vals=[],title='',backLevel=null,canDrill=false;
+  const noDays=(key==='totalExp'||key==='totalAll');
   if(level==='years'){
     title=meta.label+' — לפי שנה';canDrill=true;
     const years=Object.keys(byY).sort();
@@ -3807,7 +3825,7 @@ function _buildExpTreeChart(key){
       labels.push(y);vals.push(_expTreeSum(key,allDays));
     }
   } else if(level.startsWith('months:')){
-    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=true;
+    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=!noDays;
     const months=Object.keys(byY[y]?.months||{}).sort();
     _expTreeLevel['_mList_'+key]=months;
     for(const ym of months){
