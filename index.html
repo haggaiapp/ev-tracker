@@ -1115,12 +1115,16 @@ async function clearAllCloud(){
   ['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff'].forEach(k=>LS.set(k,null));
   LS.set('ev4_savedAt',0);
   recalc();renderAll();renderExp();
-  if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
   try{
-    await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
-      method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-    gdDataFileId=null;
-    if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    if(gdDataFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    }
+    if(gdHtmlFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
+    }
     toast('🗑️ נמחק מקומית ומהענן');
   }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
 }
@@ -3197,14 +3201,20 @@ async function delSelected(cloud){
   if(doS){st={showCost:true};LS.set('ev4_st',st);}
   if(doExp){expenses=[];saveExpLS();}
   recalc();renderAll();
-  if(cloud&&gdToken&&gdDataFileId){
+  if(cloud&&gdToken){
     try{
-      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+      if(gdDataFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+      }
+      if(gdHtmlFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
+      }
       toast('🗑️ נמחק מקומית ומהענן');
     }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');}
   } else {
-    toast('🗑️ נמחק');if(cloud)gdAutoSave();
+    toast('🗑️ נמחק');
   }
 }
 
@@ -4318,8 +4328,8 @@ async function gdSync(){
   gdSetStatus('🔄 מסנכרן...','var(--ac2)');
   try{
     // מצא קבצים קיימים
-    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;LS.set('ev4_gd_data_fid',id);}}
-    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;LS.set('ev4_gd_html_fid',id);}}
+    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),id);}}
+    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),id);}}
     if(gdDataFileId){
       const loaded=await gdLoadData();
       if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
