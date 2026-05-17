@@ -1103,12 +1103,18 @@ function delRec(id,e){
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
 function clearAll(){
-  if(!confirm('למחוק את כל הרשומות המקומיות?'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
+  if(!confirm('למחוק את כל הנתונים המקומיים?'))return;
+  recs=[];expenses=[];
+  LS.set('ev4_recs',recs);LS.set('ev4_expenses',expenses);
+  LS.set('ev4_savedAt',0);
+  renderAll();renderExp();toast('🗑️ הכל נמחק');
 }
 async function clearAllCloud(){
   if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();
+  recs=[];expenses=[];
+  LS.set('ev4_recs',recs);LS.set('ev4_expenses',expenses);
+  LS.set('ev4_savedAt',0);
+  renderAll();renderExp();
   if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
   try{
     await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
@@ -4283,19 +4289,12 @@ async function gdLoadData(){
     const d=await r.json();
     // השווה לפי timestamp — מי עודכן לאחרונה מנצח
     const cloudTs=d._savedAt||0;
-    const localTs=LS.get('ev4_savedAt',0);
-    if(localTs>cloudTs){
-      toast('☁️ נתונים מקומיים חדשים יותר — שומר לענן');
-      await gdSaveData();
-      return true;
-    }
     if(d.recs)recs=d.recs;
     if(d.cos)cos=d.cos;
     if(d.homeRates)homeRates=d.homeRates;
     if(d.fuelRates)fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-    const localExpTs=LS.get('ev4_savedAt',0);
-    if(d.expenses&&!(localExpTs>cloudTs)){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
+    if(d.expenses){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
     LS.set('ev4_savedAt',cloudTs);
