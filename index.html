@@ -4138,7 +4138,7 @@ let gdToken=null;
 let gdUserId=null;
 let gdDataFileId=null;
 let gdHtmlFileId=null;
-let gdSyncing=false;
+let gdSyncing=false;let gdDirty=false;
 let gdAutoSaveTimer=null;
 
 function gdUserKey(k){return gdUserId?`ev4_${gdUserId}_${k}`:null;}
@@ -4222,8 +4222,9 @@ function gdCollectData(){
 
 // שמירת JSON לדרייב
 async function gdSaveData(){
-  if(!gdToken||gdSyncing)return;
-  gdSyncing=true;
+  if(!gdToken)return;
+  if(gdSyncing){gdDirty=true;return;}
+  gdSyncing=true;gdDirty=false;
   gdSetStatus('💾 שומר...','var(--ac3)');
   try{
     const body=JSON.stringify(gdCollectData(),null,2);
@@ -4249,6 +4250,7 @@ async function gdSaveData(){
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');
   } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
   gdSyncing=false;
+  if(gdDirty)gdSaveData();
 }
 
 // שמירת קובץ HTML לדרייב
