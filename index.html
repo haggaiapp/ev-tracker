@@ -3515,6 +3515,7 @@ const EXP_ICONS={ביטוח:'🛡️',טיפול:'🔧',צמיגים:'🔄',אג
 
 function saveExpLS(){
   LS.set('ev4_expenses',expenses);
+  LS.set('ev4_savedAt',Date.now());
   gdAutoSave();
 }
 
@@ -4292,7 +4293,8 @@ async function gdLoadData(){
     if(d.homeRates)homeRates=d.homeRates;
     if(d.fuelRates)fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-    if(d.expenses){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
+    const localExpTs=LS.get('ev4_savedAt',0);
+    if(d.expenses&&!(localExpTs>cloudTs)){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
     LS.set('ev4_savedAt',cloudTs);
