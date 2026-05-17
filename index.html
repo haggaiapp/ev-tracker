@@ -429,6 +429,21 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
 <div class="tc" id="tab-add">
   <div class="card">
     <div class="ct"><div class="ctb"></div>הזנת טעינה חדשה</div>
+    <!-- צילום/העלאת תמונה לקריאת נתונים -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:.72rem;color:var(--tx3);margin-bottom:5px">📷 קרא נתונים מתמונה (אודומטר / ק"מ נשאר)</div>
+      <div style="display:flex;gap:8px">
+        <label class="gbtn g" style="cursor:pointer;font-size:.75rem;padding:6px 12px">
+          🖼️ העלה תמונה
+          <input type="file" id="ocrFileIn" accept="image/*" style="display:none" onchange="readOdomImg(this)">
+        </label>
+        <label class="gbtn g" style="cursor:pointer;font-size:.75rem;padding:6px 12px">
+          📷 צלם
+          <input type="file" id="ocrCamIn" accept="image/*" capture="environment" style="display:none" onchange="readOdomImg(this)">
+        </label>
+        <span id="ocrStatus" style="font-size:.7rem;color:var(--tx3);align-self:center"></span>
+      </div>
+    </div>
     <div class="fr">
       <div class="f"><label>📅 תאריך</label><input type="date" id="inDate"></div>
       <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="inKmLeft" placeholder="150" inputmode="numeric"></div>
@@ -665,10 +680,6 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('exp_st')"><div class="chk-box" id="exp_st" data-on="1"></div></div>
         </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הוצאות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('exp_exp')"><div class="chk-box" id="exp_exp" data-on="1"></div></div>
-        </label>
       </div>
       <div style="display:flex;gap:8px">
         <button class="gbtn g" onclick="expSelected('json')" style="flex:1;justify-content:center">📦 JSON</button>
@@ -694,10 +705,6 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('imp_st')"><div class="chk-box" id="imp_st" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הוצאות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('imp_exp')"><div class="chk-box" id="imp_exp" data-on="1"></div></div>
         </label>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -732,10 +739,6 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
           <span style="flex:1">הגדרות רכב</span>
           <div class="chk-wrap" onclick="toggleChk('del_st')"><div class="chk-box chk-red" id="del_st" data-on="0"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הוצאות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('del_exp')"><div class="chk-box chk-red" id="del_exp" data-on="0"></div></div>
         </label>
       </div>
       <div style="display:flex;gap:8px">
@@ -930,12 +933,6 @@ const LS={
   get(k,d){try{const v=localStorage.getItem(this._k(k));return v!=null?JSON.parse(v):d;}catch{return d;}},
   set(k,v){localStorage.setItem(this._k(k),JSON.stringify(v));}
 };
-// הגדר uid לפני כל טעינת נתונים — כך הנתונים תמיד נטענים מהמפתח הנכון
-try{
-  const _uid=JSON.parse(localStorage.getItem('ev4_gd_uid'));
-  const _tok=JSON.parse(localStorage.getItem('ev4_gd_token'));
-  if(_uid&&_tok)LS._uid=_uid;
-}catch{}
 const $=id=>document.getElementById(id);
 
 let cos=LS.get('ev4_cos',[
@@ -1108,34 +1105,19 @@ function delRec(id,e){
   if(!confirm('למחוק?'))return;
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
-const DATA_KEYS=['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff','ev4_hr_init','ev4_tblY','ev4_tblM','ev4_openYears','ev4_openMonths','ev4_openCos','ev4_insYearOpen'];
-function lsClearAll(){
-  DATA_KEYS.forEach(k=>{
-    localStorage.removeItem(k);
-    if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);
-  });
-}
 function clearAll(){
-  if(!confirm('למחוק את כל הנתונים המקומיים?'))return;
-  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
-  lsClearAll();
-  recalc();renderAll();renderExp();toast('🗑️ הכל נמחק');
+  if(!confirm('למחוק את כל הרשומות המקומיות?'))return;
+  recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
 }
 async function clearAllCloud(){
   if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
-  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
-  lsClearAll();
-  recalc();renderAll();renderExp();
-  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  recs=[];LS.set('ev4_recs',recs);renderAll();
+  if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
   try{
-    if(gdDataFileId){
-      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
-    }
-    if(gdHtmlFileId){
-      await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-      gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
-    }
+    await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
+      method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+    gdDataFileId=null;
+    if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
     toast('🗑️ נמחק מקומית ומהענן');
   }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
 }
@@ -1154,12 +1136,6 @@ function togAdd(){$('addF').style.display=$('hasAdd').checked?'block':'none';if(
 async function readOdomImg(input){
   const file=input.files[0];if(!file)return;
   const status=$('ocrStatus');
-  // ← הכנס כאן את ה-URL של ה-Cloud Function שלך
-  const PROXY_URL=st.proxyUrl||'';
-  if(!PROXY_URL){
-    status.textContent='⚠️ הגדר URL של Proxy בהגדרות';status.style.color='var(--ac3)';
-    return;
-  }
   status.textContent='⏳ קורא תמונה...';status.style.color='var(--tx3)';
   try{
     const b64=await new Promise((res,rej)=>{
@@ -1168,7 +1144,7 @@ async function readOdomImg(input){
       r.onerror=rej;
       r.readAsDataURL(file);
     });
-    const resp=await fetch(PROXY_URL,{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -1193,7 +1169,7 @@ async function readOdomImg(input){
       status.textContent='⚠️ לא זוהו מספרים';status.style.color='var(--ac3)';
     }
   }catch(e){
-    status.textContent='❌ שגיאה: '+e.message;status.style.color='var(--er)';
+    status.textContent='❌ שגיאה בקריאה';status.style.color='var(--er)';
     console.error(e);
   }
   input.value='';
@@ -3054,7 +3030,6 @@ function loadSt(){
   $('sShowCost').checked=st.showCost!==false;
   if($('sKw'))$('sKw').value=st.kw||'';
   if($('sChargeKwh'))$('sChargeKwh').value=st.chargeKwh||'';
-  if($('sProxyUrl'))$('sProxyUrl').value=st.proxyUrl||'';
   const avg=calcAvgFuel();
   const fuel=st.fuelManual?st.fuel:avg;
   $('sFuel').value=st._saved||st.fuelManual?fuel.toFixed(2):'';
@@ -3123,7 +3098,6 @@ function saveSt(){
   st.kw=parseFloat($('sKw')?.value)||null;
   const _ckwh=parseFloat($('sChargeKwh')?.value)||null;
   st.chargeKwh=_ckwh&&_ckwh>0?_ckwh:null;
-  st.proxyUrl=($('sProxyUrl')?.value||'').trim()||null;
   const entered=parseFloat($('sFuel').value);
   const avg=calcAvgFuel();
   st.fuelManual=Math.abs(entered-avg)>0.02?entered:false;
@@ -3163,15 +3137,14 @@ function toggleChk(id){
 function isChk(id){const el=$(id);return el&&el.dataset.on==='1';}
 
 function expSelected(fmt){
-  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st'),doExp=isChk('exp_exp');
-  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
+  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st');
+  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
   if(fmt==='csv'){expCSV();return;}
   const out={};
   if(doR)out.recs=recs;
   if(doC)out.cos=cos;
   if(doRt){out.homeRates=homeRates;out.fuelRates=fuelRates;}
   if(doS)out.st=st;
-  if(doExp)out.expenses=expenses;
   dl(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),`ev_export_${today()}.json`);
   toast('📦 ייצוא הושלם');
 }
@@ -3179,7 +3152,7 @@ function expAll(){expSelected('json');}
 
 function impJSONSel(e){
   const f=e.target.files[0];if(!f)return;
-  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st'),doExp=isChk('imp_exp');
+  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st');
   const r=new FileReader();
   r.onload=ev=>{
     try{
@@ -3189,12 +3162,7 @@ function impJSONSel(e){
       if(doRt&&d.homeRates){homeRates=d.homeRates;LS.set('ev4_hr',homeRates);}
       if(doRt&&d.fuelRates){fuelRates=d.fuelRates;LS.set('ev4_fuel',fuelRates);}
       if(doS&&d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-      if(doExp&&d.expenses){expenses=d.expenses;saveExpLS();}
-      LS.set('ev4_savedAt',Date.now());
-      recalc();renderAll();toast('✅ ייבוא הושלם');
-      // שמירה מיידית לענן (לא debounced)
-      clearTimeout(gdAutoSaveTimer);
-      gdSaveData();
+      recalc();renderAll();toast('✅ ייבוא הושלם');gdAutoSave();
     }catch(err){toast('⚠️ קובץ לא תקין: '+err.message,'e');}
     e.target.value='';
   };
@@ -3202,34 +3170,23 @@ function impJSONSel(e){
 }
 
 async function delSelected(cloud){
-  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st'),doExp=isChk('del_exp');
-  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
-  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות',doExp&&'הוצאות'].filter(Boolean).join(', ');
+  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st');
+  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
+  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות'].filter(Boolean).join(', ');
   if(!confirm(`למחוק: ${items}${cloud?' + ענן':''}?\nלא ניתן לשחזר!`))return;
-  const ck=(k)=>{localStorage.removeItem(k);if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);};
-  const COS_DEF=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];
-  if(doR){recs=[];ck('ev4_recs');ck('ev4_savedAt');}
-  if(doC){cos=COS_DEF;ck('ev4_cos');}
-  if(doRt){homeRates=[];fuelRates=[];ck('ev4_hr');ck('ev4_fuel');ck('ev4_hr_init');}
-  if(doS){st=Object.assign({},ST_DEF);ck('ev4_st');ck('ev4_bat');ck('ev4_eff');}
-  if(doExp){expenses=[];ck('ev4_expenses');}
-  recalc();renderAll();renderExp();
-  if(cloud&&gdToken){
+  if(doR){recs=[];LS.set('ev4_recs',recs);}
+  if(doC){cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];LS.set('ev4_cos',cos);}
+  if(doRt){homeRates=[];fuelRates=[];LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);}
+  if(doS){st={showCost:true};LS.set('ev4_st',st);}
+  recalc();renderAll();
+  if(cloud&&gdToken&&gdDataFileId){
     try{
-      if(gdDataFileId){
-        await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-        gdDataFileId=null;ck(gdUserKey('gd_data_fid'));
-      }
-      if(gdHtmlFileId){
-        await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-        gdHtmlFileId=null;ck(gdUserKey('gd_html_fid'));
-      }
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
       toast('🗑️ נמחק מקומית ומהענן');
     }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');}
   } else {
-    // מחיקה מקומית בלבד — שמור לענן את הנתונים החדשים (הריקים)
-    if(gdToken)gdAutoSave();
-    toast('🗑️ נמחק מקומית');
+    toast('🗑️ נמחק');if(cloud)gdAutoSave();
   }
 }
 
@@ -3544,11 +3501,7 @@ let expenses=LS.get('ev4_expenses',[
 
 const EXP_ICONS={ביטוח:'🛡️',טיפול:'🔧',צמיגים:'🔄',אגרה:'📋',איתורן:'📍',שטיפה:'🚿','תשלום חודשי':'💳',אחר:'📦'};
 
-function saveExpLS(){
-  LS.set('ev4_expenses',expenses);
-  LS.set('ev4_savedAt',Date.now());
-  gdAutoSave();
-}
+function saveExpLS(){LS.set('ev4_expenses',expenses);gdAutoSave();}
 
 function renderExp(){
   renderExpTable();
@@ -3589,21 +3542,15 @@ function renderExpSummary(){
   // months of ownership: from first charging record to today
   const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
   const firstDate=sortedRecs[0]?.date||today();
-  const _mStart=new Date(firstDate.slice(0,7)+'-01');
-  const _mEnd=new Date(today().slice(0,7)+'-01');
-  let months=0;
-  for(let d=new Date(_mStart);d<=_mEnd;d.setMonth(d.getMonth()+1))months++;
-  months=Math.max(1,months);
+  const months=Math.max(1,Math.round((new Date(today())-new Date(firstDate))/(1000*60*60*24*30.44)));
   const totalPerMonth=grandTotal/months;
 
-  // calculate effective amounts — תשלום חודשי רק מהגדרות
+  // calculate effective amounts for monthly-type expenses
   function effectiveAmt(e){
-    if(e.cat==='תשלום חודשי') return 0; // מחושב מ-st.monthly בנפרד
-    if(ANNUAL_CATS.has(e.cat)) return e.amt; // שנתי — כפי שהוזן
+    if(e.cat==='תשלום חודשי'){const rate=st.monthly||e.amt;return rate*months;}
     return e.amt;
   }
-  const monthlyFromSettings=st.monthly?st.monthly*months:0;
-  const totalEffective=expenses.reduce((s,e)=>s+effectiveAmt(e),0)+monthlyFromSettings;
+  const totalEffective=expenses.reduce((s,e)=>s+effectiveAmt(e),0);
   const grandTotalEffective=totalEffective+elecTotal;
 
   // electricity per month
@@ -3772,47 +3719,31 @@ function _expTreeData(key){
   if(key==='totalExp'||key==='totalAll'){
     const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
     const firstDate=sortedRecs[0]?.date||today();
+    // כל חודשי הבעלות
     const allMonths=[];
     const start=new Date(firstDate.slice(0,7)+'-01');
     const end=new Date(today().slice(0,7)+'-01');
     for(let d=new Date(start);d<=end;d.setMonth(d.getMonth()+1))
       allMonths.push(d.toISOString().slice(0,7));
-    const months=allMonths.length;
-
-    // תשלום חודשי מהגדרות — מחולק שווה לכל ימי כל חודש
-    if(st.monthly){
-      for(const ym of allMonths){
-        const [y,mo]=ym.split('-');
-        const daysInMonth=new Date(+y,+mo,0).getDate();
-        const perDay=st.monthly/daysInMonth;
-        for(let day=1;day<=daysInMonth;day++){
-          addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
-        }
-      }
-    }
 
     for(const e of expenses){
-      if(e.cat==='תשלום חודשי') continue;
-      if(ANNUAL_CATS.has(e.cat)){
-        // מחולק ל-12 חודשים, כל חודש מחולק לימים שווים
+      if(e.cat==='תשלום חודשי'){
+        const rate=st.monthly||e.amt;
+        for(const ym of allMonths) addToDay(ym+'-01',0,rate);
+      } else if(ANNUAL_CATS.has(e.cat)){
         const monthly=e.amt/12;
         const base=new Date(e.date.slice(0,7)+'-01');
         for(let i=0;i<12;i++){
           const d=new Date(base);d.setMonth(d.getMonth()+i);
-          const ym=d.toISOString().slice(0,7);
-          const [y,mo]=ym.split('-');
-          const daysInMonth=new Date(+y,+mo,0).getDate();
-          const perDay=monthly/daysInMonth;
-          for(let day=1;day<=daysInMonth;day++){
-            addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
-          }
+          addToDay(d.toISOString().slice(0,10),0,monthly);
         }
       } else if((e.inst||1)>1){
-        const n=e.inst;const perInst=e.amt/n;
+        // תשלומים חודשיים
+        const n=e.inst;const monthly=e.amt/n;
         const base=new Date(e.date);
         for(let i=0;i<n;i++){
           const d=new Date(base);d.setMonth(d.getMonth()+i);
-          addToDay(d.toISOString().slice(0,10),0,perInst);
+          addToDay(d.toISOString().slice(0,10),0,monthly);
         }
       } else {
         addToDay(e.date,0,e.amt);
@@ -3854,7 +3785,6 @@ function _buildExpTreeChart(key){
   const byY=_expTreeData(key);
   const level=_expTreeLevel[key]||'years';
   let labels=[],vals=[],title='',backLevel=null,canDrill=false;
-  const noDays=(key==='totalExp'||key==='totalAll');
   if(level==='years'){
     title=meta.label+' — לפי שנה';canDrill=true;
     const years=Object.keys(byY).sort();
@@ -3864,7 +3794,7 @@ function _buildExpTreeChart(key){
       labels.push(y);vals.push(_expTreeSum(key,allDays));
     }
   } else if(level.startsWith('months:')){
-    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=!noDays;
+    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=true;
     const months=Object.keys(byY[y]?.months||{}).sort();
     _expTreeLevel['_mList_'+key]=months;
     for(const ym of months){
@@ -4168,7 +4098,7 @@ let gdToken=null;
 let gdUserId=null;
 let gdDataFileId=null;
 let gdHtmlFileId=null;
-let gdSyncing=false;let gdDirty=false;
+let gdSyncing=false;
 let gdAutoSaveTimer=null;
 
 function gdUserKey(k){return gdUserId?`ev4_${gdUserId}_${k}`:null;}
@@ -4181,8 +4111,15 @@ function gdLoadUserIds(){
 function gdShowBar(){
   const bar=$('gdBar');
   if(bar)bar.style.transform='translateY(0)';
+  // דחוף תוכן מטה
   const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
   if(wrap)wrap.style.paddingTop='38px';
+}
+function gdHideBar(){
+  const bar=$('gdBar');
+  if(bar)bar.style.transform='translateY(-60px)';
+  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
+  if(wrap)wrap.style.paddingTop='';
 }
 function gdSetStatus(txt,color){
   const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx2)';}
@@ -4207,12 +4144,20 @@ function gdLogin(){
         const u=await r.json();
         gdUserId=u.id;
         localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
+        // הגדר LS לעבוד עם uid זה וטען נתוני המשתמש
         LS._uid=gdUserId;
+        recs=LS.get('ev4_recs',recs);
+        cos=LS.get('ev4_cos',cos);
+        homeRates=LS.get('ev4_hr',homeRates);
+        fuelRates=LS.get('ev4_fuel',fuelRates);
+        st=LS.get('ev4_st',st);
+        tblExpandY=LS.get('ev4_tblY',{});tblExpandM=LS.get('ev4_tblM',{});
+        const _th=LS.get('ev4_theme','dark');document.body.classList.toggle('light',_th==='light');syncThemeBtns();
+        recalc();renderAll();
       }catch{}
       gdLoadUserIds();
       gdSetStatus('✅ מחובר','var(--ac)');
       gdSetBtn('התנתק',gdLogout,'var(--er)');
-      // התחברות חדשה — תמיד טען מהענן (ענן מנצח מקומי)
       gdSync();
     }
   });
@@ -4220,7 +4165,6 @@ function gdLogin(){
 }
 
 function gdLogout(){
-  // התנתקות — שמור נתונים מקומית תחת uid, אחר כך נקה session
   gdToken=null;gdUserId=null;gdDataFileId=null;gdHtmlFileId=null;
   LS._uid=null;
   localStorage.setItem('ev4_gd_token',JSON.stringify(null));
@@ -4231,16 +4175,13 @@ function gdLogout(){
 
 // איסוף כל הנתונים
 function gdCollectData(){
-  const _savedAt=Date.now();
-  LS.set('ev4_savedAt',_savedAt);
-  return {recs,cos,homeRates,fuelRates,st,expenses,_savedAt,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
+  return {recs,cos,homeRates,fuelRates,st,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
 }
 
 // שמירת JSON לדרייב
 async function gdSaveData(){
-  if(!gdToken)return;
-  if(gdSyncing){gdDirty=true;return;}
-  gdSyncing=true;gdDirty=false;
+  if(!gdToken||gdSyncing)return;
+  gdSyncing=true;
   gdSetStatus('💾 שומר...','var(--ac3)');
   try{
     const body=JSON.stringify(gdCollectData(),null,2);
@@ -4266,7 +4207,6 @@ async function gdSaveData(){
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');
   } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
   gdSyncing=false;
-  if(gdDirty)gdSaveData();
 }
 
 // שמירת קובץ HTML לדרייב
@@ -4297,17 +4237,22 @@ async function gdLoadData(){
       headers:{'Authorization':'Bearer '+gdToken}});
     if(!r.ok)return false;
     const d=await r.json();
-    // השווה לפי timestamp — מי עודכן לאחרונה מנצח
-    const cloudTs=d._savedAt||0;
+    // אם יש יותר נתונים מקומיים — שמור לענן במקום לטעון
+    const cloudRecs=(d.recs||[]).length;
+    const localRecs=recs.length;
+    if(localRecs>cloudRecs){
+      toast('☁️ נתונים מקומיים חדשים יותר — שומר לענן');
+      await gdSaveData();
+      return true;
+    }
     if(d.recs)recs=d.recs;
     if(d.cos)cos=d.cos;
     if(d.homeRates)homeRates=d.homeRates;
     if(d.fuelRates)fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-    if(d.expenses){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
-    LS.set('ev4_savedAt',cloudTs);
+    // theme — שמור את הבחירה המקומית, אל תדרוס
     LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);
     renderAll();
     return true;
@@ -4327,37 +4272,18 @@ async function gdSync(){
   if(!gdToken)return;
   gdSetStatus('🔄 מסנכרן...','var(--ac2)');
   try{
-    // מצא קבצים קיימים בענן
-    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),id);}}
-    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),id);}}
-    const localTs=LS.get('ev4_savedAt',0);
+    // מצא קבצים קיימים
+    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;LS.set('ev4_gd_data_fid',id);}}
+    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;LS.set('ev4_gd_html_fid',id);}}
     if(gdDataFileId){
-      // יש קובץ ענן — בדוק מי חדש יותר
-      const hdr=await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}?fields=modifiedTime`,{
-        headers:{'Authorization':'Bearer '+gdToken}});
-      const meta=await hdr.json();
-      const cloudTs=meta.modifiedTime?new Date(meta.modifiedTime).getTime():0;
-      if(cloudTs>localTs){
-        // ענן חדש יותר — טען ממנו
-        const loaded=await gdLoadData();
-        if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
-        else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
-      } else {
-        // מקומי חדש יותר (או שווה) — שמור לענן
-        await gdSaveData();
-        gdSetStatus('✅ מסונכרן','var(--ac)');
-      }
+      const loaded=await gdLoadData();
+      if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
+      else await gdSaveData();
     } else {
-      // אין קובץ ענן
-      const localRecs=LS.get('ev4_recs',[]);
-      if(localRecs.length>0||recs.length>0){
-        // יש נתונים מקומיים — שמור לענן
-        await gdSaveData();
-        toast('☁️ גיבוי נשמר בענן');
-      }
-      gdSetStatus('✅ מחובר','var(--ac)');
+      await gdSaveData();
+      toast('☁️ גיבוי ראשון נשמר בענן');
     }
-  } catch(e){gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
+  } catch{gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
 }
 
 // שמירה אוטומטית — מופעלת אחרי כל שינוי
@@ -4367,7 +4293,7 @@ function gdAutoSave(){
   gdAutoSaveTimer=setTimeout(gdSaveData,2000);
 }
 
-// אתחול בטעינה
+// ניסיון שחזור טוקן קיים בטעינה
 (function gdInit(){
   gdShowBar();
   const savedToken=localStorage.getItem('ev4_gd_token');
@@ -4375,17 +4301,21 @@ function gdAutoSave(){
   const token=savedToken?JSON.parse(savedToken):null;
   const uid=savedUid?JSON.parse(savedUid):null;
   if(token&&uid){
-    // משתמש מחובר — הגדר uid ב-LS לפני הכל
-    gdToken=token;gdUserId=uid;LS._uid=uid;
+    gdToken=token;gdUserId=uid;
+    LS._uid=uid;
+    // טען נתוני המשתמש הספציפי
+    recs=LS.get('ev4_recs',recs);
+    cos=LS.get('ev4_cos',cos);
+    homeRates=LS.get('ev4_hr',homeRates);
+    fuelRates=LS.get('ev4_fuel',fuelRates);
+    st=LS.get('ev4_st',st);
+    tblExpandY=LS.get('ev4_tblY',{});tblExpandM=LS.get('ev4_tblM',{});
+    const _th=LS.get('ev4_theme','dark');document.body.classList.toggle('light',_th==='light');syncThemeBtns();
+    recalc();renderAll();
     gdLoadUserIds();
     gdSetStatus('🔄 מתחבר...','var(--ac2)');
     gdSetBtn('התנתק',gdLogout,'var(--er)');
-    // טען מהענן — אם אין קובץ ענן, השתמש במה שב-localStorage
     gdSync();
-  } else {
-    // לא מחובר — הצג כפתור התחברות
-    gdSetStatus('☁️ לא מחובר','var(--tx2)');
-    gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
   }
 })();
 
