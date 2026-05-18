@@ -3267,6 +3267,16 @@ async function delSelected(cloud){
   const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st'),doExp=isChk('del_exp');
   if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
   const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'נתוני רכב',doExp&&'הוצאות'].filter(Boolean).join(', ');
+
+  // הצע גיבוי לפני מחיקה
+  const wantBackup=await confirmAsync('לפני המחיקה — לייצא גיבוי JSON?');
+  if(wantBackup){
+    const out={recs,cos,homeRates,fuelRates,st,expenses};
+    dl(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),`ev_backup_${today()}.json`);
+    toast('📦 גיבוי יוצא');
+    await new Promise(r=>setTimeout(r,800));
+  }
+
   if(!await confirmAsync(`למחוק: ${items}${cloud?' + ענן':''}?`))return;
 
   // מחק לפי המפתח הנכון — עם uid אם קיים
