@@ -114,7 +114,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
   position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);
   border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;
   padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));
-  animation:su .25s ease;
+  animation:su .25s ease;max-height:85vh;overflow-y:auto;
 }
 .settings-title{font-size:1rem;font-weight:800;margin-bottom:16px;}
 .theme-row{display:flex;gap:10px;margin-bottom:4px;}
@@ -136,9 +136,11 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .tab{flex-shrink:0;padding:9px 14px;font-family:var(--fn);font-size:0.85rem;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;}
 .tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s;}
 .tab.active{color:var(--ac);}.tab.active::after{transform:scaleX(1);}
-.wrap{max-width:560px;margin:0 auto;padding:14px;}
+.wrap{max-width:560px;margin:0 auto;padding:14px;padding-top:52px;}
 @media(min-width:900px){
-  .wrap{max-width:1100px;padding:20px 24px;}
+  body{display:flex;flex-direction:column;}
+  .app-layout{display:flex;flex:1;align-items:flex-start;gap:0;max-width:1300px;margin:0 auto;width:100%;}
+  .wrap{max-width:1100px;padding:20px 24px;flex:1;min-width:0;}
   .tw table,.tw{min-width:100%!important;}
   table{min-width:100%!important;}
   .fr{grid-template-columns:1fr 1fr 1fr;}
@@ -178,6 +180,10 @@ select option{background:#1c2330;}
 .sg{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
 @media(min-width:480px){.sg{grid-template-columns:repeat(4,1fr);}}
 .sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px;}
+.sc[data-ekey]{cursor:pointer;transition:border-color .18s;}
+.sc[data-ekey]:hover{border-color:rgba(255,255,255,.18);}
+body.light .sc[data-ekey]:hover{border-color:rgba(0,0,0,.18);}
+.sc.kpi-open{border-color:var(--ac)!important;}
 .sv{font-size:1.35rem;font-weight:900;color:var(--ac);line-height:1.1;}
 .sv.b{color:var(--ac2);}.sv.g{color:var(--ac3);}
 .sl{font-size:.75rem;color:var(--tx2);margin-top:3px;font-weight:500;}
@@ -297,6 +303,26 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
 .dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
 @media(min-width:480px){.dash-kpis{grid-template-columns:repeat(4,1fr);}}
 .kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px 14px;position:relative;overflow:hidden;}
+.kpi.kpi-clickable{cursor:pointer;transition:border-color .18s;}
+.kpi.kpi-clickable:hover{border-color:rgba(255,255,255,.18);}
+body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
+.kpi.kpi-open{border-color:var(--ac)!important;}
+.kpi-hint{font-size:.58rem;color:var(--tx3);margin-bottom:3px;opacity:.7;}
+/* KPI chart: full-width panel injected into grid */
+.kpi-chart-row{grid-column:1/-1;animation:fi .2s ease;}
+.kpi-chart-panel-full{background:var(--sf);border:1px solid var(--ac);border-radius:var(--r);padding:14px 14px 10px;}
+.kpi-chart-panel-full canvas{width:100%!important;display:block;touch-action:none;}
+.kpi-chart-inner{margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;animation:fi .2s ease;}
+.kpi-chart-panel{background:var(--sf);border:1px solid var(--ac);border-top:none;border-radius:0 0 var(--r) var(--r);padding:12px 14px 10px;margin-bottom:4px;animation:fi .2s ease;}
+.kpi-chart-panel canvas{width:100%!important;display:block;}
+.kpi-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.kpi-chart-title{font-size:.7rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;}
+.exp-chart-card .ct{margin-bottom:0}
+.exp-chart-body{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);animation:fi .2s ease;}
+.exp-chart-body canvas{width:100%!important;display:block;}
+.exp-chart-row{grid-column:1/-1;animation:fi .2s ease;}
+.kpi-chart-close{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.85rem;padding:2px 7px;border-radius:4px;font-family:var(--fn);}
+.kpi-chart-close:hover{color:var(--tx);background:var(--sf2);}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;}
 .kpi.green::before{background:var(--ac);}
 .kpi.blue::before{background:var(--ac2);}
@@ -355,6 +381,7 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
       <div class="hdr-t">⚡ <span>עלות חשמל רכב</span></div>
       <div class="hdr-s" id="hSub">טוען...</div>
     </div>
+    <div id="gdStatusHdr" style="font-size:.72rem;color:var(--tx3);text-align:left;line-height:1.4;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid transparent;transition:border-color .15s;" onclick="window.innerWidth<900?openSettingsDrawer():sw('gd',null)" title="לחץ להגדרות חיבור"></div>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="sw('data',this)">📊 מבט כללי</button>
@@ -363,17 +390,20 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
     <button class="tab" onclick="sw('stats',this)">📈 סטטיסטיקה</button>
     <button class="tab" onclick="sw('rates',this)">⚡ תעריפים</button>
     <button class="tab" onclick="sw('cos',this)">🏢 חברות</button>
-    <button class="tab" onclick="sw('set',this)">⚙️ הגדרות</button>
+    <button class="tab" onclick="sw('exp2',this)">💸 הוצאות</button>
+    <button class="tab" onclick="sw('set',this)">🚗 נתוני רכב</button>
+    <button class="tab" onclick="sw('gd',this)">⚙️ הגדרות</button>
   </div>
 </div>
 
+<div class="app-layout">
 <div class="wrap">
 
 <!-- ═══ נתונים ═══ -->
 <div class="tc active" id="tab-data">
   <!-- כרטיסי KPI -->
   <div class="dash-kpis" id="dashKpis"></div>
-  <!-- שורה: גרף חיסכון מצטבר + מד יעילות -->
+    <!-- שורה: גרף חיסכון מצטבר + מד יעילות -->
   <div class="dash-row">
     <div class="card dash-card" id="dashSavingCard">
       <div class="ct"><div class="ctb" style="background:var(--ok)"></div>חיסכון מצטבר מדלק</div>
@@ -394,6 +424,8 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
     </div>
     <canvas id="cKm" height="130"></canvas>
   </div>
+  <!-- גרף מגמת הוצאה -->
+  <div class="card" id="dashTrendCard"></div>
   <!-- רצועת מידע תחתית -->
   <div class="card" id="dashBottom"></div>
 </div>
@@ -540,10 +572,44 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
 </div>
 
 <!-- ═══ הגדרות ═══ -->
+<!-- ═══ הוצאות ═══ -->
+<div class="tc" id="tab-exp2">
+
+  <!-- סיכום עלויות -->
+  <div class="card" id="exp2Summary"></div>
+
+  <!-- טבלת הוצאות -->
+  <div class="card">
+    <div class="lrow">
+      <div class="ct" style="margin-bottom:0"><div class="ctb" style="background:var(--er)"></div>הוצאות רכב</div>
+      <button class="gbtn g" onclick="openAddExp()">+ הוסף</button>
+    </div>
+    <div class="tw" style="max-height:50vh">
+      <table id="expTbl">
+        <thead><tr>
+          <th>תיאור</th><th>סכום ₪</th><th>קטגוריה</th><th>תאריך</th><th></th>
+        </tr></thead>
+        <tbody id="expBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ביטוח לפי שנה -->
+  <div class="card">
+    <div class="ct"><div class="ctb" style="background:var(--ac2)"></div>ביטוח לפי שנה</div>
+    <div id="expInsurance"></div>
+  </div>
+
+</div>
+
 <div class="tc" id="tab-set">
   <div class="card">
     <div class="ct"><div class="ctb"></div>נתוני רכב מוצהרים</div>
     <div class="f"><label>🚗 שם הרכב</label><input type="text" id="sCarName" placeholder="Geely Geometry C" oninput="saveSt()"></div>
+    <div class="fr">
+      <div class="f"><label>💰 עלות רכב ₪</label><input type="number" id="sCarCost" placeholder="150000" inputmode="numeric" oninput="saveSt()"><div class="hint">מחיר הרכב בקנייה</div></div>
+      <div class="f"><label>💳 תשלום חודשי ₪</label><input type="number" id="sMonthly" placeholder="3000" inputmode="numeric" oninput="saveSt()"><div class="hint">ליסינג / הלוואה חודשית</div></div>
+    </div>
     <div class="fr">
       <div class="f"><label>🔋 קיבולת סוללה (קו"ש)</label><input type="number" id="sBatt" placeholder="70" oninput="saveSt()"></div>
       <div class="f"><label>🛣️ טווח מוצהר (ק"מ)</label><input type="number" id="sRange" placeholder="485" oninput="saveSt()"></div>
@@ -554,7 +620,7 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
       <div class="hint">לדוגמה: סוללה 70 קו"ש אך בטעינה מלאה מגיע ל-80 קו"ש — הזן 80</div>
     </div>
     <div class="fr">
-      <div class="f"><label>⚡ קו"ש ל-100 ק"מ (מוצהר)</label><input type="number" id="sDeclKwh100" placeholder="מחושב אוטומטית" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= קיבולת סוללה ÷ טווח × 100</div></div>
+      <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="מחושב אוטומטית" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= קיבולת סוללה ÷ טווח × 100</div></div>
       <div class="f"><label>🏎️ כ"ס</label><input type="number" id="sKw" placeholder="204" oninput="saveSt()"></div>
     </div>
     <div class="fr">
@@ -570,104 +636,81 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
       <div id="sDeclCalc"></div>
     </div>
   </div>
+  <input type="checkbox" id="sShowCost" checked style="display:none">
+</div>
+
+<!-- ═══ הגדרות (דסקטופ) ═══ -->
+<div class="tc" id="tab-gd">
   <div class="card">
-    <div class="ct"><div class="ctb"></div>תצוגה</div>
-    <div class="trow">
-      <div><div style="font-size:.82rem;font-weight:600">הצג עמודות עלות ותעריף</div></div>
-      <label class="tgl"><input type="checkbox" id="sShowCost" checked onchange="saveSt();renderTable()"><div class="tsl"></div></label>
+    <div class="ct"><div class="ctb" style="background:var(--ac2)"></div>מצב תצוגה</div>
+    <div class="theme-row" style="gap:10px">
+      <button class="theme-opt" id="themeLightTab" onclick="setTheme('light')">☀️ בהיר</button>
+      <button class="theme-opt active" id="themeDarkTab" onclick="setTheme('dark')">🌙 כהה</button>
     </div>
   </div>
   <div class="card">
-    <div class="ct"><div class="ctb"></div>ניהול נתונים</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="gbtn g" id="btnPanelExp" onclick="togglePanel('exp')" style="flex:1;justify-content:center">📦 ייצוא</button>
-      <button class="gbtn" id="btnPanelImp" onclick="togglePanel('imp')" style="flex:1;justify-content:center;color:var(--ac2);border-color:rgba(59,130,246,.4)">📥 ייבוא</button>
-      <button class="gbtn d" id="btnPanelDel" onclick="togglePanel('del')" style="flex:1;justify-content:center">🗑️ מחיקה</button>
+    <div class="ct"><div class="ctb" style="background:var(--ac2)"></div>☁️ גיבוי ענן</div>
+    <div id="gdStatusTab" style="font-size:.85rem;color:var(--tx3);margin-bottom:12px;line-height:1.6;">☁️ לא מחובר</div>
+    <button id="gdBtnTab" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:.88rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ctb" style="background:var(--er)"></div>🗂️ ניהול נתונים</div>
+    <div style="display:flex;gap:8px;margin-bottom:0">
+      <button class="gbtn g" id="btnTabPanelExp" onclick="toggleTabPanel('exp')" style="flex:1;justify-content:center">📦 ייצוא</button>
+      <button class="gbtn" id="btnTabPanelImp" onclick="toggleTabPanel('imp')" style="flex:1;justify-content:center;color:var(--ac2);border-color:rgba(59,130,246,.4)">📥 ייבוא</button>
+      <button class="gbtn d" id="btnTabPanelDel" onclick="toggleTabPanel('del')" style="flex:1;justify-content:center">🗑️ מחיקה</button>
     </div>
 
     <!-- פאנל ייצוא -->
-    <div id="panelExp" style="display:none;border-top:1px solid var(--bd);padding-top:12px">
+    <div id="tabPanelExp" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">היסטוריית טעינות</span>
-          <div class="chk-wrap" onclick="toggleChk('exp_recs')"><div class="chk-box" id="exp_recs" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">חברות וחשבונות</span>
-          <div class="chk-wrap" onclick="toggleChk('exp_cos')"><div class="chk-box" id="exp_cos" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">תעריפים (חשמל + דלק)</span>
-          <div class="chk-wrap" onclick="toggleChk('exp_rates')"><div class="chk-box" id="exp_rates" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הגדרות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('exp_st')"><div class="chk-box" id="exp_st" data-on="1"></div></div>
-        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('texp_recs')"><div class="chk-box" id="texp_recs" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('texp_cos')"><div class="chk-box" id="texp_cos" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('texp_rates')"><div class="chk-box" id="texp_rates" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('texp_st')"><div class="chk-box" id="texp_st" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('texp_exp')"><div class="chk-box" id="texp_exp" data-on="1"></div></div></label>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="gbtn g" onclick="expSelected('json')" style="flex:1;justify-content:center">📦 JSON</button>
-        <button class="gbtn g" onclick="expSelected('csv')" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
+        <button class="gbtn g" onclick="tabExpSelected('json')" style="flex:1;justify-content:center">📦 JSON</button>
+        <button class="gbtn g" onclick="tabExpSelected('csv')" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
       </div>
     </div>
 
     <!-- פאנל ייבוא -->
-    <div id="panelImp" style="display:none;border-top:1px solid var(--bd);padding-top:12px">
+    <div id="tabPanelImp" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">היסטוריית טעינות</span>
-          <div class="chk-wrap" onclick="toggleChk('imp_recs')"><div class="chk-box" id="imp_recs" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">חברות וחשבונות</span>
-          <div class="chk-wrap" onclick="toggleChk('imp_cos')"><div class="chk-box" id="imp_cos" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">תעריפים (חשמל + דלק)</span>
-          <div class="chk-wrap" onclick="toggleChk('imp_rates')"><div class="chk-box" id="imp_rates" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הגדרות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('imp_st')"><div class="chk-box" id="imp_st" data-on="1"></div></div>
-        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('timp_recs')"><div class="chk-box" id="timp_recs" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('timp_cos')"><div class="chk-box" id="timp_cos" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('timp_rates')"><div class="chk-box" id="timp_rates" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('timp_st')"><div class="chk-box" id="timp_st" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('timp_exp')"><div class="chk-box" id="timp_exp" data-on="1"></div></div></label>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="gbtn" onclick="$('impJSON').click()" style="flex:1;justify-content:center">📥 JSON</button>
-        <button class="gbtn g" onclick="$('impXLSM').click()" style="flex:1;justify-content:center;border-color:rgba(0,200,150,.4)">📊 Excel</button>
-        <button class="gbtn g" onclick="$('impCSV').click()" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
+        <button class="gbtn" onclick="tabImpStart('tImpJSON')" style="flex:1;justify-content:center">📥 JSON</button>
+        <button class="gbtn g" onclick="tabImpStart('tImpXLSM')" style="flex:1;justify-content:center;border-color:rgba(0,200,150,.4)">📊 Excel</button>
+        <button class="gbtn g" onclick="tabImpStart('tImpCSV')" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
       </div>
-      <input type="file" id="impJSON" accept=".json" style="display:none" onchange="impJSONSel(event)">
-      <input type="file" id="impXLSM" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="impXLSM(event)">
-      <input type="file" id="impCSV" accept=".csv" style="display:none" onchange="impCSV(event)">
-      <div class="impbar" id="impBar">
-        <div style="font-size:.75rem;color:var(--tx2)" id="impMsg">מייבא...</div>
-        <div class="prog"><div class="prog-fill" id="impProg" style="width:0%"></div></div>
+      <input type="file" id="tImpJSON" accept=".json" style="display:none" onchange="impJSONSel(event)">
+      <input type="file" id="tImpXLSM" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="impXLSM(event)">
+      <input type="file" id="tImpCSV" accept=".csv" style="display:none" onchange="impCSV(event)">
+      <div class="impbar" id="tImpBar" style="margin-top:8px">
+        <div style="font-size:.75rem;color:var(--tx2)" id="tImpMsg">מייבא...</div>
+        <div class="prog"><div class="prog-fill" id="tImpProg" style="width:0%"></div></div>
       </div>
     </div>
 
     <!-- פאנל מחיקה -->
-    <div id="panelDel" style="display:none;border-top:1px solid var(--bd);padding-top:12px">
+    <div id="tabPanelDel" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">היסטוריית טעינות</span>
-          <div class="chk-wrap" onclick="toggleChk('del_recs')"><div class="chk-box chk-red" id="del_recs" data-on="1"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">חברות וחשבונות</span>
-          <div class="chk-wrap" onclick="toggleChk('del_cos')"><div class="chk-box chk-red" id="del_cos" data-on="0"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">תעריפים (חשמל + דלק)</span>
-          <div class="chk-wrap" onclick="toggleChk('del_rates')"><div class="chk-box chk-red" id="del_rates" data-on="0"></div></div>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
-          <span style="flex:1">הגדרות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('del_st')"><div class="chk-box chk-red" id="del_st" data-on="0"></div></div>
-        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('tdel_recs')"><div class="chk-box chk-red" id="tdel_recs" data-on="1"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('tdel_cos')"><div class="chk-box chk-red" id="tdel_cos" data-on="0"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('tdel_rates')"><div class="chk-box chk-red" id="tdel_rates" data-on="0"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('tdel_st')"><div class="chk-box chk-red" id="tdel_st" data-on="0"></div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('tdel_exp')"><div class="chk-box chk-red" id="tdel_exp" data-on="0"></div></div></label>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="gbtn d" onclick="delSelected(false)" style="flex:1;justify-content:center">🗑️ מחק מקומית</button>
-        <button class="gbtn d" onclick="delSelected(true)" style="flex:1;justify-content:center">☁️ מחק + ענן</button>
+        <button class="gbtn d" onclick="tabDelSelected(false)" style="flex:1;justify-content:center">🗑️ מחק מקומית</button>
+        <button class="gbtn d" onclick="tabDelSelected(true)" style="flex:1;justify-content:center">☁️ מחק + ענן</button>
       </div>
     </div>
   </div>
@@ -732,6 +775,37 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
     <div class="mbs"><div class="mcan" onclick="closeModal('mEdit')">ביטול</div><button class="btn" onclick="saveEdit()">שמור שינויים</button></div>
   </div>
 </div>
+<!-- MODAL: הוצאה -->
+<div class="mov" id="mExp">
+  <div class="modal">
+    <div class="mt" id="mExpT">הוסף הוצאה</div>
+    <input type="hidden" id="expEditId">
+    <div class="f"><label>תיאור</label><input type="text" id="expDesc" placeholder="טיפול, צמיגים, ביטוח..."></div>
+    <div class="fr">
+      <div class="f"><label>סכום ₪</label><input type="number" id="expAmt" placeholder="0" step="0.01" inputmode="decimal"></div>
+      <div class="f"><label>מספר תשלומים</label><input type="number" id="expInst" value="1" min="1" max="120" inputmode="numeric" onchange="expInstChanged()"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>מתאריך</label><input type="date" id="expDate" onchange="expInstChanged()"></div>
+      <div class="f"><label>עד תאריך</label><input type="date" id="expDateEnd"></div>
+    </div>
+    <div class="f"><label>קטגוריה</label>
+      <select id="expCat">
+        <option value="ביטוח">🛡️ ביטוח</option>
+        <option value="טיפול">🔧 טיפול</option>
+        <option value="צמיגים">🔄 צמיגים</option>
+        <option value="אגרה">📋 אגרה</option>
+        <option value="איתורן">📍 איתורן</option>
+        <option value="שטיפה">🚿 שטיפה</option>
+        <option value="תשלום חודשי">💳 תשלום חודשי</option>
+        <option value="אחר">📦 אחר</option>
+      </select>
+    </div>
+    <div class="f"><label>הערה</label><input type="text" id="expNote" placeholder="פרטים נוספים..."></div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mExp')">ביטול</div><button class="btn" onclick="saveExp()">שמור</button></div>
+  </div>
+</div>
+
 <!-- MODAL: פרטי חברה -->
 <div class="mov" id="mCoDetail">
   <div class="modal">
@@ -789,7 +863,8 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
       <button class="menu-item" id="mi-stats" onclick="swMobile('stats')"><span class="menu-item-icon">📈</span>סטטיסטיקה</button>
       <button class="menu-item" id="mi-rates" onclick="swMobile('rates')"><span class="menu-item-icon">⚡</span>תעריפים</button>
       <button class="menu-item" id="mi-cos" onclick="swMobile('cos')"><span class="menu-item-icon">🏢</span>חברות</button>
-      <button class="menu-item" id="mi-set" onclick="swMobile('set')"><span class="menu-item-icon">⚙️</span>הגדרות</button>
+      <button class="menu-item" id="mi-exp2" onclick="swMobile('exp2')"><span class="menu-item-icon">💸</span>הוצאות</button>
+      <button class="menu-item" id="mi-set" onclick="swMobile('set')"><span class="menu-item-icon">🚗</span>נתוני רכב</button>
     </div>
   </div>
 </div>
@@ -798,22 +873,92 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
 <div class="settings-drawer" id="settingsDrawer">
   <div class="menu-overlay" onclick="closeSettingsDrawer()"></div>
   <div class="settings-panel">
-    <div class="settings-title">⚙️ הגדרות תצוגה</div>
+    <div class="settings-title">⚙️ הגדרות</div>
     <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">מצב תצוגה</div>
     <div class="theme-row">
       <button class="theme-opt" id="themeLight" onclick="setTheme('light')">☀️ בהיר</button>
       <button class="theme-opt active" id="themeDark" onclick="setTheme('dark')">🌙 כהה</button>
     </div>
+    <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;">
+      <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">☁️ גיבוי ענן</div>
+      <div id="gdStatus" style="font-size:.8rem;color:var(--tx3);margin-bottom:10px;">☁️ לא מחובר</div>
+      <button id="gdBtn" onclick="gdLogin()" style="width:100%;background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:.85rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;">
+      <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">🗂️ ניהול נתונים</div>
+      <div style="display:flex;gap:8px;margin-bottom:0">
+        <button class="gbtn g" id="btnPanelExp" onclick="toggleDrawerPanel('exp')" style="flex:1;justify-content:center;padding:10px 8px">📦 ייצוא</button>
+        <button class="gbtn" id="btnPanelImp" onclick="toggleDrawerPanel('imp')" style="flex:1;justify-content:center;padding:10px 8px;color:var(--ac2);border-color:rgba(59,130,246,.4)">📥 ייבוא</button>
+        <button class="gbtn d" id="btnPanelDel" onclick="toggleDrawerPanel('del')" style="flex:1;justify-content:center;padding:10px 8px">🗑️ מחיקה</button>
+      </div>
+
+      <!-- פאנל ייצוא -->
+      <div id="drawerPanelExp" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('exp_recs')"><div class="chk-box" id="exp_recs" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('exp_cos')"><div class="chk-box" id="exp_cos" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('exp_rates')"><div class="chk-box" id="exp_rates" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('exp_st')"><div class="chk-box" id="exp_st" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('exp_exp')"><div class="chk-box" id="exp_exp" data-on="1"></div></div></label>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="gbtn g" onclick="expSelected('json')" style="flex:1;justify-content:center">📦 JSON</button>
+          <button class="gbtn g" onclick="expSelected('csv')" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
+        </div>
+      </div>
+
+      <!-- פאנל ייבוא -->
+      <div id="drawerPanelImp" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('imp_recs')"><div class="chk-box" id="imp_recs" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('imp_cos')"><div class="chk-box" id="imp_cos" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('imp_rates')"><div class="chk-box" id="imp_rates" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('imp_st')"><div class="chk-box" id="imp_st" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('imp_exp')"><div class="chk-box" id="imp_exp" data-on="1"></div></div></label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="gbtn" onclick="$('impJSON').click()" style="flex:1;justify-content:center">📥 JSON</button>
+          <button class="gbtn g" onclick="$('impXLSM').click()" style="flex:1;justify-content:center;border-color:rgba(0,200,150,.4)">📊 Excel</button>
+          <button class="gbtn g" onclick="$('impCSV').click()" style="flex:1;justify-content:center;border-color:rgba(59,130,246,.4);color:var(--ac2)">📄 CSV</button>
+        </div>
+        <input type="file" id="impJSON" accept=".json" style="display:none" onchange="impJSONSel(event)">
+        <input type="file" id="impXLSM" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="impXLSM(event)">
+        <input type="file" id="impCSV" accept=".csv" style="display:none" onchange="impCSV(event)">
+        <div class="impbar" id="impBar" style="margin-top:8px">
+          <div style="font-size:.75rem;color:var(--tx2)" id="impMsg">מייבא...</div>
+          <div class="prog"><div class="prog-fill" id="impProg" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- פאנל מחיקה -->
+      <div id="drawerPanelDel" style="display:none;border-top:1px solid var(--bd);margin-top:12px;padding-top:12px">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">היסטוריית טעינות</span><div class="chk-wrap" onclick="toggleChk('del_recs')"><div class="chk-box chk-red" id="del_recs" data-on="1"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">חברות וחשבונות</span><div class="chk-wrap" onclick="toggleChk('del_cos')"><div class="chk-box chk-red" id="del_cos" data-on="0"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">תעריפים (חשמל + דלק)</span><div class="chk-wrap" onclick="toggleChk('del_rates')"><div class="chk-box chk-red" id="del_rates" data-on="0"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">נתוני רכב</span><div class="chk-wrap" onclick="toggleChk('del_st')"><div class="chk-box chk-red" id="del_st" data-on="0"></div></div></label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem"><span style="flex:1">הוצאות רכב</span><div class="chk-wrap" onclick="toggleChk('del_exp')"><div class="chk-box chk-red" id="del_exp" data-on="0"></div></div></label>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="gbtn d" onclick="delSelected(false)" style="flex:1;justify-content:center">🗑️ מחק מקומית</button>
+          <button class="gbtn d" onclick="delSelected(true)" style="flex:1;justify-content:center">☁️ מחק + ענן</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+<div id="confirmModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;max-width:320px;width:90%;text-align:center;">
+    <div id="confirmMsg" style="font-size:.95rem;color:var(--tx);margin-bottom:20px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="confirmNo" style="flex:1;padding:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx2);border-radius:8px;font-size:.85rem;cursor:pointer;font-family:var(--fn);">ביטול</button>
+      <button id="confirmYes" style="flex:1;padding:10px;border:none;background:var(--er);color:#fff;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:var(--fn);">אישור</button>
+    </div>
+  </div>
+</div>
+</div><!-- /app-layout -->
 
 <div class="toast" id="toast"></div>
-
-<!-- סרגל סטטוס Google Drive -->
-<div id="gdBar" style="position:fixed;top:0;left:0;right:0;z-index:998;background:var(--sf2);border-bottom:1px solid var(--bd);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--tx2);transform:translateY(-60px);transition:transform .3s ease;">
-  <span id="gdStatus">☁️ לא מחובר</span>
-  <button id="gdBtn" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:.72rem;cursor:pointer;font-family:var(--fn)">התחבר ל-Google</button>
-</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -825,6 +970,12 @@ const LS={
   get(k,d){try{const v=localStorage.getItem(this._k(k));return v!=null?JSON.parse(v):d;}catch{return d;}},
   set(k,v){localStorage.setItem(this._k(k),JSON.stringify(v));}
 };
+// הגדר uid לפני כל טעינת נתונים — כך הנתונים תמיד נטענים מהמפתח הנכון
+try{
+  const _uid=JSON.parse(localStorage.getItem('ev4_gd_uid'));
+  const _tok=JSON.parse(localStorage.getItem('ev4_gd_token'));
+  if(_uid&&_tok)LS._uid=_uid;
+}catch{}
 const $=id=>document.getElementById(id);
 
 let cos=LS.get('ev4_cos',[
@@ -843,7 +994,7 @@ function initMonthlyRates(){
 }
 let fuelRates=LS.get('ev4_fuel',[]);
 let recs=LS.get('ev4_recs',[]);
-const ST_DEF={carName:'',batt:70,range:485,kpl:12.125,fuel:7.2,showCost:true,declKwh100:null,kw:null,chargeKwh:null};
+const ST_DEF={carName:'',batt:70,range:485,kpl:12.125,fuel:7.2,showCost:true,declKwh100:null,kw:null,chargeKwh:null,carCost:null,monthly:null};
 function stV(k){const v=st[k];return(v==null||v===''||isNaN(v))?ST_DEF[k]:v;}
 let st=Object.assign({},ST_DEF,LS.get('ev4_st',{}));
 let editCoIdx=null;
@@ -958,9 +1109,18 @@ function renderCoBtns(){
 // SAVE RECORD
 // ══════════════════════════════════════════
 function saveRec(){
-  const ds=$('inDate').value,kl=parseFloat($('inKmLeft').value),kt=parseFloat($('inKmTotal').value),kw=parseFloat($('inKwh').value),note=$('inNote').value.trim();
-  if(!ds||isNaN(kl)||isNaN(kt)||isNaN(kw)){toast('⚠️ יש למלא תאריך, ק"מ נשאר, אודומטר וקו"ש','e');return;}
-  if(kw<=0){toast('⚠️ קו"ש חייב להיות חיובי','e');return;}
+  const ds=$('inDate').value,kl=parseFloat($('inKmLeft').value),kt=parseFloat($('inKmTotal').value);
+  let kw=parseFloat($('inKwh').value);
+  const note=$('inNote').value.trim();
+  if(!ds||isNaN(kl)||isNaN(kt)){toast('⚠️ יש למלא תאריך, ק"מ נשאר ואודומטר','e');return;}
+  // אם לא הוזן קו"ש — חשב לפי נוסחה
+  if(isNaN(kw)||kw<=0){
+    const chargeKwh=st.chargeKwh||80;
+    const range=st.range||485;
+    // ((טווח - ק"מ נשאר) * (chargeKwh / טווח)) / chargeKwh
+    kw=(range-kl)*(chargeKwh/range);
+    if(kw<=0){toast('⚠️ לא ניתן לחשב קו"ש — בדוק ק"מ נשאר וטווח מוצהר','e');return;}
+  }
   if(recs.length>0&&ds<recs[recs.length-1].date){toast('⚠️ התאריך מוקדם מהרשומה האחרונה','e');return;}
   const manR=parseFloat($('inRate').value);
   const r1=(!isNaN(manR)&&manR>0)?manR:coRate(selCo,ds);
@@ -983,26 +1143,44 @@ function saveRec(){
   sw('log', null);
 }
 
-function delRec(id,e){
+async function delRec(id,e){
   e.stopPropagation();
-  if(!confirm('למחוק?'))return;
+  if(!await confirmAsync('למחוק?'))return;
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
-function clearAll(){
-  if(!confirm('למחוק את כל הרשומות המקומיות?'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
+const DATA_KEYS=['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff','ev4_hr_init','ev4_tblY','ev4_tblM','ev4_openYears','ev4_openMonths','ev4_openCos','ev4_insYearOpen'];
+function lsClearAll(){
+  DATA_KEYS.forEach(k=>{
+    localStorage.removeItem(k);
+    if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);
+  });
+}
+async function clearAll(){
+  if(!await confirmAsync('למחוק את כל הנתונים המקומיים?'))return;
+  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
+  lsClearAll();
+  // שמור timestamp גבוה כדי שה-reload לא יטען ענן על הנתונים הריקים
+  localStorage.setItem('ev4_justCleared','1');
+  recalc();renderAll();renderExp();toast('🗑️ הכל נמחק');setTimeout(()=>location.reload(),800);
 }
 async function clearAllCloud(){
-  if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();
-  if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  if(!await confirmAsync('למחוק את כל הנתונים — גם מקומית וגם מהענן?'))return;
+  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
+  lsClearAll();
+  localStorage.setItem('ev4_justCleared','1');
+  recalc();renderAll();renderExp();
+  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');setTimeout(()=>location.reload(),800);return;}
   try{
-    await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
-      method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-    gdDataFileId=null;
-    if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
-    toast('🗑️ נמחק מקומית ומהענן');
-  }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
+    if(gdDataFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    }
+    if(gdHtmlFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
+    }
+    toast('🗑️ נמחק מקומית ומהענן');setTimeout(()=>location.reload(),800);
+  }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');setTimeout(()=>location.reload(),800);}
 }
 function recalc(){
   let c=0;
@@ -1015,6 +1193,54 @@ function recalc(){
   }
 }
 function togAdd(){$('addF').style.display=$('hasAdd').checked?'block':'none';if($('hasAdd').checked)updateRatePlaceholder();}
+
+async function readOdomImg(input){
+  const file=input.files[0];if(!file)return;
+  const status=$('ocrStatus');
+  // ← הכנס כאן את ה-URL של ה-Cloud Function שלך
+  const PROXY_URL=st.proxyUrl||'';
+  if(!PROXY_URL){
+    status.textContent='⚠️ הגדר URL של Proxy בהגדרות';status.style.color='var(--ac3)';
+    return;
+  }
+  status.textContent='⏳ קורא תמונה...';status.style.color='var(--tx3)';
+  try{
+    const b64=await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+    const resp=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+          {type:'text',text:'זוהי תמונה של לוח מחוונים של רכב חשמלי. חפש: 1) אודומטר - מספר ק"מ מצטבר גדול (ODO או מספר 5-6 ספרות כמו 144627). 2) ק"מ נשאר - טווח נסיעה שנותר (מספר קטן יותר כמו 117 או 278, לפעמים ליד סמל מטען או חץ). ענה אך ורק ב-JSON בפורמט: {"odometer":מספר_או_null,"kmLeft":מספר_או_null} ללא שום טקסט אחר.'}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content?.find(c=>c.type==='text')?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    let filled=0;
+    if(parsed.odometer!=null){$('inKmTotal').value=parsed.odometer;filled++;}
+    if(parsed.kmLeft!=null){$('inKmLeft').value=parsed.kmLeft;filled++;}
+    if(filled>0){
+      status.textContent=`✅ מולאו ${filled} שדות`;status.style.color='var(--ok)';
+    } else {
+      status.textContent='⚠️ לא זוהו מספרים';status.style.color='var(--ac3)';
+    }
+  }catch(e){
+    status.textContent='❌ שגיאה: '+e.message;status.style.color='var(--er)';
+    console.error(e);
+  }
+  input.value='';
+}
 let coBtnsOpen=true;
 function togCoBtns(){coBtnsOpen=!coBtnsOpen;$('coBtns').style.display=coBtnsOpen?'':'none';$('coBtnsToggle').textContent=coBtnsOpen?'▾ הסתר':'▸ הצג';}
 
@@ -1472,7 +1698,7 @@ function saveEdit(){
   toast('✅ הרשומה עודכנה');
 }
 
-function renderAll(hl=false){renderMini();renderTable(hl);renderStats();renderMonthly();renderCoBtns();renderCoList();renderRates();renderFuelHist();renderHdr();loadSt();}
+function renderAll(hl=false){renderMini();renderTable(hl);renderStats();renderMonthly();renderCoBtns();renderCoList();renderRates();renderFuelHist();renderHdr();loadSt();if($('tab-exp2')&&$('tab-exp2').classList.contains('active'))renderExp();}
 
 function renderHdr(){
   if(!recs.length){$('hSub').textContent='אין טעינות';return;}
@@ -1489,6 +1715,503 @@ function renderMini(){ renderDashboard(); }
 // ══════════════════════════════════════════
 let kmOffset=0;
 let kmOffsetDirty=false; // true = המשתמש גלל ידנית
+let openKpiKey=null;
+
+// מטא-מידע לכל סוג KPI
+const KPI_META={
+  rate:   {label:'תעריף ממוצע',color:'#00c896',fmt:v=>v.toFixed(3)+' ₪',invertedGood:false},
+  costKm: {label:'₪ לק"מ',color:'#f59e0b',fmt:v=>fmtILS(v,4),invertedGood:true},
+  per100: {label:'1 ל-100 שקילות',color:'#f59e0b',fmt:v=>fmtNum(v,2),invertedGood:true},
+  range:  {label:'טווח ממוצע מחושב',color:'#00c896',fmt:v=>Math.round(v)+' ק"מ',invertedGood:false},
+  kwh100: {label:'צריכת חשמל ל-100 ק"מ',color:'#3b82f6',fmt:v=>fmtNum(v,2)+' קו"ש',invertedGood:true},
+  kwh:    {label:'סה"כ קו"ש חודשי',color:'#3b82f6',fmt:v=>fmtNum(v,1)+' קו"ש',invertedGood:false},
+  km:     {label:'סה"כ ק"מ חודשי',color:'#00c896',fmt:v=>fmtNum(v,0)+' ק"מ',invertedGood:false},
+  saving: {label:'חיסכון מדלק חודשי',color:'#22c55e',fmt:v=>fmtILS(v,0),invertedGood:false},
+  cost:   {label:'עלות חשמל חודשית',color:'#ef4444',fmt:v=>fmtILS(v,0),invertedGood:true},
+};
+
+function calcKpiMonthly(key){
+  const byM={};
+  for(const r of recs){
+    const ym=r.date.slice(0,7);
+    if(!byM[ym])byM[ym]={kwh:0,cost:0,km:0,fuelCost:0};
+    byM[ym].kwh+=(r.kwh||0);byM[ym].cost+=(r.cost||0);
+    if(r.kmDriven>0){byM[ym].km+=r.kmDriven;byM[ym].fuelCost+=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));}
+  }
+  const chargeCap=st.chargeKwh||stV("batt");
+  const pts=[];
+  for(const ym of Object.keys(byM).sort()){
+    const d=byM[ym];let val=null;
+    if(key==='rate'&&d.kwh>0)val=d.cost/d.kwh;
+    else if(key==='costKm'&&d.km>0)val=d.cost/d.km;
+    else if(key==='per100'&&d.km>0&&d.kwh>0){const avgElec=d.kwh>0?d.cost/d.kwh:homeRate(ym+'-01');const avgFuelLiter=d.fuelCost/d.km*(stV("kpl"));val=(1/(d.kwh/d.km))*(avgFuelLiter/avgElec);}
+    else if(key==='range'&&d.km>0&&d.kwh>0)val=(d.km/d.kwh)*chargeCap;
+    else if(key==='kwh100'&&d.km>0&&d.kwh>0)val=(d.kwh/d.km)*100;
+    else if(key==='kwh')val=d.kwh>0?d.kwh:null;
+    else if(key==='km')val=d.km>0?d.km:null;
+    else if(key==='saving')val=d.fuelCost-d.cost;
+    else if(key==='cost')val=d.cost>0?d.cost:null;
+    if(val!=null)pts.push({ym,val});
+  }
+  return pts;
+}
+
+function toggleKpiChart(key){
+  const sameKey=(openKpiKey===key);
+  if(!sameKey){_kpiViewStart=0;_kpiViewEnd=1;}
+  openKpiKey=sameKey?null:key;
+  _syncKpiChart();
+}
+
+function _syncKpiChart(){
+  const grid=$('dashKpis');if(!grid)return;
+  grid.querySelectorAll('.kpi[data-kkey]').forEach(el=>{
+    el.classList.toggle('kpi-open',el.dataset.kkey===openKpiKey);
+  });
+  if(!openKpiKey||!recs.length){
+    const old=grid.querySelector('.kpi-chart-row');if(old)old.remove();
+    return;
+  }
+  const existing=grid.querySelector('.kpi-chart-row');
+  if(existing&&existing.dataset.kkey===openKpiKey)return;
+  if(existing)existing.remove();
+  const row=document.createElement('div');
+  row.className='kpi-chart-row';
+  row.dataset.kkey=openKpiKey;
+  const meta=KPI_META[openKpiKey];
+  const TREE_KEYS=['kwh','km','saving','cost'];
+  if(TREE_KEYS.includes(openKpiKey)){
+    row.innerHTML=`<div class="kpi-chart-panel-full">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:.75rem;font-weight:700;color:var(--tx2)">${meta.label} — פירוט לפי תקופה</div>
+        <button class="kpi-chart-close" onclick="toggleKpiChart('${openKpiKey}')">✕ סגור</button>
+      </div>
+      <div id="kpiTreeChart_${openKpiKey}"></div>
+    </div>`;
+    _insertRow(grid,row);
+    requestAnimationFrame(()=>_initTreeChart(openKpiKey));
+  } else {
+    const pts=calcKpiMonthly(openKpiKey);
+    const n=pts.length;
+    if(n<2){row.innerHTML=`<div class="kpi-chart-panel-full" style="text-align:center;color:var(--tx3);font-size:.8rem;padding:14px">נדרשים לפחות 2 חודשי נתונים</div>`;_insertRow(grid,row);return;}
+    const vals=pts.map(p=>p.val);
+    const minV=Math.min(...vals),maxV=Math.max(...vals);
+    const minIdx=vals.indexOf(minV),maxIdx=vals.indexOf(maxV);
+    const trendPct=pts[0].val>0?((pts[n-1].val-pts[0].val)/pts[0].val*100):0;
+    const goodTrend=meta.invertedGood?trendPct<=0:trendPct>=0;
+    const trendCol=goodTrend?'var(--ok)':'var(--er)';
+    const trendDir=trendPct>=0?'▲':'▼';
+    row.innerHTML=`<div class="kpi-chart-panel-full">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--tx2)">${meta.label} — מגמה חודשית</div>
+          <div style="font-size:.67rem;color:${trendCol};font-weight:700;margin-top:2px">${trendDir} ${Math.abs(trendPct).toFixed(1)}% מהחודש הראשון</div>
+        </div>
+        <button class="kpi-chart-close" onclick="toggleKpiChart('${openKpiKey}')">✕ סגור</button>
+      </div>
+      <canvas id="kpiCanvas_${openKpiKey}" height="130"></canvas>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:.65rem;color:var(--tx3)">
+        <span>● <b style="color:var(--tx)">${meta.fmt(pts[n-1].val)}</b> עכשיו (${pts[n-1].ym})</span>
+        <span style="color:#ef4444">▲ <b>${meta.fmt(maxV)}</b> מקסימום (${pts[maxIdx].ym})</span>
+        <span style="color:#22c55e">▼ <b>${meta.fmt(minV)}</b> מינימום (${pts[minIdx].ym})</span>
+      </div>
+      <div style="font-size:.58rem;color:var(--tx3);margin-top:4px;text-align:center">צבוט להגדלה · גרור להזזה · הקש פעמיים לאיפוס</div>
+    </div>`;
+    _insertRow(grid,row);
+    requestAnimationFrame(()=>{
+      const c=$('kpiCanvas_'+openKpiKey);
+      if(c)drawKpiChart(pts,meta,c);
+      attachKpiGestures(openKpiKey);
+    });
+  }
+}
+
+function _insertRow(grid,row){
+  const allChildren=Array.from(grid.children).filter(el=>el.classList.contains('kpi'));
+  allChildren.forEach((el,i)=>{el.style.order=String(i*2);});
+  const cardIdx=allChildren.findIndex(el=>el.dataset.kkey===openKpiKey);
+  const colsStr=getComputedStyle(grid).gridTemplateColumns;
+  const cols=colsStr.trim().split(/\s+/).length||2;
+  const rowEnd=Math.min(allChildren.length-1,cardIdx+(cols-1-(cardIdx%cols)));
+  row.style.order=String(rowEnd*2+1);
+  grid.appendChild(row);
+}
+
+// ── Tree data ──
+function _treeData(key){
+  const byY={};
+  for(const r of recs){
+    const y=r.date.slice(0,4),ym=r.date.slice(0,7),d=r.date;
+    if(!byY[y])byY[y]={months:{}};
+    if(!byY[y].months[ym])byY[y].months[ym]={days:{}};
+    if(!byY[y].months[ym].days[d])byY[y].months[ym].days[d]={kwh:0,cost:0,km:0,fuelCost:0};
+    const dd=byY[y].months[ym].days[d];
+    dd.kwh+=(r.kwh||0);dd.cost+=(r.cost||0);
+    if(r.kmDriven>0){dd.km+=r.kmDriven;dd.fuelCost+=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));}
+  }
+  return byY;
+}
+function _treeVal(key,d){
+  if(key==='kwh')return d.kwh||0;
+  if(key==='km')return d.km||0;
+  if(key==='cost')return d.cost||0;
+  if(key==='saving')return(d.fuelCost||0)-(d.cost||0);
+  return 0;
+}
+function _treeSum(key,days){
+  return Object.values(days).reduce((s,d)=>s+_treeVal(key,d),0);
+}
+const _treeLevel={};
+function _buildTreeHTML(key){
+  return '<div id="kpiTreeChart_'+key+'"></div>';
+}
+function _initTreeChart(key){
+  if(!_treeLevel[key])_treeLevel[key]='years';
+  _buildTreeChart(key);
+}
+function _buildTreeChart(key){
+  const meta=KPI_META[key];
+  const byY=_treeData(key);
+  const level=_treeLevel[key]||'years';
+  let labels=[],vals=[],title='',backLevel=null,canDrill=false;
+  if(level==='years'){
+    title=meta.label+' — לפי שנה';canDrill=true;
+    const years=Object.keys(byY).sort();
+    _treeLevel['_yList_'+key]=years;
+    for(const y of years){
+      const allDays=Object.values(byY[y].months).reduce((acc,m)=>Object.assign(acc,m.days),{});
+      labels.push(y);vals.push(_treeSum(key,allDays));
+    }
+  } else if(level.startsWith('months:')){
+    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=true;
+    const months=Object.keys(byY[y]?.months||{}).sort();
+    _treeLevel['_mList_'+key]=months;
+    for(const ym of months){
+      const [,mo]=ym.split('-');
+      labels.push(mo);vals.push(_treeSum(key,byY[y].months[ym].days));
+    }
+  } else if(level.startsWith('days:')){
+    const ym=level.split(':')[1];const [y,mo]=ym.split('-');
+    backLevel='months:'+y;title=mo+'/'+y+' — לפי יום';
+    const days=Object.keys(byY[y]?.months[ym]?.days||{}).sort();
+    for(const d of days){
+      const ddata=byY[y].months[ym].days[d];
+      const dVal=_treeVal(key,ddata);
+      // skip days with no relevant data for this key
+      if((key==='km'||key==='saving')&&ddata.km===0)continue;
+      const [,,day]=d.split('-');
+      labels.push(day);vals.push(dVal);
+    }
+  }
+  const el=document.getElementById('kpiTreeChart_'+key);if(!el)return;
+  const backBtn=backLevel?'<button onclick="kpiTreeDrillUp(\''+key+'\',\''+backLevel+'\')" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.72rem;padding:4px 10px;cursor:pointer">◀ חזרה</button>':'';
+  const hint=canDrill&&labels.length>1?'<div style="font-size:.6rem;color:var(--tx3);text-align:center;margin-top:3px">לחץ על עמוד לפירוט</div>':'';
+  // compute total for title
+  const _tot=vals.reduce((s,v)=>s+v,0);
+  function _fmtTot(v){
+    const abs=Math.abs(v);const sign=v<0?'-':'';
+    if(key==='saving'||key==='cost'){if(abs>=1000)return sign+'₪'+(abs/1000).toFixed(1)+'k';return sign+'₪'+abs.toFixed(0);}
+    if(key==='km'){if(abs>=1000)return sign+(abs/1000).toFixed(1)+'k';return sign+abs.toFixed(0);}
+    if(key==='kwh'){if(abs>=1000)return sign+(abs/1000).toFixed(1)+'k';return sign+abs.toFixed(1);}
+    return sign+abs.toFixed(1);
+  }
+  const titleWithTotal=title+' — סה"כ: '+_fmtTot(_tot);
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px"><div style="font-size:.72rem;font-weight:700;color:var(--tx2)">'+titleWithTotal+'</div>'+backBtn+'</div><canvas id="kpiBarCanvas_'+key+'" height="150"></canvas>'+hint;
+  requestAnimationFrame(function(){_drawTreeBar(key,labels,vals,meta,level,byY,canDrill);});
+}
+function _drawTreeBar(key,labels,vals,meta,level,byY,canDrill){
+  const canvas=document.getElementById('kpiBarCanvas_'+key);if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.max(canvas.parentElement.offsetWidth-4,160);const H=150;
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const n=labels.length;if(!n)return;
+  const hasNeg=vals.some(function(v){return v<0;});
+  const posMax=Math.max.apply(null,vals.concat([0]))||1;
+  const negMin=Math.min.apply(null,vals.concat([0]))||0;
+  const range=(posMax-negMin)||1;
+  const PAD={t:18,r:6,b:28,l:52};
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const zeroY=PAD.t+ch*(posMax/range);
+  const bw=Math.max(6,Math.floor(cw/n*0.72));
+  const spacing=cw/n;
+  const lineCol=meta.color;
+
+  function fmtY(v){
+    if(key==='saving'||key==='cost'){
+      const abs=Math.abs(v);const sign=v<0?'-':'';
+      if(abs>=1000)return sign+'₪'+(abs/1000).toFixed(1)+'k';
+      return sign+'₪'+abs.toFixed(0);
+    }
+    if(key==='km'){const abs=Math.abs(v);const sign=v<0?'-':'';return sign+(abs>=1000?(abs/1000).toFixed(1)+'k':abs.toFixed(0));}
+    if(key==='kwh'){const abs=Math.abs(v);const sign=v<0?'-':'';return sign+(abs>=1000?(abs/1000).toFixed(1)+'k':abs.toFixed(1));}
+    let lbl=meta.fmt(v);if(lbl.length>7)lbl=lbl.slice(0,7);return lbl;
+  }
+  function fmtBar(v){
+    const abs=Math.abs(v);const sign=v<0?'-':'';
+    if(key==='saving'||key==='cost'){if(abs>=1000)return sign+'₪'+(abs/1000).toFixed(1)+'k';return sign+'₪'+abs.toFixed(0);}
+    if(key==='km'){if(abs>=1000)return sign+(abs/1000).toFixed(1)+'k';return sign+abs.toFixed(0);}
+    if(key==='kwh'){if(abs>=1000)return sign+(abs/1000).toFixed(1)+'k';if(abs>=100)return sign+abs.toFixed(0);return sign+abs.toFixed(1);}
+    let lbl=meta.fmt(abs);if(lbl.length>6)lbl=lbl.slice(0,6);return sign+lbl;
+  }
+  // grid lines
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){const y=PAD.t+(ch/4)*i;ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();}
+  if(hasNeg){ctx.strokeStyle=isLight()?'rgba(0,0,0,.2)':'rgba(255,255,255,.2)';ctx.lineWidth=1.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(PAD.l,zeroY);ctx.lineTo(PAD.l+cw,zeroY);ctx.stroke();}
+  ctx.setLineDash([]);
+
+  vals.forEach(function(v,i){
+    const x=PAD.l+spacing*i+(spacing-bw)/2;
+    const isNeg=v<0;
+    const barH=Math.max(2,Math.abs(v)/range*ch);
+    const y=isNeg?zeroY:zeroY-barH;
+    const col=key==='saving'?(isNeg?'#ef4444':'#22c55e'):lineCol;
+    const grad=ctx.createLinearGradient(0,y,0,y+barH);
+    grad.addColorStop(0,col+'ee');grad.addColorStop(1,col+'55');
+    ctx.fillStyle=grad;
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
+    else ctx.fillRect(x,y,bw,barH);
+    if(barH>14){
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
+      ctx.fillText(fmtBar(v),x+bw/2,isNeg?y+barH-4:y+11);
+    }
+    ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
+    ctx.fillText(labels[i],x+bw/2,H-4);
+  });
+
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v=negMin+(range/3)*i;
+    ctx.fillText(fmtY(v),PAD.l-3,PAD.t+ch-(ch/3)*i+4);
+  }
+  if(canvas._kpiClick)canvas.removeEventListener('click',canvas._kpiClick);
+  if(canDrill){
+    canvas._kpiClick=function(e){
+      const rect=canvas.getBoundingClientRect();
+      const xClick=(e.clientX-rect.left)*(W/rect.width);
+      const idx=Math.floor((xClick-PAD.l)/spacing);
+      if(idx<0||idx>=n)return;
+      if(level==='years'){
+        const yl=_treeLevel['_yList_'+key]||[];
+        if(yl[idx])kpiTreeDrillDown(key,'months:'+yl[idx]);
+      } else if(level.startsWith('months:')){
+        const ml=_treeLevel['_mList_'+key]||[];
+        if(ml[idx])kpiTreeDrillDown(key,'days:'+ml[idx]);
+      }
+    };
+    canvas.addEventListener('click',canvas._kpiClick);
+  }
+}
+function kpiTreeDrillDown(key,level){_treeLevel[key]=level;_buildTreeChart(key);}
+function kpiTreeDrillUp(key,level){_treeLevel[key]=level;_buildTreeChart(key);}
+
+function renderKpiChartArea(){
+  _syncKpiChart();
+}
+
+// state for KPI chart pan/zoom
+let _kpiViewStart=0, _kpiViewEnd=1; // fraction 0..1 of the data range
+
+function drawKpiChart(pts,meta,canvas){
+  if(!canvas)canvas=$('kpiCanvas');if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.max(canvas.parentElement.offsetWidth-28,160);
+  const H=130;
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+
+  // apply view window
+  const total=pts.length;
+  const iStart=Math.max(0,Math.floor(_kpiViewStart*(total-1)));
+  const iEnd=Math.min(total-1,Math.ceil(_kpiViewEnd*(total-1)));
+  const visible=pts.slice(iStart,iEnd+1);
+  if(visible.length<2)return;
+
+  const vals=visible.map(p=>p.val);
+  const minV=Math.min(...vals),maxV=Math.max(...vals);
+  const pad=Math.max((maxV-minV)*0.15,maxV*0.06)||1;
+  const pMin=minV-pad,pMax=maxV+pad;
+  const PAD={t:22,r:10,b:26,l:50}; // t=22 for dot labels above
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const px=i=>PAD.l+i*(cw/Math.max(visible.length-1,1));
+  const py=v=>PAD.t+ch-((v-pMin)/(pMax-pMin))*ch;
+
+  // grid
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){const y=PAD.t+(ch/4)*i;ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();}
+  ctx.setLineDash([]);
+
+  // area fill
+  const lineCol=meta.color;
+  const grad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+ch);
+  grad.addColorStop(0,lineCol+'40');grad.addColorStop(1,lineCol+'08');
+  ctx.beginPath();ctx.moveTo(px(0),py(visible[0].val));
+  for(let i=1;i<visible.length;i++)ctx.lineTo(px(i),py(visible[i].val));
+  ctx.lineTo(px(visible.length-1),PAD.t+ch);ctx.lineTo(px(0),PAD.t+ch);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+
+  // line
+  ctx.beginPath();ctx.strokeStyle=lineCol;ctx.lineWidth=2.5;ctx.lineJoin='round';
+  ctx.moveTo(px(0),py(visible[0].val));
+  for(let i=1;i<visible.length;i++)ctx.lineTo(px(i),py(visible[i].val));
+  ctx.stroke();
+
+  // special dots: first, last, min, max — with labels
+  const vVals=visible.map(p=>p.val);
+  const minIdx=vVals.indexOf(Math.min(...vVals));
+  const maxIdx=vVals.indexOf(Math.max(...vVals));
+  const specialMap={};
+  // order matters: later entries override label position
+  [[0,'first'],[visible.length-1,'last'],[minIdx,'min'],[maxIdx,'max']].forEach(([i,role])=>{
+    if(!specialMap[i])specialMap[i]=[];
+    specialMap[i].push(role);
+  });
+  ctx.font='bold 8.5px Heebo,sans-serif';
+  for(const [iStr,roles] of Object.entries(specialMap)){
+    const i=+iStr;
+    const isMin=roles.includes('min'),isMax=roles.includes('max');
+    const dotCol=isMin?'#22c55e':isMax?'#ef4444':lineCol;
+    // dot
+    ctx.beginPath();ctx.arc(px(i),py(visible[i].val),4.5,0,Math.PI*2);ctx.fillStyle=dotCol;ctx.fill();
+    ctx.beginPath();ctx.arc(px(i),py(visible[i].val),2,0,Math.PI*2);ctx.fillStyle=isLight()?'#fff':'var(--sf)';ctx.fill();
+    // label above dot
+    const lbl=meta.fmt(visible[i].val);
+    const lblX=Math.min(PAD.l+cw-2,Math.max(PAD.l+2,px(i)));
+    const lblY=py(visible[i].val)-8;
+    ctx.fillStyle=dotCol;
+    ctx.textAlign=i===0?'left':i===visible.length-1?'right':'center';
+    ctx.fillText(lbl,lblX,Math.max(PAD.t-2,lblY));
+  }
+
+  // average line (updates with zoom)
+  const avgVal=visible.reduce((s,p)=>s+p.val,0)/visible.length;
+  const avgY=py(avgVal);
+  ctx.beginPath();
+  ctx.strokeStyle=isLight()?'rgba(0,0,0,.18)':'rgba(255,255,255,.28)';
+  ctx.lineWidth=1.2;ctx.setLineDash([5,4]);
+  ctx.moveTo(PAD.l,avgY);ctx.lineTo(PAD.l+cw,avgY);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=isLight()?'rgba(0,0,0,.4)':'rgba(255,255,255,.5)';
+  ctx.font='8px Heebo,sans-serif';ctx.textAlign='right';
+  let avgLbl='~'+meta.fmt(avgVal);if(avgLbl.length>13)avgLbl=avgLbl.slice(0,13);
+  ctx.fillText(avgLbl,PAD.l+cw,avgY-3);
+
+  // Y labels
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v=pMin+(pMax-pMin)/3*i;
+    let lbl=meta.fmt(v);if(lbl.length>7)lbl=lbl.slice(0,7);
+    ctx.fillText(lbl,PAD.l-3,py(v)+4);
+  }
+
+  // X labels — spaced to avoid overlap (min 36px apart)
+  ctx.fillStyle=chartLabelColor2();ctx.font='9px Heebo,sans-serif';
+  const minSpacing=36;
+  const maxLabels=Math.max(2,Math.floor(cw/minSpacing));
+  const step=Math.max(1,Math.ceil(visible.length/maxLabels));
+  let lastLabelX=-999;
+  for(let i=0;i<visible.length;i+=step){
+    const xPos=px(i);
+    if(xPos-lastLabelX<minSpacing&&i>0)continue;
+    const[y,m]=visible[i].ym.split('-');
+    ctx.textAlign='center';ctx.fillText(m+'/'+y.slice(2),xPos,H-4);
+    lastLabelX=xPos;
+  }
+  // always show last label if it fits without overlapping previous
+  const lastX=px(visible.length-1);
+  if(lastX-lastLabelX>=minSpacing-4){
+    const[ly,lm]=visible[visible.length-1].ym.split('-');
+    ctx.textAlign='right';ctx.fillText(lm+'/'+ly.slice(2),lastX,H-4);
+  }
+
+  // zoom indicator strip (if zoomed in)
+  if(_kpiViewStart>0.01||_kpiViewEnd<0.99){
+    const stripH=3,stripY=H-3;
+    ctx.fillStyle=chartGridColor();ctx.fillRect(PAD.l,stripY,cw,stripH);
+    ctx.fillStyle=lineCol;
+    ctx.fillRect(PAD.l+cw*_kpiViewStart,stripY,cw*(_kpiViewEnd-_kpiViewStart),stripH);
+  }
+}
+
+// attach pinch/pan gestures to kpiCanvas after it's rendered
+function attachKpiGestures(key){
+  const c=$('kpiCanvas_'+key);if(!c)return;
+  c.style.touchAction='none'; // prevent browser scroll interfering
+
+  let lastDist=null,lastPanX=null;
+
+  function redraw(){
+    const pts2=calcKpiMonthly(key);
+    if(pts2&&pts2.length>=2)drawKpiChart(pts2,KPI_META[key],c);
+  }
+
+  c.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){
+      lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      lastPanX=null;
+    } else if(e.touches.length===1){
+      lastPanX=e.touches[0].clientX;
+      lastDist=null;
+    }
+  },{passive:false});
+
+  c.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    const pts2=calcKpiMonthly(key);if(!pts2||pts2.length<2)return;
+    if(e.touches.length===2&&lastDist!==null){
+      // pinch zoom — zoom stays after release
+      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const scale=lastDist/dist;
+      const centerX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+      const rect=c.getBoundingClientRect();
+      const PADl=50,cw=rect.width-PADl-10;
+      const frac=Math.max(0,Math.min(1,(centerX-rect.left-PADl)/cw));
+      const span=_kpiViewEnd-_kpiViewStart;
+      const minSpan=2/Math.max(pts2.length,2);
+      const newSpan=Math.min(1,Math.max(minSpan,span*scale));
+      const pivot=_kpiViewStart+frac*span;
+      _kpiViewStart=Math.max(0,pivot-frac*newSpan);
+      _kpiViewEnd=_kpiViewStart+newSpan;
+      if(_kpiViewEnd>1){_kpiViewEnd=1;_kpiViewStart=Math.max(0,1-newSpan);}
+      lastDist=dist;
+      drawKpiChart(pts2,KPI_META[key],c);
+    } else if(e.touches.length===1&&lastPanX!==null){
+      // pan — also stays after release
+      const dx=e.touches[0].clientX-lastPanX;
+      const rect=c.getBoundingClientRect();
+      const cw=rect.width-60;
+      const frac=-dx/cw;
+      const span=_kpiViewEnd-_kpiViewStart;
+      _kpiViewStart=Math.max(0,_kpiViewStart+frac);
+      _kpiViewEnd=_kpiViewStart+span;
+      if(_kpiViewEnd>1){_kpiViewEnd=1;_kpiViewStart=Math.max(0,1-span);}
+      lastPanX=e.touches[0].clientX;
+      drawKpiChart(pts2,KPI_META[key],c);
+    }
+  },{passive:false});
+
+  // on touchend: if 2→1 finger, keep zoom, switch to pan mode
+  c.addEventListener('touchend',e=>{
+    if(e.touches.length===1){
+      lastPanX=e.touches[0].clientX;
+      lastDist=null;
+    } else if(e.touches.length===0){
+      lastDist=null;lastPanX=null;
+      // zoom is already saved in _kpiViewStart/_kpiViewEnd — do nothing
+    }
+  },{passive:true});
+
+  // double-tap to reset zoom
+  let lastTap=0;
+  c.addEventListener('touchend',e=>{
+    if(e.changedTouches.length===1){
+      const now=Date.now();
+      if(now-lastTap<280){_kpiViewStart=0;_kpiViewEnd=1;redraw();}
+      lastTap=now;
+    }
+  },{passive:true});
+}
 
 function renderDashboard(){
   const kpiEl=$('dashKpis');
@@ -1500,6 +2223,7 @@ function renderDashboard(){
   if(!recs.length){
     kpiEl.innerHTML='<div class="mpty" style="grid-column:1/-1"><div class="mpty-i">⚡</div><p>אין טעינות עדיין<br>הזן נתונים ביומן</p></div>';
     [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='none';});
+    $('kpiChartArea').innerHTML='';
     return;
   }
   [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='';});
@@ -1525,8 +2249,10 @@ function renderDashboard(){
   const per100fuel=tkm>0&&tkw>0?(1/(tkw/tkm))*(curFuelMini/avgElecMini):null;
 
   // ─── KPI cards ───
-  function kpi(label,value,sub,colorClass,extraClass=''){
-    return `<div class="kpi ${colorClass} ${extraClass}">
+  function kpi(label,value,sub,colorClass,key=''){
+    const isOpen=openKpiKey===key;
+    const clickable=!!key;
+    return `<div class="kpi ${colorClass}${clickable?' kpi-clickable':''}${isOpen?' kpi-open':''}" ${clickable?`onclick="toggleKpiChart('${key}')" data-kkey="${key}"`:''}>${clickable?`<div class="kpi-hint">📈 לחץ לגרף מגמה</div>`:''}
       <div class="kpi-label">${label}</div>
       <div class="kpi-value ${colorClass}">${value}</div>
       ${sub?`<div class="kpi-sub">${sub}</div>`:''}
@@ -1534,20 +2260,22 @@ function renderDashboard(){
   }
   const savedColor=saved>=0?'ok':'red';
   kpiEl.innerHTML=
-    kpi('סה"כ עלות חשמל',fmtILS(tco,0),'מתחילת המעקב','red')+
-    kpi('חיסכון מדלק',fuelTotal>0?fmtILS(saved,0):'—','לעומת דלק שקילה',savedColor)+
-    kpi('₪ לק"מ',ckm>0?fmtILS(ckm,4):'—',curFuel>0?`דלק: ${fmtILS(curFuel/(stV("kpl")),4)}/ק"מ`:'','yellow')+
-    kpi('סה"כ ק"מ',fmtNum(tkm,0),'שנסעו ברכב','blue')+
-    kpi('סה"כ קו"ש',fmtNum(tkw,1),'שנטענו','green')+
-    kpi('1 ל-100 שקילות',per100fuel!=null?fmtNum(per100fuel,1):'—','שקילות לרכב דלק','yellow')+
-    kpi('צריכת חשמל ל-100 ק"מ',qkm>0?fmtNum(qkm*100,2)+' קו"ש':'—','','blue')+
-    kpi('טווח ממוצע מחושב',avgRange>0?Math.round(avgRange)+' ק"מ':'—',st.range?`מוצהר: ${st.range} ק"מ`:'','green')+
-    kpi('תעריף ממוצע',avgRate>0?avgRate.toFixed(3)+' ₪':'—','₪ לקו"ש','green')+
-    kpi('חיבורים',fmtNum(recs.length,0),'סה"כ טעינות','blue');
+    kpi('סה"כ עלות חשמל',fmtILS(tco,0),'מתחילת המעקב','red','cost')+
+    kpi('חיסכון מדלק',fuelTotal>0?fmtILS(saved,0):'—','לעומת דלק שקילה',savedColor,'saving')+
+    kpi('₪ לק"מ',ckm>0?fmtILS(ckm,4):'—',curFuel>0?`דלק: ${fmtILS(curFuel/(stV("kpl")),4)}/ק"מ`:'','yellow','costKm')+
+    kpi('סה"כ ק"מ',fmtNum(tkm,0),'שנסעו ברכב','blue','km')+
+    kpi('סה"כ קו"ש',fmtNum(tkw,1),'שנטענו','green','kwh')+
+    kpi('1 ל-100 שקילות',per100fuel!=null?fmtNum(per100fuel,1):'—','שקילות לרכב דלק','yellow','per100')+
+    kpi('צריכת חשמל ל-100 ק"מ',qkm>0?fmtNum(qkm*100,2)+' קו"ש':'—','','blue','kwh100')+
+    kpi('טווח ממוצע מחושב',avgRange>0?Math.round(avgRange)+' ק"מ':'—',st.range?`מוצהר: ${st.range} ק"מ`:'','green','range')+
+    kpi('תעריף ממוצע',avgRate>0?avgRate.toFixed(3)+' ₪':'—','₪ לקו"ש','green','rate')+
+    kpi('חיבורים',fmtNum(recs.length,0),`${(tkw/(stV('chargeKwh')||stV('batt'))).toFixed(1)} טעינות מלאות`,'blue');
 
+  renderKpiChartArea();
   drawSavingChart();
   drawGauge(effPct);
   drawKmChart();
+  drawTrendChart();
 
   // ─── רצועת מידע תחתית ───
   botEl.innerHTML=`
@@ -1779,6 +2507,170 @@ function drawGauge(pct){
     ${svg}
     <div style="font-size:.72rem;color:var(--tx3);margin-top:2px">${label} — מוצהר: ${st.range||'—'} ק"מ, ממוצע: ${avg||'—'} ק"מ</div>
   </div>`;
+}
+
+const _trendLevel={level:'years',key:null};
+
+function _trendVal(kwh,km){
+  const batKwh=st.chargeKwh||80;
+  const range=st.range||485;
+  if(!kwh||!km)return null;
+  return (1-(kwh/batKwh)/(km/range))*100;
+}
+
+function _trendAvg(recs_list){
+  const batKwh=st.chargeKwh||80;
+  const range=st.range||485;
+  const kwh=recs_list.reduce((s,r)=>s+(r.kwh||0),0);
+  const km=recs_list.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
+  if(!kwh||!km)return null;
+  return ((kwh/batKwh)/(km/range)-1)*100;
+}
+
+function drawTrendChart(){
+  const el=$('dashTrendCard');if(!el)return;
+  // בנה נתונים לפי רמה
+  const level=_trendLevel.level;
+  let labels=[],vals=[],title='',canDrill=false,backLevel=null;
+
+  if(level==='years'){
+    const byY={};
+    for(const r of recs){
+      const y=r.date.slice(0,4);
+      if(!byY[y])byY[y]=[];
+      byY[y].push(r);
+    }
+    const years=Object.keys(byY).sort();
+    if(!years.length){el.style.display='none';return;}
+    el.style.display='';
+    _trendLevel._yList=years;
+    for(const y of years){
+      labels.push(y);vals.push(_trendAvg(byY[y]));
+    }
+    const allAvg=_trendAvg(recs);
+    title=`מגמת הוצאה — לפי שנה — ממוצע: ${allAvg!=null?allAvg.toFixed(1)+'%':'—'}`;canDrill=true;
+  } else if(level==='months'){
+    const y=_trendLevel.key;backLevel='years';
+    const byM={};
+    for(const r of recs){
+      if(r.date.slice(0,4)!==y)continue;
+      const ym=r.date.slice(0,7);
+      if(!byM[ym])byM[ym]=[];
+      byM[ym].push(r);
+    }
+    const months=Object.keys(byM).sort();
+    _trendLevel._mList=months;
+    const yearRecs=recs.filter(r=>r.date.slice(0,4)===y);
+    const yearAvg=_trendAvg(yearRecs);
+    for(const ym of months){
+      const [,mo]=ym.split('-');
+      labels.push(mo+'/'+y.slice(2));vals.push(_trendAvg(byM[ym]));
+    }
+    title=`${y} — לפי חודש — ממוצע: ${yearAvg!=null?yearAvg.toFixed(1)+'%':'—'}`;canDrill=true;
+  } else if(level==='days'){
+    const ym=_trendLevel.key;const [y,mo]=ym.split('-');
+    backLevel='months';
+    const byD={};
+    for(const r of recs){
+      if(r.date.slice(0,7)!==ym)continue;
+      if(!byD[r.date])byD[r.date]=[];
+      byD[r.date].push(r);
+    }
+    const days=Object.keys(byD).sort();
+    const monthRecs=recs.filter(r=>r.date.slice(0,7)===ym);
+    const monthAvg=_trendAvg(monthRecs);
+    for(const d of days){
+      labels.push(d.slice(8));vals.push(_trendAvg(byD[d]));
+    }
+    title=`${mo}/${y} — לפי יום — ממוצע: ${monthAvg!=null?monthAvg.toFixed(1)+'%':'—'}`;
+  }
+
+  if(!labels.length){el.style.display='none';return;}
+
+  const backBtn=backLevel?`<button onclick="_trendUp('${backLevel}')" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.72rem;padding:4px 10px;cursor:pointer">◀ חזרה</button>`:'';
+  const hint=canDrill?'<div style="font-size:.6rem;color:var(--tx3);text-align:center;margin-top:3px">לחץ על עמוד לפירוט</div>':'';
+  el.innerHTML=`<div class="ct"><div class="ctb" style="background:var(--ac3)"></div>מגמת הוצאה — עלות לק"מ לפי שנה</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--tx2)">${title}</div>
+      ${backBtn}
+    </div>
+    <canvas id="cTrend" height="140"></canvas>${hint}`;
+
+  requestAnimationFrame(()=>_drawTrendBars(labels,vals,canDrill));
+}
+
+function _drawTrendBars(labels,vals,canDrill){
+  const g=getCanvasSize('cTrend',140);if(!g)return;
+  const {ctx,W,H}=g;
+  const n=labels.length;if(!n)return;
+
+  const posMax=Math.max(...vals.filter(v=>v!=null&&isFinite(v)),0.01);
+  const negMin=Math.min(...vals.filter(v=>v!=null&&isFinite(v)),0);
+  const range=(posMax-negMin)||0.01;
+
+  const PAD={t:18,r:10,b:28,l:52};
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const spacing=cw/n;
+  const bw=Math.max(8,Math.floor(spacing*0.65));
+  const zeroY=PAD.t+ch*(posMax/range);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){const y=PAD.t+(ch/4)*i;ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();}
+  ctx.setLineDash([]);
+  // zero line
+  if(negMin<0){ctx.strokeStyle=chartLabelColor();ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PAD.l,zeroY);ctx.lineTo(PAD.l+cw,zeroY);ctx.stroke();}
+
+  vals.forEach((v,i)=>{
+    if(v==null||!isFinite(v))return;
+    const x=PAD.l+spacing*i+(spacing-bw)/2;
+    const col=v>=0?'#ef4444':'#00c896';
+    const barH=Math.max(2,Math.abs(v)/range*ch);
+    const y=v>=0?zeroY-barH:zeroY;
+    const grad=ctx.createLinearGradient(0,y,0,y+barH);
+    grad.addColorStop(0,col+'ee');grad.addColorStop(1,col+'44');
+    ctx.fillStyle=grad;
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
+    else ctx.fillRect(x,y,bw,barH);
+    if(barH>14){
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
+      ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%',x+bw/2,v>=0?y+11:y+barH-4);
+    }
+    ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
+    ctx.fillText(labels[i],x+bw/2,H-4);
+  });
+
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v=negMin+(range/3)*i;
+    ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%',PAD.l-3,PAD.t+ch-(ch/3)*i+4);
+  }
+
+  if(canDrill){
+    const c=document.getElementById('cTrend');if(!c)return;
+    if(c._trendClick)c.removeEventListener('click',c._trendClick);
+    c._trendClick=e=>{
+      const rect=c.getBoundingClientRect();
+      const xClick=(e.clientX-rect.left)*(W/rect.width);
+      const idx=Math.floor((xClick-PAD.l)/spacing);
+      if(idx<0||idx>=labels.length)return;
+      if(_trendLevel.level==='years'){
+        const yl=_trendLevel._yList||[];
+        if(yl[idx]){_trendLevel.level='months';_trendLevel.key=yl[idx];drawTrendChart();}
+      } else if(_trendLevel.level==='months'){
+        const ml=_trendLevel._mList||[];
+        if(ml[idx]){_trendLevel.level='days';_trendLevel.key=ml[idx];drawTrendChart();}
+      }
+    };
+    c.addEventListener('click',c._trendClick);
+  }
+}
+
+function _trendUp(level){
+  _trendLevel.level=level;
+  if(level==='years')_trendLevel.key=null;
+  else if(level==='months')_trendLevel.key=_trendLevel.key?.slice(0,4);
+  drawTrendChart();
 }
 
 function drawKmChart(){
@@ -2150,7 +3042,7 @@ function saveFuel(){
   fuelRates.sort((a,b)=>a.date.localeCompare(b.date));
   LS.set('ev4_fuel',fuelRates);closeModal('mFuel');renderFuelHist();toast('✅ מחיר דלק עודכן');
 }
-function delFuel(d){if(!confirm('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
+async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
 
 // ══════════════════════════════════════════
 // COMPANIES
@@ -2179,7 +3071,7 @@ function saveCo(){
   else{const id='c'+Date.now();cos.push({id,name,type,rate,isDefault:isDef});}
   LS.set('ev4_cos',cos);closeModal('mCo');renderCoBtns();renderCoList();toast('✅ נשמר');gdAutoSave();
 }
-function rmCo(i){if(!confirm('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
+async function rmCo(i){if(!await confirmAsync('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
 
 // ══════════════════════════════════════════
 // SETTINGS
@@ -2197,12 +3089,15 @@ function setAvgFuel(){
 }
 function loadSt(){
   $('sCarName').value=st.carName||'';
+  if($('sCarCost'))$('sCarCost').value=st.carCost!=null?st.carCost:'';
+  if($('sMonthly'))$('sMonthly').value=st.monthly!=null?st.monthly:'';
   $('sBatt').value=st.batt!=null?st.batt:'';
   $('sRange').value=st.range!=null?st.range:'';
   $('sKpl').value=st.kpl!=null?st.kpl:'';
   $('sShowCost').checked=st.showCost!==false;
   if($('sKw'))$('sKw').value=st.kw||'';
   if($('sChargeKwh'))$('sChargeKwh').value=st.chargeKwh||'';
+  if($('sProxyUrl'))$('sProxyUrl').value=st.proxyUrl||'';
   const avg=calcAvgFuel();
   const fuel=st.fuelManual?st.fuel:avg;
   $('sFuel').value=st._saved||st.fuelManual?fuel.toFixed(2):'';
@@ -2260,6 +3155,8 @@ function saveSt(){
   st._saved=true;
   const _b=parseFloat($('sBatt').value),_r=parseFloat($('sRange').value),_kpl=parseFloat($('sKpl').value);
   st.carName=$('sCarName').value;
+  const _cc=parseFloat($('sCarCost')?.value);st.carCost=(!isNaN(_cc)&&_cc>0)?_cc:null;
+  const _mo=parseFloat($('sMonthly')?.value);st.monthly=(!isNaN(_mo)&&_mo>0)?_mo:null;
   st.batt=isNaN(_b)||_b<=0?null:_b;
   st.range=isNaN(_r)||_r<=0?null:_r;
   st.kpl=isNaN(_kpl)||_kpl<=0?null:_kpl;
@@ -2269,6 +3166,7 @@ function saveSt(){
   st.kw=parseFloat($('sKw')?.value)||null;
   const _ckwh=parseFloat($('sChargeKwh')?.value)||null;
   st.chargeKwh=_ckwh&&_ckwh>0?_ckwh:null;
+  st.proxyUrl=($('sProxyUrl')?.value||'').trim()||null;
   const entered=parseFloat($('sFuel').value);
   const avg=calcAvgFuel();
   st.fuelManual=Math.abs(entered-avg)>0.02?entered:false;
@@ -2308,14 +3206,15 @@ function toggleChk(id){
 function isChk(id){const el=$(id);return el&&el.dataset.on==='1';}
 
 function expSelected(fmt){
-  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st');
-  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
+  const doR=isChk('exp_recs'),doC=isChk('exp_cos'),doRt=isChk('exp_rates'),doS=isChk('exp_st'),doExp=isChk('exp_exp');
+  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
   if(fmt==='csv'){expCSV();return;}
   const out={};
   if(doR)out.recs=recs;
   if(doC)out.cos=cos;
   if(doRt){out.homeRates=homeRates;out.fuelRates=fuelRates;}
   if(doS)out.st=st;
+  if(doExp)out.expenses=expenses;
   dl(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),`ev_export_${today()}.json`);
   toast('📦 ייצוא הושלם');
 }
@@ -2323,7 +3222,7 @@ function expAll(){expSelected('json');}
 
 function impJSONSel(e){
   const f=e.target.files[0];if(!f)return;
-  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st');
+  const doR=isChk('imp_recs'),doC=isChk('imp_cos'),doRt=isChk('imp_rates'),doS=isChk('imp_st'),doExp=isChk('imp_exp');
   const r=new FileReader();
   r.onload=ev=>{
     try{
@@ -2333,7 +3232,12 @@ function impJSONSel(e){
       if(doRt&&d.homeRates){homeRates=d.homeRates;LS.set('ev4_hr',homeRates);}
       if(doRt&&d.fuelRates){fuelRates=d.fuelRates;LS.set('ev4_fuel',fuelRates);}
       if(doS&&d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-      recalc();renderAll();toast('✅ ייבוא הושלם');gdAutoSave();
+      if(doExp&&d.expenses){expenses=d.expenses;saveExpLS();}
+      LS.set('ev4_savedAt',Date.now());
+      recalc();renderAll();toast('✅ ייבוא הושלם');
+      // שמירה מיידית לענן (לא debounced)
+      clearTimeout(gdAutoSaveTimer);
+      gdSaveData();
     }catch(err){toast('⚠️ קובץ לא תקין: '+err.message,'e');}
     e.target.value='';
   };
@@ -2341,23 +3245,36 @@ function impJSONSel(e){
 }
 
 async function delSelected(cloud){
-  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st');
-  if(!doR&&!doC&&!doRt&&!doS){toast('⚠️ לא נבחר כלום','e');return;}
-  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות'].filter(Boolean).join(', ');
-  if(!confirm(`למחוק: ${items}${cloud?' + ענן':''}?\nלא ניתן לשחזר!`))return;
-  if(doR){recs=[];LS.set('ev4_recs',recs);}
-  if(doC){cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];LS.set('ev4_cos',cos);}
-  if(doRt){homeRates=[];fuelRates=[];LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);}
-  if(doS){st={showCost:true};LS.set('ev4_st',st);}
-  recalc();renderAll();
-  if(cloud&&gdToken&&gdDataFileId){
+  const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st'),doExp=isChk('del_exp');
+  if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
+  const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות',doExp&&'הוצאות'].filter(Boolean).join(', ');
+  if(!await confirmAsync(`למחוק: ${items}${cloud?' + ענן':''}?`))return;
+  const ck=(k)=>{localStorage.removeItem(k);if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);};
+  const COS_DEF=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];
+  if(doR){recs=[];ck('ev4_recs');ck('ev4_savedAt');}
+  if(doC){cos=COS_DEF;ck('ev4_cos');}
+  if(doRt){homeRates=[];fuelRates=[];ck('ev4_hr');ck('ev4_fuel');ck('ev4_hr_init');}
+  if(doS){st=Object.assign({},ST_DEF);ck('ev4_st');ck('ev4_bat');ck('ev4_eff');}
+  if(doExp){expenses=[];ck('ev4_expenses');LS.set('ev4_expenses',[]);}
+  recalc();renderAll();renderExp();
+  if(cloud&&gdToken){
     try{
-      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
-      toast('🗑️ נמחק מקומית ומהענן');
-    }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');}
+      if(gdDataFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdDataFileId=null;ck(gdUserKey('gd_data_fid'));
+      }
+      if(gdHtmlFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdHtmlFileId=null;ck(gdUserKey('gd_html_fid'));
+      }
+      gdSetStatus('✅ מחובר','var(--ac)');gdSetHdrStatus('✅ מחובר');
+      gdSetBtn('התנתק',gdLogout,'var(--er)');
+      toast('🗑️ נמחק מקומית ומהענן');setTimeout(()=>location.reload(),800);
+    }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');setTimeout(()=>location.reload(),800);}
   } else {
-    toast('🗑️ נמחק');if(cloud)gdAutoSave();
+    // מחיקה מקומית בלבד — שמור לענן את הנתונים החדשים (הריקים)
+    if(gdToken)gdAutoSave();
+    toast('🗑️ נמחק מקומית');setTimeout(()=>location.reload(),800);
   }
 }
 
@@ -2384,10 +3301,10 @@ function impJSON(e){
 // ══════════════════════════════════════════
 // IMPORT CSV
 // ══════════════════════════════════════════
-function impCSV(e){
+async function impCSV(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{
+  r.onload=async ev=>{
     try{
       const lines=ev.target.result.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
       const hdr=lines[0].split(',');
@@ -2405,7 +3322,7 @@ function impCSV(e){
         imported.push({id:Date.now()+i,date:ds,kmLeft:parseFloat(c[iKl])||0,kmTotal:parseFloat(c[iKt])||0,kmDriven:c[iKd]?parseFloat(c[iKd])||null:null,kwh:kw,kwhAdd:parseFloat(c[iKwa])||0,kwhCumul:parseFloat(c[iKwC])||0,companyId:coId,companyName:coName,rate:parseFloat(c[iRate])||0,cost:parseFloat(c[iCost])||0,note:(c[iNote]||'').trim()});
       }
       if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
-      if(confirm(`ייבוא ${imported.length} רשומות מ-CSV?\n(ימחקו הנתונים הקיימים)`)){
+      if(await confirmAsync(`ייבוא ${imported.length} רשומות מ-CSV?`)){
         recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast('✅ יובאו '+imported.length+' רשומות');
       }
     }catch(err){toast('⚠️ שגיאה: '+err.message,'e');}
@@ -2416,7 +3333,7 @@ function impCSV(e){
 // ══════════════════════════════════════════
 // IMPORT XLSM
 // ══════════════════════════════════════════
-function impXLSM(e){
+async function impXLSM(e){
   const f=e.target.files[0];if(!f)return;
   setImpBar(true,'טוען ספריית Excel...',10);
   if(window.XLSX){_doXLSM(f);return;}
@@ -2430,7 +3347,7 @@ function impXLSM(e){
 
 function _doXLSM(file){
   const reader=new FileReader();
-  reader.onload=ev=>{
+  reader.onload=async ev=>{
     try{
       setImpBar(true,'מנתח גיליון...',50);
       const data=new Uint8Array(ev.target.result);
@@ -2482,7 +3399,7 @@ function _doXLSM(file){
       }
       setImpBar(false);
       if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
-      if(confirm(`ייבוא ${imported.length} רשומות מ-Excel?\n(ימחקו הנתונים הקיימים)`)){
+      if(await confirmAsync(`ייבוא ${imported.length} רשומות מ-Excel?`)){
         recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast(`✅ יובאו ${imported.length} רשומות מ-Excel`);
       }
     }catch(err){setImpBar(false);toast('⚠️ שגיאה: '+err.message,'e');console.error(err);}
@@ -2491,8 +3408,11 @@ function _doXLSM(file){
 }
 
 function setImpBar(show,msg='',pct=0){
-  $('impBar').className='impbar'+(show?' open':'');
-  if(show){$('impMsg').textContent=msg;$('impProg').style.width=pct+'%';}
+  ['impBar','tImpBar'].forEach(id=>{const el=$(id);if(el)el.className='impbar'+(show?' open':'');});
+  if(show){
+    ['impMsg','tImpMsg'].forEach(id=>{const el=$(id);if(el)el.textContent=msg;});
+    ['impProg','tImpProg'].forEach(id=>{const el=$(id);if(el)el.style.width=pct+'%';});
+  }
 }
 
 // ══════════════════════════════════════════
@@ -2577,6 +3497,8 @@ function sw(id,btn){
   if(desktopTab) desktopTab.classList.add('active');
   const tc=$('tab-'+id);if(tc) tc.classList.add('active');
   _curTab=id;
+  if(id==='add'){const d=$('inDate');if(d)d.value=today();}
+  if(id==='exp2')renderExp();
   window.scrollTo({top:0,behavior:'instant'});
 }
 function toast(msg,type=''){
@@ -2628,8 +3550,46 @@ function openAddEntry(){
 function openSettingsDrawer(){
   $('settingsDrawer').classList.add('open');
   syncThemeBtns();
+  syncGdBtn();
 }
 function closeSettingsDrawer(){$('settingsDrawer').classList.remove('open');}
+function toggleDrawerPanel(name){
+  ['exp','imp','del'].forEach(n=>{
+    const p=$('drawerPanel'+n.charAt(0).toUpperCase()+n.slice(1));
+    const b=$('btnPanel'+n.charAt(0).toUpperCase()+n.slice(1));
+    if(n===name){
+      const open=p&&p.style.display!=='none';
+      if(p)p.style.display=open?'none':'block';
+    } else {
+      if(p)p.style.display='none';
+    }
+  });
+}
+function toggleTabPanel(name){
+  ['exp','imp','del'].forEach(n=>{
+    const p=$('tabPanel'+n.charAt(0).toUpperCase()+n.slice(1));
+    if(n===name){const open=p&&p.style.display!=='none';if(p)p.style.display=open?'none':'block';}
+    else{if(p)p.style.display='none';}
+  });
+}
+function _syncTabToDrawer(prefix,target){
+  ['recs','cos','rates','st','exp'].forEach(k=>{
+    const src=$(prefix+k),dst=$(target+k);
+    if(src&&dst)dst.dataset.on=src.dataset.on;
+  });
+}
+function tabExpSelected(fmt){
+  _syncTabToDrawer('texp_','exp_');
+  expSelected(fmt);
+}
+function tabImpStart(inputId){
+  _syncTabToDrawer('timp_','imp_');
+  $(inputId).click();
+}
+function tabDelSelected(withCloud){
+  _syncTabToDrawer('tdel_','del_');
+  delSelected(withCloud);
+}
 
 // ── Theme ──
 function setTheme(mode){
@@ -2640,9 +3600,8 @@ function setTheme(mode){
 }
 function syncThemeBtns(){
   const isLight=document.body.classList.contains('light');
-  const lBtn=$('themeLight'),dBtn=$('themeDark');
-  if(lBtn){lBtn.classList.toggle('active',isLight);}
-  if(dBtn){dBtn.classList.toggle('active',!isLight);}
+  ['themeLight','themeLightTab'].forEach(id=>{const b=$(id);if(b)b.classList.toggle('active',isLight);});
+  ['themeDark','themeDarkTab'].forEach(id=>{const b=$(id);if(b)b.classList.toggle('active',!isLight);});
 }
 // apply saved theme on load
 (function(){
@@ -2650,6 +3609,631 @@ function syncThemeBtns(){
   if(saved==='light') document.body.classList.add('light');
   syncThemeBtns();
 })();
+
+// ══════════════════════════════════════════
+// EXPENSES (הוצאות)
+// ══════════════════════════════════════════
+let expenses=LS.get('ev4_expenses',[
+  {id:1,desc:'תשלום חודשי',amt:3000,cat:'תשלום חודשי',date:'2023-08-01',note:'תשלום קבוע'},
+  {id:2,desc:'אגרה',amt:229,cat:'אגרה',date:'2024-01-01',note:''},
+  {id:3,desc:'איתורן',amt:348.8,cat:'איתורן',date:'2024-01-01',note:'שנתי'},
+  {id:4,desc:'טיפולים',amt:6230,cat:'טיפול',date:'2024-06-01',note:''},
+  {id:5,desc:'ביטוח מקיף 2024',amt:6473.44,cat:'ביטוח',date:'2024-01-01',note:'מקיף'},
+  {id:6,desc:'ביטוח חובה 2024',amt:1486,cat:'ביטוח',date:'2024-01-01',note:'חובה'},
+  {id:7,desc:'צמיגים',amt:4000,cat:'צמיגים',date:'2024-03-01',note:''},
+  {id:8,desc:'שטיפה',amt:300,cat:'שטיפה',date:'2024-01-01',note:''},
+  {id:9,desc:'צמיג פרונט',amt:3200,cat:'צמיגים',date:'2025-01-01',note:''},
+  {id:10,desc:'ביטוח מקיף 2025',amt:8075,cat:'ביטוח',date:'2025-01-01',note:'מקיף'},
+  {id:11,desc:'ביטוח חובה 2025',amt:1630,cat:'ביטוח',date:'2025-01-01',note:'חובה'},
+]);
+
+const EXP_ICONS={ביטוח:'🛡️',טיפול:'🔧',צמיגים:'🔄',אגרה:'📋',איתורן:'📍',שטיפה:'🚿','תשלום חודשי':'💳',אחר:'📦'};
+
+function saveExpLS(){
+  LS.set('ev4_expenses',expenses);
+  LS.set('ev4_savedAt',Date.now());
+  gdAutoSave();
+}
+
+function renderExp(){
+  renderExpTable();
+  renderExpSummary();
+  renderExpInsurance();
+  renderExpCharts();
+}
+
+function renderExpTable(){
+  const tbody=$('expBody');if(!tbody)return;
+  if(!expenses.length){tbody.innerHTML=`<tr><td colspan="5" class="mpty"><div class="mpty-i">💸</div><p>אין הוצאות</p></td></tr>`;return;}
+  const sorted=[...expenses].sort((a,b)=>b.date.localeCompare(a.date));
+  tbody.innerHTML=sorted.map(e=>`<tr>
+    <td style="padding:7px 5px">${EXP_ICONS[e.cat]||'📦'} ${e.desc}${e.note?`<div style="font-size:.65rem;color:var(--tx3)">${e.note}</div>`:''}</td>
+    <td style="padding:7px 5px;color:var(--er);font-weight:700;white-space:nowrap">${fmtILS(e.amt,0)}</td>
+    <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${e.cat}</td>
+    <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${fd(e.date)}</td>
+    <td style="padding:7px 5px;white-space:nowrap">
+      <button class="bdl" style="color:var(--ac2)" onclick="editExp(${e.id})">✎</button>
+      <button class="bdl" onclick="delExp(${e.id})">✕</button>
+    </td>
+  </tr>`).join('');
+}
+
+function renderExpSummary(){
+  const el=$('exp2Summary');if(!el)return;
+  const total=expenses.reduce((s,e)=>s+e.amt,0);
+  // by category
+  const byCat={};
+  for(const e of expenses){if(!byCat[e.cat])byCat[e.cat]=0;byCat[e.cat]+=e.amt;}
+  // km and months from main data
+  const tkm=recs.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
+  const elecTotal=recs.reduce((s,r)=>s+(r.cost||0),0);
+  const grandTotal=total+elecTotal;
+  const totalPerKm=tkm>0?grandTotal/tkm:0;
+  const elecPerKm=tkm>0?elecTotal/tkm:0;
+  const expPerKm=tkm>0?total/tkm:0;
+  // months of ownership: from first charging record to today
+  const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=sortedRecs[0]?.date||today();
+  const _mStart=new Date(firstDate.slice(0,7)+'-01');
+  const _mEnd=new Date(today().slice(0,7)+'-01');
+  let months=0;
+  for(let d=new Date(_mStart);d<=_mEnd;d.setMonth(d.getMonth()+1))months++;
+  months=Math.max(1,months);
+  const totalPerMonth=grandTotal/months;
+
+  // calculate effective amounts — תשלום חודשי רק מהגדרות
+  function effectiveAmt(e){
+    if(e.cat==='תשלום חודשי') return 0; // מחושב מ-st.monthly בנפרד
+    if(ANNUAL_CATS.has(e.cat)) return e.amt; // שנתי — כפי שהוזן
+    return e.amt;
+  }
+  const monthlyFromSettings=st.monthly?st.monthly*months:0;
+  const totalEffective=expenses.reduce((s,e)=>s+effectiveAmt(e),0)+monthlyFromSettings;
+  const grandTotalEffective=totalEffective+elecTotal;
+
+  // electricity per month
+  const elecPerMonth=elecTotal/months;
+  // total cost of electricity (charged kwh × current home rate) vs paid
+  const tkw=recs.reduce((s,r)=>s+(r.kwh||0),0);
+  const curElecRate=homeRate(today());
+  const elecAtCurrentRate=tkw*curElecRate;
+
+  const catRows=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`
+    <div class="stat-row">
+      <span class="stat-lbl">${EXP_ICONS[cat]||'📦'} ${cat}</span>
+      <span class="stat-val y">${fmtILS(amt,0)}</span>
+    </div>`).join('');
+
+  el.innerHTML=`
+    <div class="ct"><div class="ctb" style="background:var(--er)"></div>סיכום הוצאות <span style="font-size:.68rem;color:var(--tx3);font-weight:400;margin-right:6px">${months} חודשי בעלות מ-${fd(firstDate)}</span></div>
+    <div class="sg exp-sg" id="expSummaryGrid">
+      <div class="sc kpi-clickable" data-ekey="totalExp" onclick="toggleExpChart('totalExp')" style="cursor:pointer"><div class="sv" style="color:var(--er)">${fmtILS(totalEffective,0)}</div><div class="sl">סה"כ הוצאות (ללא חשמל) 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="totalAll" onclick="toggleExpChart('totalAll')" style="cursor:pointer"><div class="sv" style="color:var(--er)">${fmtILS(grandTotalEffective,0)}</div><div class="sl">סה"כ כולל חשמל 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="costKm" onclick="toggleExpChart('costKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac3)">${fmtILS(tkm>0?grandTotalEffective/tkm:0,4)}</div><div class="sl">עלות כוללת לק"מ 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="totalMonth" onclick="toggleExpChart('totalMonth')" style="cursor:pointer"><div class="sv" style="color:var(--ac3)">${fmtILS(grandTotalEffective/months,0)}</div><div class="sl">ממוצע לחודש 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="expKm" onclick="toggleExpChart('expKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac2)">${fmtILS(tkm>0?totalEffective/tkm:0,4)}</div><div class="sl">הוצאות (ללא חשמל) לק"מ 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="elecKm" onclick="toggleExpChart('elecKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecPerKm,4)}</div><div class="sl">חשמל לק"מ 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="elecMonth" onclick="toggleExpChart('elecMonth')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecPerMonth,0)}</div><div class="sl">עלות חשמל לחודש 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="totalElecPaid" onclick="toggleExpChart('totalElecPaid')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecTotal,0)}</div><div class="sl">סה"כ שולם על חשמל 📈</div></div>
+      <div class="sc kpi-clickable" data-ekey="insTotal" onclick="toggleExpChart('insTotal')" style="cursor:pointer"><div class="sv" style="color:var(--ac2)">${fmtILS(expenses.filter(e=>e.cat==='ביטוח').reduce((s,e)=>s+e.amt,0),0)}</div><div class="sl">סה"כ ביטוח 📊</div></div>
+      ${st.carCost?`<div class="sc"><div class="sv" style="color:var(--er)">${fmtILS(st.carCost,0)}</div><div class="sl">עלות הרכב</div></div>`:''}
+      ${st.monthly?`<div class="sc"><div class="sv" style="color:var(--ac2)">${fmtILS(st.monthly,0)}</div><div class="sl">תשלום חודשי (הגדרות)</div></div>`:''}
+      ${st.monthly?`<div class="sc"><div class="sv" style="color:var(--ac2)">${fmtILS(st.monthly*months,0)}</div><div class="sl">סה"כ תשלומים × ${months} חודשים</div></div>`:''}
+    </div>
+    <div class="card" style="background:rgba(0,200,150,.06);border-color:rgba(0,200,150,.25);margin-bottom:12px">
+      <div class="ct"><div class="ctb" style="background:var(--ac)"></div>מחיר חשמל כולל</div>
+      <div class="stat-row"><span class="stat-lbl">סה"כ קו"ש שנטענו</span><span class="stat-val g">${fmtNum(tkw,1)} קו"ש</span></div>
+      <div class="stat-row"><span class="stat-lbl">שולם בפועל</span><span class="stat-val y">${fmtILS(elecTotal,0)}</span></div>
+      <div class="stat-row"><span class="stat-lbl">לפי תעריף נוכחי (${curElecRate.toFixed(3)} ₪)</span><span class="stat-val">${fmtILS(elecAtCurrentRate,0)}</span></div>
+      <div class="stat-row"><span class="stat-lbl">תעריף ממוצע ששולם</span><span class="stat-val g">${tkw>0?(elecTotal/tkw).toFixed(3):0} ₪/קו"ש</span></div>
+    </div>
+    <div class="divl"></div>
+    <div class="ct" style="margin-top:10px"><div class="ctb" style="background:var(--ac3)"></div>פירוט לפי קטגוריה</div>
+    ${catRows}`;
+}
+
+// ── גרפי הוצאות ──
+let _openExpKey=null;
+
+const EXP_CHART_META={
+  elecMonth:    {label:'עלות חשמל לחודש',           color:'#00c896',fmt:v=>fmtILS(v,0),  invertedGood:true},
+  totalMonth:   {label:'ממוצע לחודש (כולל הוצאות)', color:'#f59e0b',fmt:v=>fmtILS(v,0),  invertedGood:true},
+  costKm:       {label:'עלות כוללת לק"מ',            color:'#3b82f6',fmt:v=>fmtILS(v,4),  invertedGood:true},
+  elecKm:       {label:'חשמל לק"מ',                  color:'#00c896',fmt:v=>fmtILS(v,4),  invertedGood:true},
+  expKm:        {label:'הוצאות (ללא חשמל) לק"מ',     color:'#a78bfa',fmt:v=>fmtILS(v,4),  invertedGood:true},
+  totalExp:     {label:'סה"כ הוצאות (ללא חשמל)', color:'#ef4444', fmt:v=>fmtILS(v,0), treeBar:true},
+  totalAll:     {label:'סה"כ כולל חשמל',           color:'#f59e0b', fmt:v=>fmtILS(v,0), treeBar:true},
+  totalElecPaid:{label:'סה"כ שולם על חשמל',        color:'#00c896', fmt:v=>fmtILS(v,0), treeBar:true},
+  insTotal:     {label:'סה"כ ביטוח',                color:'#a78bfa', fmt:v=>fmtILS(v,0), treeBar:true},
+};
+
+function calcExpChartData(key){
+  const byM={};
+  for(const r of recs){
+    const ym=r.date.slice(0,7);
+    if(!byM[ym])byM[ym]={elec:0,km:0};
+    byM[ym].elec+=(r.cost||0);
+    if(r.kmDriven>0)byM[ym].km+=r.kmDriven;
+  }
+  const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=sortedRecs[0]?.date||today();
+  const oms=Object.keys(byM).sort();
+  if(!oms.length)return [];
+  const pts=[];
+  for(const ym of oms){
+    const d=byM[ym];
+    const elecSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.elec,0);
+    const kmSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.km,0);
+    const expSoFar=expenses.filter(e=>e.date.slice(0,7)<=ym).reduce((s,e)=>s+e.amt,0);
+    const expMonth=expenses.filter(e=>e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0);
+    if(key==='elecMonth'){
+      if(d.elec>0)pts.push({ym,val:d.elec});
+    } else if(key==='totalMonth'){
+      const monthEnd=ym+'-28';
+      const mElapsed=Math.max(1,Math.round((new Date(monthEnd)-new Date(firstDate))/(1000*60*60*24*30.44)));
+      pts.push({ym,val:(elecSoFar+expSoFar)/mElapsed});
+    } else if(key==='costKm'){
+      if(kmSoFar>0)pts.push({ym,val:(elecSoFar+expSoFar)/kmSoFar});
+    } else if(key==='elecKm'){
+      if(kmSoFar>0)pts.push({ym,val:elecSoFar/kmSoFar});
+    } else if(key==='expKm'){
+      if(kmSoFar>0)pts.push({ym,val:expSoFar/kmSoFar});
+    } else if(key==='totalExp'){
+      pts.push({ym,x:ym+'-15',val:expSoFar});
+    } else if(key==='totalAll'){
+      pts.push({ym,x:ym+'-15',val:elecSoFar+expSoFar});
+    } else if(key==='totalElecPaid'){
+      pts.push({ym,x:ym+'-15',val:elecSoFar});
+    }
+  }
+  return pts;
+}
+
+function calcExpChartData(key){
+  const byM={};
+  for(const r of recs){
+    const ym=r.date.slice(0,7);
+    if(!byM[ym])byM[ym]={elec:0,km:0};
+    byM[ym].elec+=(r.cost||0);
+    if(r.kmDriven>0)byM[ym].km+=r.kmDriven;
+  }
+  const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=sortedRecs[0]?.date||today();
+  const oms=Object.keys(byM).sort();
+  if(!oms.length)return [];
+  const pts=[];
+  for(const ym of oms){
+    const d=byM[ym];
+    const elecSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.elec,0);
+    const kmSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.km,0);
+    const expSoFar=expenses.filter(e=>e.date.slice(0,7)<=ym).reduce((s,e)=>s+e.amt,0);
+    const expMonth=expenses.filter(e=>e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0);
+    if(key==='elecMonth'){
+      if(d.elec>0)pts.push({ym,val:d.elec});
+    } else if(key==='totalMonth'){
+      const monthEnd=ym+'-28';
+      const mElapsed=Math.max(1,Math.round((new Date(monthEnd)-new Date(firstDate))/(1000*60*60*24*30.44)));
+      pts.push({ym,val:(elecSoFar+expSoFar)/mElapsed});
+    } else if(key==='costKm'){
+      if(kmSoFar>0)pts.push({ym,val:(elecSoFar+expSoFar)/kmSoFar});
+    } else if(key==='elecKm'){
+      if(kmSoFar>0)pts.push({ym,val:elecSoFar/kmSoFar});
+    } else if(key==='expKm'){
+      if(kmSoFar>0)pts.push({ym,val:expSoFar/kmSoFar});
+    } else if(key==='totalExp'){
+      if(expMonth>0)pts.push({ym,val:expMonth});
+    } else if(key==='totalAll'){
+      if(d.elec>0||expMonth>0)pts.push({ym,val:d.elec+expMonth});
+    } else if(key==='totalElecPaid'){
+      if(d.elec>0)pts.push({ym,val:d.elec});
+    }
+  }
+  return pts;
+}
+
+
+// ── exp tree bar chart (שנים → חודשים → ימים) ──
+const _expTreeLevel={};
+
+const ANNUAL_CATS=new Set(['ביטוח','איתורן','אגרה']);
+
+function _expTreeData(key){
+  const byY={};
+  function addToDay(date,elec,exp){
+    const y=date.slice(0,4),ym=date.slice(0,7),d=date;
+    if(!byY[y])byY[y]={months:{}};
+    if(!byY[y].months[ym])byY[y].months[ym]={days:{}};
+    if(!byY[y].months[ym].days[d])byY[y].months[ym].days[d]={elec:0,exp:0};
+    byY[y].months[ym].days[d].elec+=elec;
+    byY[y].months[ym].days[d].exp+=exp;
+  }
+  if(key==='insTotal'){
+    for(const e of expenses.filter(x=>x.cat==='ביטוח'))
+      addToDay(e.date,0,e.amt);
+  }
+  if(key==='totalElecPaid'||key==='totalAll'){
+    for(const r of recs) addToDay(r.date,r.cost||0,0);
+  }
+  if(key==='totalExp'||key==='totalAll'){
+    const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
+    const firstDate=sortedRecs[0]?.date||today();
+    const allMonths=[];
+    const start=new Date(firstDate.slice(0,7)+'-01');
+    const end=new Date(today().slice(0,7)+'-01');
+    for(let d=new Date(start);d<=end;d.setMonth(d.getMonth()+1))
+      allMonths.push(d.toISOString().slice(0,7));
+    const months=allMonths.length;
+
+    // תשלום חודשי מהגדרות — מחולק שווה לכל ימי כל חודש
+    if(st.monthly){
+      for(const ym of allMonths){
+        const [y,mo]=ym.split('-');
+        const daysInMonth=new Date(+y,+mo,0).getDate();
+        const perDay=st.monthly/daysInMonth;
+        for(let day=1;day<=daysInMonth;day++){
+          addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
+        }
+      }
+    }
+
+    for(const e of expenses){
+      if(e.cat==='תשלום חודשי') continue;
+      if(ANNUAL_CATS.has(e.cat)){
+        // מחולק ל-12 חודשים, כל חודש מחולק לימים שווים
+        const monthly=e.amt/12;
+        const base=new Date(e.date.slice(0,7)+'-01');
+        for(let i=0;i<12;i++){
+          const d=new Date(base);d.setMonth(d.getMonth()+i);
+          const ym=d.toISOString().slice(0,7);
+          const [y,mo]=ym.split('-');
+          const daysInMonth=new Date(+y,+mo,0).getDate();
+          const perDay=monthly/daysInMonth;
+          for(let day=1;day<=daysInMonth;day++){
+            addToDay(`${ym}-${String(day).padStart(2,'0')}`,0,perDay);
+          }
+        }
+      } else if((e.inst||1)>1){
+        const n=e.inst;const perInst=e.amt/n;
+        const base=new Date(e.date);
+        for(let i=0;i<n;i++){
+          const d=new Date(base);d.setMonth(d.getMonth()+i);
+          addToDay(d.toISOString().slice(0,10),0,perInst);
+        }
+      } else {
+        addToDay(e.date,0,e.amt);
+      }
+    }
+  }
+  return byY;
+}
+function _expTreeVal(key,d){
+  if(key==='totalElecPaid')return d.elec||0;
+  if(key==='totalExp')return d.exp||0;
+  if(key==='totalAll')return (d.elec||0)+(d.exp||0);
+  if(key==='insTotal')return d.exp||0;
+  return 0;
+}
+function _expTreeSum(key,days){
+  return Object.values(days).reduce((s,d)=>s+_expTreeVal(key,d),0);
+}
+function _buildExpTreeChart(key){
+  const meta=EXP_CHART_META[key];
+
+  // ביטוח — שנים בלבד, ללא drilldown
+  if(key==='insTotal'){
+    const byY={};
+    for(const e of expenses.filter(x=>x.cat==='ביטוח')){
+      const y=e.date.slice(0,4);
+      byY[y]=(byY[y]||0)+e.amt;
+    }
+    const years=Object.keys(byY).sort();
+    const labels=years,vals=years.map(y=>byY[y]);
+    const tot=vals.reduce((s,v)=>s+v,0);
+    const totFmt=fmtILS(tot,0);
+    const el=document.getElementById('expTree_'+key);if(!el)return;
+    el.innerHTML=`<div style="font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:6px">${meta.label} — לפי שנה — סה"כ: ${totFmt}</div><canvas id="expBarCanvas_${key}" height="150"></canvas>`;
+    requestAnimationFrame(()=>_drawExpTreeBar(key,labels,vals,meta,'years',{},false));
+    return;
+  }
+
+  const byY=_expTreeData(key);
+  const level=_expTreeLevel[key]||'years';
+  let labels=[],vals=[],title='',backLevel=null,canDrill=false;
+  const noDays=(key==='totalExp'||key==='totalAll');
+  if(level==='years'){
+    title=meta.label+' — לפי שנה';canDrill=true;
+    const years=Object.keys(byY).sort();
+    _expTreeLevel['_yList_'+key]=years;
+    for(const y of years){
+      const allDays=Object.values(byY[y].months).reduce((acc,m)=>Object.assign(acc,m.days),{});
+      labels.push(y);vals.push(_expTreeSum(key,allDays));
+    }
+  } else if(level.startsWith('months:')){
+    const y=level.split(':')[1];backLevel='years';title=y+' — לפי חודש';canDrill=!noDays;
+    const months=Object.keys(byY[y]?.months||{}).sort();
+    _expTreeLevel['_mList_'+key]=months;
+    for(const ym of months){
+      const [,mo]=ym.split('-');
+      labels.push(mo);vals.push(_expTreeSum(key,byY[y].months[ym].days));
+    }
+  } else if(level.startsWith('days:')){
+    const ym=level.split(':')[1];const [y,mo]=ym.split('-');
+    backLevel='months:'+y;title=mo+'/'+y+' — לפי יום';
+    const days=Object.keys(byY[y]?.months[ym]?.days||{}).sort();
+    for(const d of days){
+      const ddata=byY[y].months[ym].days[d];
+      const [,,day]=d.split('-');
+      labels.push(day);vals.push(_expTreeVal(key,ddata));
+    }
+  }
+  const el=document.getElementById('expTree_'+key);if(!el)return;
+  const backBtn=backLevel?`<button onclick="_expTreeUp('${key}','${backLevel}')" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.72rem;padding:4px 10px;cursor:pointer">◀ חזרה</button>`:'';
+  const tot=vals.reduce((s,v)=>s+v,0);
+  const totFmt=Math.abs(tot)>=1000?'₪'+(tot/1000).toFixed(1)+'k':'₪'+tot.toFixed(0);
+  const hint=canDrill&&labels.length>1?'<div style="font-size:.6rem;color:var(--tx3);text-align:center;margin-top:3px">לחץ על עמוד לפירוט</div>':'';
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px"><div style="font-size:.72rem;font-weight:700;color:var(--tx2)">${title} — סה"כ: ${totFmt}</div>${backBtn}</div><canvas id="expBarCanvas_${key}" height="150"></canvas>${hint}`;
+  requestAnimationFrame(()=>_drawExpTreeBar(key,labels,vals,meta,level,byY,canDrill));
+}
+function _drawExpTreeBar(key,labels,vals,meta,level,byY,canDrill){
+  const canvas=document.getElementById('expBarCanvas_'+key);if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.max(canvas.parentElement.offsetWidth-4,160),H=150;
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const n=labels.length;if(!n)return;
+  const posMax=Math.max(...vals,0)||1;
+  const negMin=Math.min(...vals,0)||0;
+  const range=(posMax-negMin)||1;
+  const PAD={t:18,r:6,b:28,l:52};
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const zeroY=PAD.t+ch*(posMax/range);
+  const bw=Math.max(6,Math.floor(cw/n*0.72));
+  const spacing=cw/n;
+  const col=meta.color;
+  function fmtY(v){const abs=Math.abs(v);const sign=v<0?'-':'';return abs>=1000?sign+'₪'+(abs/1000).toFixed(1)+'k':sign+'₪'+abs.toFixed(0);}
+  function fmtBar(v){const abs=Math.abs(v);const sign=v<0?'-':'';return abs>=1000?sign+'₪'+(abs/1000).toFixed(1)+'k':sign+'₪'+abs.toFixed(0);}
+  ctx.strokeStyle=chartGridColor();ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let i=1;i<=3;i++){const y=PAD.t+(ch/4)*i;ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();}
+  ctx.setLineDash([]);
+  vals.forEach((v,i)=>{
+    const x=PAD.l+spacing*i+(spacing-bw)/2;
+    const barH=Math.max(2,Math.abs(v)/range*ch);
+    const y=v<0?zeroY:zeroY-barH;
+    const grad=ctx.createLinearGradient(0,y,0,y+barH);
+    grad.addColorStop(0,col+'ee');grad.addColorStop(1,col+'55');
+    ctx.fillStyle=grad;
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
+    else ctx.fillRect(x,y,bw,barH);
+    if(barH>14){ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';ctx.fillText(fmtBar(v),x+bw/2,v<0?y+barH-4:y+11);}
+    ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
+    ctx.fillText(labels[i],x+bw/2,H-4);
+  });
+  ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=3;i++){const v=negMin+(range/3)*i;ctx.fillText(fmtY(v),PAD.l-3,PAD.t+ch-(ch/3)*i+4);}
+  if(canvas._expClick)canvas.removeEventListener('click',canvas._expClick);
+  if(canDrill){
+    canvas._expClick=e=>{
+      const rect=canvas.getBoundingClientRect();
+      const xClick=(e.clientX-rect.left)*(W/rect.width);
+      const idx=Math.floor((xClick-PAD.l)/spacing);
+      if(idx<0||idx>=n)return;
+      if(level==='years'){const yl=_expTreeLevel['_yList_'+key]||[];if(yl[idx])_expTreeDown(key,'months:'+yl[idx]);}
+      else if(level.startsWith('months:')){const ml=_expTreeLevel['_mList_'+key]||[];if(ml[idx])_expTreeDown(key,'days:'+ml[idx]);}
+    };
+    canvas.addEventListener('click',canvas._expClick);
+  }
+}
+function _expTreeDown(key,level){_expTreeLevel[key]=level;_buildExpTreeChart(key);}
+function _expTreeUp(key,level){_expTreeLevel[key]=level;_buildExpTreeChart(key);}
+
+function toggleExpChart(key){
+  _openExpKey=(_openExpKey===key)?null:key;
+  _syncExpChart();
+}
+
+function _syncExpChart(){
+  const grid=$('expSummaryGrid');if(!grid)return;
+  grid.querySelectorAll('.sc[data-ekey]').forEach(el=>{
+    el.classList.toggle('kpi-open',el.dataset.ekey===_openExpKey);
+  });
+  if(!_openExpKey||!recs.length){
+    const old=grid.querySelector('.kpi-chart-row');if(old)old.remove();
+    return;
+  }
+  const existing=grid.querySelector('.kpi-chart-row');
+  if(existing&&existing.dataset.ekey===_openExpKey)return;
+  if(existing)existing.remove();
+  const row=document.createElement('div');
+  row.className='kpi-chart-row';
+  row.dataset.ekey=_openExpKey;
+  const meta=EXP_CHART_META[_openExpKey];
+  const pts=meta.treeBar?[]:calcExpChartData(_openExpKey);
+  const n=pts.length;
+  if(!meta.treeBar&&n<2){row.innerHTML=`<div class="kpi-chart-panel-full" style="text-align:center;color:var(--tx3);font-size:.8rem;padding:14px">נדרשים לפחות 2 חודשי נתונים</div>`;_insertExpRow(grid,row);return;}
+
+  if(meta.treeBar){
+    row.innerHTML=`<div class="kpi-chart-panel-full">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:.75rem;font-weight:700;color:var(--tx2)">${meta.label}</div>
+        <button class="kpi-chart-close" onclick="toggleExpChart('${_openExpKey}')">✕ סגור</button>
+      </div>
+      <div id="expTree_${_openExpKey}"></div>
+    </div>`;
+    _insertExpRow(grid,row);
+    if(!_expTreeLevel[_openExpKey])_expTreeLevel[_openExpKey]='years';
+    _buildExpTreeChart(_openExpKey);
+  } else {
+    const vals=pts.map(p=>p.val);
+    const minV=Math.min(...vals),maxV=Math.max(...vals);
+    const minIdx=vals.indexOf(minV),maxIdx=vals.indexOf(maxV);
+    const trendPct=pts[0].val>0?((pts[n-1].val-pts[0].val)/pts[0].val*100):0;
+    const goodTrend=meta.invertedGood?trendPct<=0:trendPct>=0;
+    const trendCol=goodTrend?'var(--ok)':'var(--er)';
+    const trendDir=trendPct>=0?'▲':'▼';
+    row.innerHTML=`<div class="kpi-chart-panel-full">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--tx2)">${meta.label} — מגמה חודשית</div>
+          <div style="font-size:.67rem;color:${trendCol};font-weight:700;margin-top:2px">${trendDir} ${Math.abs(trendPct).toFixed(1)}% מהחודש הראשון</div>
+        </div>
+        <button class="kpi-chart-close" onclick="toggleExpChart('${_openExpKey}')">✕ סגור</button>
+      </div>
+      <canvas id="expCanvas_${_openExpKey}" height="130"></canvas>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:.65rem;color:var(--tx3)">
+        <span>● <b style="color:var(--tx)">${meta.fmt(pts[n-1].val)}</b> עכשיו (${pts[n-1].ym})</span>
+        <span style="color:#ef4444">▲ <b>${meta.fmt(maxV)}</b> מקסימום (${pts[maxIdx].ym})</span>
+        <span style="color:#22c55e">▼ <b>${meta.fmt(minV)}</b> מינימום (${pts[minIdx].ym})</span>
+      </div>
+      <div style="font-size:.58rem;color:var(--tx3);margin-top:4px;text-align:center">צבוט להגדלה · גרור להזזה · הקש פעמיים לאיפוס</div>
+    </div>`;
+    _insertExpRow(grid,row);
+    requestAnimationFrame(()=>{
+      const c=$('expCanvas_'+_openExpKey);
+      if(c){drawKpiChart(pts,meta,c);attachExpGestures(_openExpKey,pts,meta);}
+    });
+  }
+}
+
+function attachExpGestures(key,pts,meta){
+  const c=$('expCanvas_'+key);if(!c)return;
+  c.style.touchAction='none';
+  let lastDist=null,lastPanX=null;
+  function redraw(){if(pts&&pts.length>=2)drawKpiChart(pts,meta,c);}
+  c.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);lastPanX=null;}
+    else if(e.touches.length===1){lastPanX=e.touches[0].clientX;lastDist=null;}
+  },{passive:false});
+  c.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(!pts||pts.length<2)return;
+    if(e.touches.length===2&&lastDist!==null){
+      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const scale=lastDist/dist;
+      const centerX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+      const rect=c.getBoundingClientRect();
+      const PADl=50,cw=rect.width-PADl-10;
+      const frac=Math.max(0,Math.min(1,(centerX-rect.left-PADl)/cw));
+      const span=_kpiViewEnd-_kpiViewStart;
+      const minSpan=2/Math.max(pts.length,2);
+      const newSpan=Math.min(1,Math.max(minSpan,span*scale));
+      const pivot=_kpiViewStart+frac*span;
+      _kpiViewStart=Math.max(0,pivot-frac*newSpan);
+      _kpiViewEnd=_kpiViewStart+newSpan;
+      if(_kpiViewEnd>1){_kpiViewEnd=1;_kpiViewStart=Math.max(0,1-newSpan);}
+      lastDist=dist;drawKpiChart(pts,meta,c);
+    } else if(e.touches.length===1&&lastPanX!==null){
+      const dx=e.touches[0].clientX-lastPanX;
+      const rect=c.getBoundingClientRect();
+      const cw=rect.width-60;
+      const frac=-dx/cw;
+      const span=_kpiViewEnd-_kpiViewStart;
+      _kpiViewStart=Math.max(0,_kpiViewStart+frac);
+      _kpiViewEnd=_kpiViewStart+span;
+      if(_kpiViewEnd>1){_kpiViewEnd=1;_kpiViewStart=Math.max(0,1-span);}
+      lastPanX=e.touches[0].clientX;drawKpiChart(pts,meta,c);
+    }
+  },{passive:false});
+  c.addEventListener('touchend',e=>{
+    if(e.touches.length===1){lastPanX=e.touches[0].clientX;lastDist=null;}
+    else if(e.touches.length===0){lastDist=null;lastPanX=null;}
+  },{passive:true});
+  let lastTap=0;
+  c.addEventListener('touchend',e=>{
+    if(e.changedTouches.length===1){const now=Date.now();if(now-lastTap<280){_kpiViewStart=0;_kpiViewEnd=1;redraw();}lastTap=now;}
+  },{passive:true});
+}
+
+function _insertExpRow(grid,row){
+  const allChildren=Array.from(grid.children).filter(el=>el.classList.contains('sc'));
+  allChildren.forEach((el,i)=>{el.style.order=String(i*2);});
+  const cardIdx=allChildren.findIndex(el=>el.dataset.ekey===_openExpKey);
+  const colsStr=getComputedStyle(grid).gridTemplateColumns;
+  const cols=colsStr.trim().split(/\s+/).length||2;
+  const rowEnd=Math.min(allChildren.length-1,cardIdx+(cols-1-(cardIdx%cols)));
+  row.style.order=String(rowEnd*2+1);
+  grid.appendChild(row);
+}
+
+function renderExpCharts(){_syncExpChart();}
+
+const _insYearOpen=LS.get('ev4_insYearOpen',{});
+function renderExpInsurance(){
+  const el=$('expInsurance');if(!el)return;
+  const ins=expenses.filter(e=>e.cat==='ביטוח');
+  if(!ins.length){el.innerHTML='<p style="color:var(--tx3);font-size:.8rem">אין רשומות ביטוח</p>';return;}
+  const byYear={};
+  for(const e of ins){const y=e.date.slice(0,4);if(!byYear[y])byYear[y]={total:0,items:[]};byYear[y].total+=e.amt;byYear[y].items.push(e);}
+  const years=Object.keys(byYear).sort().reverse();
+  const curY=new Date().getFullYear().toString();
+  years.forEach(y=>{if(_insYearOpen[y]===undefined)_insYearOpen[y]=(y===curY);});
+  el.innerHTML=years.map((y,i)=>{
+    const prevY=years[i+1];
+    const prevTotal=prevY?byYear[prevY].total:null;
+    const pct=prevTotal?((byYear[y].total-prevTotal)/prevTotal*100):null;
+    const pctStr=pct!=null?(pct>=0
+      ?`<span style="color:var(--er);font-size:.7rem;margin-right:6px">▲ ${pct.toFixed(1)}%</span>`
+      :`<span style="color:var(--ok);font-size:.7rem;margin-right:6px">▼ ${Math.abs(pct).toFixed(1)}%</span>`
+    ):'';
+    const diffStr=pct!=null?`<span style="font-size:.7rem;color:var(--tx3);margin-right:6px">(${pct>=0?'+':''}${fmtILS(byYear[y].total-prevTotal,0)})</span>`:'';
+    const open=_insYearOpen[y];
+    const items=byYear[y].items.map(e=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.8rem;color:var(--tx2)"><span>${e.desc}</span><span style="color:var(--ac3)">${fmtILS(e.amt,0)}</span></div>`).join('');
+    return`<div style="margin-bottom:8px;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+      <div onclick="insToggleYear('${y}')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;background:var(--sf2);font-weight:700;color:var(--ac2)">
+        <span>${open?'▾':'▸'}</span><span>${y} — ${fmtILS(byYear[y].total,0)}</span>${pctStr}${diffStr}
+      </div>
+      ${open?`<div style="padding:6px 12px 8px;border-top:1px solid var(--bd)">${items}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function insToggleYear(y){_insYearOpen[y]=!_insYearOpen[y];LS.set('ev4_insYearOpen',_insYearOpen);renderExpInsurance();}
+
+function expInstChanged(){
+  const n=parseInt($('expInst').value)||1;
+  const start=$('expDate').value;
+  if(!start)return;
+  if(n<=1){
+    $('expDateEnd').value=start;
+  } else {
+    const d=new Date(start+'-01'.slice(start.length<8?0:0));
+    const base=new Date(start);
+    base.setMonth(base.getMonth()+(n-1));
+    $('expDateEnd').value=base.toISOString().slice(0,10);
+  }
+}
+function openAddExp(){
+  $('mExpT').textContent='הוסף הוצאה';
+  $('expEditId').value='';
+  $('expDesc').value='';$('expAmt').value='';$('expNote').value='';
+  $('expDate').value=today();$('expCat').value='אחר';
+  $('expInst').value='1';$('expDateEnd').value=today();
+  openModal('mExp');
+}
+function editExp(id){
+  const e=expenses.find(x=>x.id===id);if(!e)return;
+  $('mExpT').textContent='ערוך הוצאה';
+  $('expEditId').value=id;
+  $('expDesc').value=e.desc;$('expAmt').value=e.amt;
+  $('expNote').value=e.note||'';$('expDate').value=e.date;$('expCat').value=e.cat;
+  $('expInst').value=e.inst||1;$('expDateEnd').value=e.dateEnd||e.date;
+  openModal('mExp');
+}
+function saveExp(){
+  const desc=$('expDesc').value.trim();const amt=parseFloat($('expAmt').value);
+  if(!desc||isNaN(amt)||amt<0){toast('⚠️ נא למלא תיאור וסכום','e');return;}
+  const id=parseInt($('expEditId').value)||0;
+  const inst=Math.max(1,parseInt($('expInst').value)||1);
+  const dateStart=$('expDate').value;
+  const dateEnd=$('expDateEnd').value||dateStart;
+  const obj={id:id||Date.now(),desc,amt,cat:$('expCat').value,date:dateStart,dateEnd,inst,note:$('expNote').value.trim()};
+  if(id){const idx=expenses.findIndex(x=>x.id===id);if(idx>=0)expenses[idx]=obj;else expenses.push(obj);}
+  else expenses.push(obj);
+  saveExpLS();closeModal('mExp');renderExp();toast('✅ נשמר');
+}
+async function delExp(id){
+  if(!await confirmAsync('למחוק?'))return;
+  expenses=expenses.filter(e=>e.id!==id);saveExpLS();renderExp();toast('🗑️ נמחק');
+}
 
 initMonthlyRates();
 $('inDate').value=today();
@@ -2669,8 +4253,9 @@ let gdToken=null;
 let gdUserId=null;
 let gdDataFileId=null;
 let gdHtmlFileId=null;
-let gdSyncing=false;
+let gdSyncing=false;let gdDirty=false;
 let gdAutoSaveTimer=null;
+let gdStatusText='☁️ לא מחובר';
 
 function gdUserKey(k){return gdUserId?`ev4_${gdUserId}_${k}`:null;}
 function gdLoadUserIds(){
@@ -2679,79 +4264,112 @@ function gdLoadUserIds(){
   gdHtmlFileId=LS.get(gdUserKey('gd_html_fid'),null);
 }
 
-function gdShowBar(){
-  const bar=$('gdBar');
-  if(bar)bar.style.transform='translateY(0)';
-  // דחוף תוכן מטה
-  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
-  if(wrap)wrap.style.paddingTop='38px';
-}
-function gdHideBar(){
-  const bar=$('gdBar');
-  if(bar)bar.style.transform='translateY(-60px)';
-  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
-  if(wrap)wrap.style.paddingTop='';
-}
+function gdShowBar(){}
 function gdSetStatus(txt,color){
-  const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx2)';}
+  gdStatusText=txt;
+  const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx3)';}
+  const st=$('gdStatusTab');if(st){st.textContent=txt;st.style.color=color||'var(--tx3)';}
+}
+function gdSetHdrStatus(line1,line2){
+  // compact header indicator (mobile)
+  const h=$('gdStatusHdr');if(!h)return;
+  h.innerHTML=line2?`${line1}<br><span style="color:var(--tx3);font-size:.65rem">${line2}</span>`:line1;
 }
 function gdSetBtn(label,fn,color){
-  const b=$('gdBtn');if(!b)return;
-  b.textContent=label;b.onclick=fn;
-  b.style.background=color||'var(--ac2)';
+  const b=$('gdBtn');if(b){b.textContent=label;b.onclick=fn;b.style.background=color||'var(--ac2)';}
+  const bt=$('gdBtnTab');if(bt){bt.textContent=label;bt.onclick=fn;bt.style.background=color||'var(--ac2)';}
+}
+function syncGdBtn(){
+  if(gdToken){
+    gdSetBtn('התנתק',gdLogout,'var(--er)');
+    gdSetStatus(gdStatusText||'✅ מחובר','var(--ac)');
+  } else {
+    gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    gdSetStatus('☁️ לא מחובר','var(--tx3)');
+  }
 }
 
-function gdLogin(){
-  if(!window.google){toast('⚠️ Google לא נטען, נסה שוב','e');return;}
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:GD_CLIENT_ID,
-    scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
-    callback:async(resp)=>{
-      if(resp.error){gdSetStatus('❌ שגיאת התחברות','var(--er)');return;}
-      gdToken=resp.access_token;
-      localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
-      try{
-        const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
-        const u=await r.json();
-        gdUserId=u.id;
-        localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
-        // הגדר LS לעבוד עם uid זה וטען נתוני המשתמש
-        LS._uid=gdUserId;
-        recs=LS.get('ev4_recs',recs);
-        cos=LS.get('ev4_cos',cos);
-        homeRates=LS.get('ev4_hr',homeRates);
-        fuelRates=LS.get('ev4_fuel',fuelRates);
-        st=LS.get('ev4_st',st);
-        recalc();renderAll();
-      }catch{}
-      gdLoadUserIds();
-      gdSetStatus('✅ מחובר','var(--ac)');
-      gdSetBtn('התנתק',gdLogout,'var(--er)');
-      gdSync();
-    }
+function confirmAsync(msg){
+  return new Promise(resolve=>{
+    const modal=$('confirmModal');
+    $('confirmMsg').textContent=msg;
+    modal.style.display='flex';
+    const yes=$('confirmYes'),no=$('confirmNo');
+    const done=(v)=>{modal.style.display='none';yes.onclick=null;no.onclick=null;resolve(v);};
+    yes.onclick=()=>done(true);
+    no.onclick=()=>done(false);
   });
-  client.requestAccessToken();
+}
+function gdLogin(){
+  // עדכן כפתור מיידית כדי לתת פידבק ויזואלי
+  gdSetBtn('⏳ מתחבר...','gdLogin','var(--ac2)');
+  if(!window.google||!window.google.accounts){
+    // המתן עד שה-script נטען (עד 8 שניות)
+    let tries=0;
+    const wait=setInterval(()=>{
+      tries++;
+      if(window.google&&window.google.accounts){clearInterval(wait);_doGdLogin();}
+      else if(tries>16){clearInterval(wait);gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');toast('⚠️ Google לא נטען — נסה לרענן את הדף','e');}
+    },500);
+    return;
+  }
+  _doGdLogin();
+}
+function _doGdLogin(){
+  try{
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:GD_CLIENT_ID,
+      scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
+      callback:async(resp)=>{
+        if(resp.error){gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');gdSetStatus('❌ שגיאת התחברות','var(--er)');return;}
+        gdToken=resp.access_token;
+        localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
+        try{
+          const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
+          const u=await r.json();
+          gdUserId=u.id;
+          localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
+          LS._uid=gdUserId;
+        }catch{}
+        gdLoadUserIds();
+        gdSetStatus('✅ מחובר','var(--ac)');
+        gdSetHdrStatus('✅ מחובר');
+        gdSetBtn('התנתק',gdLogout,'var(--er)');
+        // התחברות חדשה — תמיד טען מהענן (ענן מנצח מקומי)
+        gdSync();
+      }
+    });
+    client.requestAccessToken();
+  }catch(e){
+    gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    gdSetStatus('❌ שגיאה: '+e.message,'var(--er)');
+  }
 }
 
 function gdLogout(){
+  // התנתקות — שמור נתונים מקומית תחת uid, אחר כך נקה session
   gdToken=null;gdUserId=null;gdDataFileId=null;gdHtmlFileId=null;
   LS._uid=null;
   localStorage.setItem('ev4_gd_token',JSON.stringify(null));
   localStorage.setItem('ev4_gd_uid',JSON.stringify(null));
   gdSetStatus('☁️ לא מחובר','var(--tx2)');
+  gdSetHdrStatus('☁️ לא מחובר');
   gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
 }
 
 // איסוף כל הנתונים
 function gdCollectData(){
-  return {recs,cos,homeRates,fuelRates,st,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
+  const _savedAt=Date.now();
+  LS.set('ev4_savedAt',_savedAt);
+  return {recs,cos,homeRates,fuelRates,st,expenses,_savedAt,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
 }
 
 // שמירת JSON לדרייב
 async function gdSaveData(){
-  if(!gdToken||gdSyncing)return;
-  gdSyncing=true;
-  gdSetStatus('💾 שומר...','var(--ac3)');
+  if(!gdToken)return;
+  if(gdSyncing){gdDirty=true;return;}
+  gdSyncing=true;gdDirty=false;
+  gdSetStatus('💾 שומר...','var(--ac3)');gdSetHdrStatus('💾 שומר...');
   try{
     const body=JSON.stringify(gdCollectData(),null,2);
     const blob=new Blob([body],{type:'application/json'});
@@ -2772,10 +4390,15 @@ async function gdSaveData(){
     }
     // שמירת HTML
     await gdSaveHTML();
-    const now=new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
-    gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');
-  } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
+    const now=new Date().toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
+  } catch(e){
+    const is401=e&&(e.status===401||String(e).includes('401'));
+    if(is401){gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');}
+    else gdSetStatus('❌ שגיאת שמירה','var(--er)');
+  }
   gdSyncing=false;
+  if(gdDirty)gdSaveData();
 }
 
 // שמירת קובץ HTML לדרייב
@@ -2783,7 +4406,7 @@ async function gdSaveHTML(){
   if(!gdToken)return;
   const htmlContent=document.documentElement.outerHTML;
   const blob=new Blob([htmlContent],{type:'text/html'});
-  const meta={name:GD_HTML_FILE,parents:gdHtmlFileId?undefined:['appDataFolder']};
+  const meta={name:GD_HTML_FILE,...(!gdHtmlFileId&&{parents:['appDataFolder']})};
   if(gdHtmlFileId){
     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdHtmlFileId}?uploadType=media`,{
       method:'PATCH',headers:{'Authorization':'Bearer '+gdToken,'Content-Type':'text/html'},body:blob});
@@ -2806,22 +4429,17 @@ async function gdLoadData(){
       headers:{'Authorization':'Bearer '+gdToken}});
     if(!r.ok)return false;
     const d=await r.json();
-    // אם יש יותר נתונים מקומיים — שמור לענן במקום לטעון
-    const cloudRecs=(d.recs||[]).length;
-    const localRecs=recs.length;
-    if(localRecs>cloudRecs){
-      toast('☁️ נתונים מקומיים חדשים יותר — שומר לענן');
-      await gdSaveData();
-      return true;
-    }
-    if(d.recs)recs=d.recs;
-    if(d.cos)cos=d.cos;
-    if(d.homeRates)homeRates=d.homeRates;
-    if(d.fuelRates)fuelRates=d.fuelRates;
+    // השווה לפי timestamp — מי עודכן לאחרונה מנצח
+    const cloudTs=d._savedAt||0;
+    if(Array.isArray(d.recs))recs=d.recs;
+    if(Array.isArray(d.cos))cos=d.cos;
+    if(Array.isArray(d.homeRates))homeRates=d.homeRates;
+    if(Array.isArray(d.fuelRates))fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
+    if(Array.isArray(d.expenses)){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
-    // theme — שמור את הבחירה המקומית, אל תדרוס
+    LS.set('ev4_savedAt',cloudTs);
     LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);
     renderAll();
     return true;
@@ -2832,6 +4450,7 @@ async function gdLoadData(){
 async function gdFindFile(name){
   const r=await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${name}'&fields=files(id,name)`,{
     headers:{'Authorization':'Bearer '+gdToken}});
+  if(r.status===401){const e=new Error('401');e.status=401;throw e;}
   const j=await r.json();
   return j.files&&j.files.length?j.files[0].id:null;
 }
@@ -2841,18 +4460,51 @@ async function gdSync(){
   if(!gdToken)return;
   gdSetStatus('🔄 מסנכרן...','var(--ac2)');
   try{
-    // מצא קבצים קיימים
-    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;LS.set('ev4_gd_data_fid',id);}}
-    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;LS.set('ev4_gd_html_fid',id);}}
+    // מצא קבצים קיימים בענן
+    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),id);}}
+    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),id);}}
+    const localTs=LS.get('ev4_savedAt',0);
     if(gdDataFileId){
-      const loaded=await gdLoadData();
-      if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
-      else await gdSaveData();
+      // יש קובץ ענן — בדוק מי חדש יותר
+      const hdr=await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}?fields=modifiedTime`,{
+        headers:{'Authorization':'Bearer '+gdToken}});
+      const meta=await hdr.json();
+      const cloudTs=meta.modifiedTime?new Date(meta.modifiedTime).getTime():0;
+      if(cloudTs>localTs){
+        // ענן חדש יותר — טען ממנו
+        const loaded=await gdLoadData();
+        if(loaded){toast('☁️ נתונים נטענו מהענן');{const _t=new Date().toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`נטען מהענן: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}}
+        else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
+      } else {
+        // מקומי חדש יותר (או שווה) — שמור לענן
+        await gdSaveData();
+        {const _t=new Date().toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`שמור: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}
+      }
     } else {
-      await gdSaveData();
-      toast('☁️ גיבוי ראשון נשמר בענן');
+      // אין קובץ ענן
+      const localRecs=LS.get('ev4_recs',[]);
+      if(localRecs.length>0||recs.length>0){
+        // יש נתונים מקומיים — שמור לענן
+        await gdSaveData();
+        toast('☁️ גיבוי נשמר בענן');
+      }
+      gdSetStatus('✅ מחובר','var(--ac)');gdSetBtn('התנתק',gdLogout,'var(--er)');
     }
-  } catch{gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
+  } catch(e){
+    // בדוק אם הטוקן פג תוקף (401)
+    const is401=e&&(e.status===401||String(e).includes('401')||(e.message&&e.message.includes('401')));
+    if(is401||!gdToken){
+      gdToken=null;
+      localStorage.setItem('ev4_gd_token',JSON.stringify(null));
+      gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');
+      gdSetHdrStatus('⚠️ פג תוקף');
+      gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    } else {
+      gdSetStatus('❌ שגיאת סנכרון','var(--er)');
+      gdSetHdrStatus('❌ שגיאת סנכרון');
+      gdSetBtn('התנתק',gdLogout,'var(--er)');
+    }
+  }
 }
 
 // שמירה אוטומטית — מופעלת אחרי כל שינוי
@@ -2862,27 +4514,49 @@ function gdAutoSave(){
   gdAutoSaveTimer=setTimeout(gdSaveData,2000);
 }
 
-// ניסיון שחזור טוקן קיים בטעינה
+// אתחול בטעינה
 (function gdInit(){
   gdShowBar();
+  // אם זה reload אחרי clearAll — אל תסנכרן מהענן
+  const justCleared=localStorage.getItem('ev4_justCleared');
+  if(justCleared){
+    localStorage.removeItem('ev4_justCleared');
+    const savedToken=localStorage.getItem('ev4_gd_token');
+    const savedUid=localStorage.getItem('ev4_gd_uid');
+    const token=savedToken?JSON.parse(savedToken):null;
+    const uid=savedUid?JSON.parse(savedUid):null;
+    if(token&&uid){
+      gdToken=token;gdUserId=uid;LS._uid=uid;
+      gdLoadUserIds();
+      gdSetStatus('✅ מחובר — נתונים נוקו','var(--ok)');
+      gdSetHdrStatus('✅ מחובר');
+      gdSetBtn('התנתק',gdLogout,'var(--er)');
+      // שמור ריק לענן (דרוס ענן עם מצב ריק)
+      gdSaveData();
+    } else {
+      gdSetStatus('☁️ לא מחובר','var(--tx2)');
+      gdSetHdrStatus('☁️ לא מחובר');
+      gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    }
+    return;
+  }
   const savedToken=localStorage.getItem('ev4_gd_token');
   const savedUid=localStorage.getItem('ev4_gd_uid');
   const token=savedToken?JSON.parse(savedToken):null;
   const uid=savedUid?JSON.parse(savedUid):null;
   if(token&&uid){
-    gdToken=token;gdUserId=uid;
-    LS._uid=uid;
-    // טען נתוני המשתמש הספציפי
-    recs=LS.get('ev4_recs',recs);
-    cos=LS.get('ev4_cos',cos);
-    homeRates=LS.get('ev4_hr',homeRates);
-    fuelRates=LS.get('ev4_fuel',fuelRates);
-    st=LS.get('ev4_st',st);
-    recalc();renderAll();
+    // משתמש מחובר — הגדר uid ב-LS לפני הכל
+    gdToken=token;gdUserId=uid;LS._uid=uid;
     gdLoadUserIds();
-    gdSetStatus('🔄 מתחבר...','var(--ac2)');
+    gdSetStatus('🔄 מתחבר...','var(--ac2)');gdSetHdrStatus('🔄 מתחבר...');
     gdSetBtn('התנתק',gdLogout,'var(--er)');
+    // טען מהענן — אם אין קובץ ענן, השתמש במה שב-localStorage
     gdSync();
+  } else {
+    // לא מחובר — הצג כפתור התחברות
+    gdSetStatus('☁️ לא מחובר','var(--tx2)');
+    gdSetHdrStatus('☁️ לא מחובר');
+    gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
   }
 })();
 
@@ -2892,6 +4566,8 @@ const _resizeObs=new ResizeObserver(()=>{
   _resizeTimer=setTimeout(()=>{
     drawSavingChart();
     drawKmChart();
+    drawTrendChart();
+    if(openKpiKey){const pts=calcKpiMonthly(openKpiKey);const c=$('kpiCanvas_'+openKpiKey);if(pts.length>=2&&c)drawKpiChart(pts,KPI_META[openKpiKey],c);}
   },80);
 });
 ['dashSavingCard','dashKmCard','dashGaugeCard'].forEach(id=>{
