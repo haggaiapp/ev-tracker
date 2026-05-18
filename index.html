@@ -2223,7 +2223,7 @@ function renderDashboard(){
   if(!recs.length){
     kpiEl.innerHTML='<div class="mpty" style="grid-column:1/-1"><div class="mpty-i">⚡</div><p>אין טעינות עדיין<br>הזן נתונים ביומן</p></div>';
     [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='none';});
-    $('kpiChartArea').innerHTML='';
+    const kca=$('kpiChartArea');if(kca)kca.innerHTML='';
     return;
   }
   [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='';});
@@ -4239,10 +4239,9 @@ initMonthlyRates();
 $('inDate').value=today();
 $('hrDate').value=today();
 selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
-renderAll();
 
 // ══════════════════════════════════════════
-// GOOGLE DRIVE SYNC
+// GOOGLE DRIVE SYNC — הגדרת משתנים (לפני renderAll)
 // ══════════════════════════════════════════
 const GD_CLIENT_ID='339596166863-fmdletmdvd5lm3uavrreltdhvjunt80p.apps.googleusercontent.com';
 const GD_SCOPE='https://www.googleapis.com/auth/drive.appdata';
@@ -4256,6 +4255,8 @@ let gdHtmlFileId=null;
 let gdSyncing=false;let gdDirty=false;
 let gdAutoSaveTimer=null;
 let gdStatusText='☁️ לא מחובר';
+
+renderAll();
 
 function gdUserKey(k){return gdUserId?`ev4_${gdUserId}_${k}`:null;}
 function gdLoadUserIds(){
