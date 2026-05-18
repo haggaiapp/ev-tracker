@@ -136,9 +136,11 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .tab{flex-shrink:0;padding:9px 14px;font-family:var(--fn);font-size:0.85rem;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;}
 .tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s;}
 .tab.active{color:var(--ac);}.tab.active::after{transform:scaleX(1);}
-.wrap{max-width:560px;margin:0 auto;padding:14px;}
+.wrap{max-width:560px;margin:0 auto;padding:14px;padding-top:52px;}
 @media(min-width:900px){
-  .wrap{max-width:1100px;padding:20px 24px;}
+  body{display:flex;flex-direction:column;}
+  .app-layout{display:flex;flex:1;align-items:flex-start;gap:0;max-width:1300px;margin:0 auto;width:100%;}
+  .wrap{max-width:1100px;padding:20px 24px;flex:1;min-width:0;}
   .tw table,.tw{min-width:100%!important;}
   table{min-width:100%!important;}
   .fr{grid-template-columns:1fr 1fr 1fr;}
@@ -146,6 +148,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
   .rd-grid{grid-template-columns:repeat(4,1fr);}
   .cog{grid-template-columns:repeat(5,1fr);}
   .hdr{padding:18px 24px 0;}
+  #gdSidePanel{display:block!important;}
 }
 .tc{display:none;}.tc.active{display:block;}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;}
@@ -379,6 +382,7 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
       <div class="hdr-t">⚡ <span>עלות חשמל רכב</span></div>
       <div class="hdr-s" id="hSub">טוען...</div>
     </div>
+    <div id="gdStatusHdr" style="font-size:.72rem;color:var(--tx3);text-align:left;line-height:1.4;"></div>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="sw('data',this)">📊 מבט כללי</button>
@@ -392,6 +396,14 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
   </div>
 </div>
 
+<div class="app-layout">
+<div id="gdSidePanel" style="display:none;width:220px;flex-shrink:0;padding:20px 0 20px 16px;position:sticky;top:20px;align-self:flex-start;">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);margin-bottom:12px;">☁️ גיבוי ענן</div>
+    <div id="gdSideStatus" style="font-size:.8rem;color:var(--tx3);margin-bottom:12px;line-height:1.5;">☁️ לא מחובר</div>
+    <button id="gdSideBtn" onclick="gdLogin()" style="width:100%;background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:9px 10px;font-size:.78rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+  </div>
+</div>
 <div class="wrap">
 
 <!-- ═══ נתונים ═══ -->
@@ -909,16 +921,16 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
       <button class="theme-opt" id="themeLight" onclick="setTheme('light')">☀️ בהיר</button>
       <button class="theme-opt active" id="themeDark" onclick="setTheme('dark')">🌙 כהה</button>
     </div>
+    <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;">
+      <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">☁️ גיבוי ענן</div>
+      <div id="gdStatus" style="font-size:.8rem;color:var(--tx3);margin-bottom:10px;">☁️ לא מחובר</div>
+      <button id="gdBtn" onclick="gdLogin()" style="width:100%;background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:.85rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+    </div>
   </div>
 </div>
+</div><!-- /app-layout -->
 
 <div class="toast" id="toast"></div>
-
-<!-- סרגל סטטוס Google Drive -->
-<div id="gdBar" style="position:fixed;top:0;left:0;right:0;z-index:998;background:var(--sf2);border-bottom:1px solid var(--bd);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--tx2);transform:translateY(-60px);transition:transform .3s ease;">
-  <span id="gdStatus">☁️ לא מחובר</span>
-  <button id="gdBtn" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:.72rem;cursor:pointer;font-family:var(--fn)">התחבר ל-Google</button>
-</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -930,6 +942,12 @@ const LS={
   get(k,d){try{const v=localStorage.getItem(this._k(k));return v!=null?JSON.parse(v):d;}catch{return d;}},
   set(k,v){localStorage.setItem(this._k(k),JSON.stringify(v));}
 };
+// הגדר uid לפני כל טעינת נתונים — כך הנתונים תמיד נטענים מהמפתח הנכון
+try{
+  const _uid=JSON.parse(localStorage.getItem('ev4_gd_uid'));
+  const _tok=JSON.parse(localStorage.getItem('ev4_gd_token'));
+  if(_uid&&_tok)LS._uid=_uid;
+}catch{}
 const $=id=>document.getElementById(id);
 
 let cos=LS.get('ev4_cos',[
@@ -1102,19 +1120,34 @@ function delRec(id,e){
   if(!confirm('למחוק?'))return;
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
+const DATA_KEYS=['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff','ev4_hr_init','ev4_tblY','ev4_tblM','ev4_openYears','ev4_openMonths','ev4_openCos','ev4_insYearOpen'];
+function lsClearAll(){
+  DATA_KEYS.forEach(k=>{
+    localStorage.removeItem(k);
+    if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);
+  });
+}
 function clearAll(){
-  if(!confirm('למחוק את כל הרשומות המקומיות?'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();toast('🗑️ הכל נמחק');
+  if(!confirm('למחוק את כל הנתונים המקומיים?'))return;
+  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
+  lsClearAll();
+  recalc();renderAll();renderExp();toast('🗑️ הכל נמחק');
 }
 async function clearAllCloud(){
   if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
-  recs=[];LS.set('ev4_recs',recs);renderAll();
-  if(!gdToken||!gdDataFileId){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
+  lsClearAll();
+  recalc();renderAll();renderExp();
+  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
   try{
-    await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{
-      method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-    gdDataFileId=null;
-    if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    if(gdDataFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+    }
+    if(gdHtmlFileId){
+      await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+      gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
+    }
     toast('🗑️ נמחק מקומית ומהענן');
   }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
 }
@@ -3185,20 +3218,30 @@ async function delSelected(cloud){
   if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
   const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות',doExp&&'הוצאות'].filter(Boolean).join(', ');
   if(!confirm(`למחוק: ${items}${cloud?' + ענן':''}?\nלא ניתן לשחזר!`))return;
-  if(doR){recs=[];LS.set('ev4_recs',recs);}
-  if(doC){cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];LS.set('ev4_cos',cos);}
-  if(doRt){homeRates=[];fuelRates=[];LS.set('ev4_hr',homeRates);LS.set('ev4_fuel',fuelRates);}
-  if(doS){st={showCost:true};LS.set('ev4_st',st);}
-  if(doExp){expenses=[];saveExpLS();}
-  recalc();renderAll();
-  if(cloud&&gdToken&&gdDataFileId){
+  const ck=(k)=>{localStorage.removeItem(k);if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);};
+  const COS_DEF=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];
+  if(doR){recs=[];ck('ev4_recs');ck('ev4_savedAt');}
+  if(doC){cos=COS_DEF;ck('ev4_cos');}
+  if(doRt){homeRates=[];fuelRates=[];ck('ev4_hr');ck('ev4_fuel');ck('ev4_hr_init');}
+  if(doS){st=Object.assign({},ST_DEF);ck('ev4_st');ck('ev4_bat');ck('ev4_eff');}
+  if(doExp){expenses=[];ck('ev4_expenses');}
+  recalc();renderAll();renderExp();
+  if(cloud&&gdToken){
     try{
-      await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
-      gdDataFileId=null;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),null);
+      if(gdDataFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdDataFileId=null;ck(gdUserKey('gd_data_fid'));
+      }
+      if(gdHtmlFileId){
+        await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+        gdHtmlFileId=null;ck(gdUserKey('gd_html_fid'));
+      }
       toast('🗑️ נמחק מקומית ומהענן');
     }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');}
   } else {
-    toast('🗑️ נמחק');if(cloud)gdAutoSave();
+    // מחיקה מקומית בלבד — שמור לענן את הנתונים החדשים (הריקים)
+    if(gdToken)gdAutoSave();
+    toast('🗑️ נמחק מקומית');
   }
 }
 
@@ -4147,26 +4190,23 @@ function gdLoadUserIds(){
   gdHtmlFileId=LS.get(gdUserKey('gd_html_fid'),null);
 }
 
-function gdShowBar(){
-  const bar=$('gdBar');
-  if(bar)bar.style.transform='translateY(0)';
-  // דחוף תוכן מטה
-  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
-  if(wrap)wrap.style.paddingTop='38px';
-}
-function gdHideBar(){
-  const bar=$('gdBar');
-  if(bar)bar.style.transform='translateY(-60px)';
-  const wrap=document.querySelector('.app-wrap')||document.querySelector('body>div');
-  if(wrap)wrap.style.paddingTop='';
-}
+function gdShowBar(){}
 function gdSetStatus(txt,color){
-  const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx2)';}
+  // settings panel status
+  const s=$('gdStatus');if(s){s.textContent=txt;s.style.color=color||'var(--tx3)';}
+  // desktop sidebar status
+  const ss=$('gdSideStatus');if(ss){ss.textContent=txt;ss.style.color=color||'var(--tx3)';}
+}
+function gdSetHdrStatus(line1,line2){
+  // compact header indicator (mobile)
+  const h=$('gdStatusHdr');if(!h)return;
+  h.innerHTML=line2?`${line1}<br><span style="color:var(--tx3);font-size:.65rem">${line2}</span>`:line1;
 }
 function gdSetBtn(label,fn,color){
-  const b=$('gdBtn');if(!b)return;
-  b.textContent=label;b.onclick=fn;
-  b.style.background=color||'var(--ac2)';
+  // settings button
+  const b=$('gdBtn');if(b){b.textContent=label;b.onclick=fn;b.style.background=color||'var(--ac2)';}
+  // desktop sidebar button
+  const bs=$('gdSideBtn');if(bs){bs.textContent=label;bs.onclick=fn;bs.style.background=color||'var(--ac2)';}
 }
 
 function gdLogin(){
@@ -4183,21 +4223,13 @@ function gdLogin(){
         const u=await r.json();
         gdUserId=u.id;
         localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
-        // הגדר LS לעבוד עם uid זה וטען נתוני המשתמש
         LS._uid=gdUserId;
-        recs=LS.get('ev4_recs',recs);
-        cos=LS.get('ev4_cos',cos);
-        homeRates=LS.get('ev4_hr',homeRates);
-        fuelRates=LS.get('ev4_fuel',fuelRates);
-        st=LS.get('ev4_st',st);
-        expenses=LS.get('ev4_expenses',expenses);
-        tblExpandY=LS.get('ev4_tblY',{});tblExpandM=LS.get('ev4_tblM',{});
-        const _th=LS.get('ev4_theme','dark');document.body.classList.toggle('light',_th==='light');syncThemeBtns();
-        recalc();renderAll();
       }catch{}
       gdLoadUserIds();
       gdSetStatus('✅ מחובר','var(--ac)');
+      gdSetHdrStatus('✅ מחובר');
       gdSetBtn('התנתק',gdLogout,'var(--er)');
+      // התחברות חדשה — תמיד טען מהענן (ענן מנצח מקומי)
       gdSync();
     }
   });
@@ -4205,11 +4237,13 @@ function gdLogin(){
 }
 
 function gdLogout(){
+  // התנתקות — שמור נתונים מקומית תחת uid, אחר כך נקה session
   gdToken=null;gdUserId=null;gdDataFileId=null;gdHtmlFileId=null;
   LS._uid=null;
   localStorage.setItem('ev4_gd_token',JSON.stringify(null));
   localStorage.setItem('ev4_gd_uid',JSON.stringify(null));
   gdSetStatus('☁️ לא מחובר','var(--tx2)');
+  gdSetHdrStatus('☁️ לא מחובר');
   gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
 }
 
@@ -4225,7 +4259,7 @@ async function gdSaveData(){
   if(!gdToken)return;
   if(gdSyncing){gdDirty=true;return;}
   gdSyncing=true;gdDirty=false;
-  gdSetStatus('💾 שומר...','var(--ac3)');
+  gdSetStatus('💾 שומר...','var(--ac3)');gdSetHdrStatus('💾 שומר...');
   try{
     const body=JSON.stringify(gdCollectData(),null,2);
     const blob=new Blob([body],{type:'application/json'});
@@ -4247,7 +4281,7 @@ async function gdSaveData(){
     // שמירת HTML
     await gdSaveHTML();
     const now=new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
-    gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');
+    gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
   } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
   gdSyncing=false;
   if(gdDirty)gdSaveData();
@@ -4283,19 +4317,12 @@ async function gdLoadData(){
     const d=await r.json();
     // השווה לפי timestamp — מי עודכן לאחרונה מנצח
     const cloudTs=d._savedAt||0;
-    const localTs=LS.get('ev4_savedAt',0);
-    if(localTs>cloudTs){
-      toast('☁️ נתונים מקומיים חדשים יותר — שומר לענן');
-      await gdSaveData();
-      return true;
-    }
     if(d.recs)recs=d.recs;
     if(d.cos)cos=d.cos;
     if(d.homeRates)homeRates=d.homeRates;
     if(d.fuelRates)fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-    const localExpTs=LS.get('ev4_savedAt',0);
-    if(d.expenses&&!(localExpTs>cloudTs)){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
+    if(d.expenses){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
     LS.set('ev4_savedAt',cloudTs);
@@ -4318,18 +4345,37 @@ async function gdSync(){
   if(!gdToken)return;
   gdSetStatus('🔄 מסנכרן...','var(--ac2)');
   try{
-    // מצא קבצים קיימים
-    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;LS.set('ev4_gd_data_fid',id);}}
-    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;LS.set('ev4_gd_html_fid',id);}}
+    // מצא קבצים קיימים בענן
+    if(!gdDataFileId){const id=await gdFindFile(GD_DATA_FILE);if(id){gdDataFileId=id;if(gdUserId)LS.set(gdUserKey('gd_data_fid'),id);}}
+    if(!gdHtmlFileId){const id=await gdFindFile(GD_HTML_FILE);if(id){gdHtmlFileId=id;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),id);}}
+    const localTs=LS.get('ev4_savedAt',0);
     if(gdDataFileId){
-      const loaded=await gdLoadData();
-      if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');}
-      else await gdSaveData();
+      // יש קובץ ענן — בדוק מי חדש יותר
+      const hdr=await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}?fields=modifiedTime`,{
+        headers:{'Authorization':'Bearer '+gdToken}});
+      const meta=await hdr.json();
+      const cloudTs=meta.modifiedTime?new Date(meta.modifiedTime).getTime():0;
+      if(cloudTs>localTs){
+        // ענן חדש יותר — טען ממנו
+        const loaded=await gdLoadData();
+        if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר','נטען מהענן');}
+        else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
+      } else {
+        // מקומי חדש יותר (או שווה) — שמור לענן
+        await gdSaveData();
+        gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר');
+      }
     } else {
-      await gdSaveData();
-      toast('☁️ גיבוי ראשון נשמר בענן');
+      // אין קובץ ענן
+      const localRecs=LS.get('ev4_recs',[]);
+      if(localRecs.length>0||recs.length>0){
+        // יש נתונים מקומיים — שמור לענן
+        await gdSaveData();
+        toast('☁️ גיבוי נשמר בענן');
+      }
+      gdSetStatus('✅ מחובר','var(--ac)');
     }
-  } catch{gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
+  } catch(e){gdSetStatus('❌ שגיאת סנכרון','var(--er)');}
 }
 
 // שמירה אוטומטית — מופעלת אחרי כל שינוי
@@ -4339,7 +4385,7 @@ function gdAutoSave(){
   gdAutoSaveTimer=setTimeout(gdSaveData,2000);
 }
 
-// ניסיון שחזור טוקן קיים בטעינה
+// אתחול בטעינה
 (function gdInit(){
   gdShowBar();
   const savedToken=localStorage.getItem('ev4_gd_token');
@@ -4347,22 +4393,18 @@ function gdAutoSave(){
   const token=savedToken?JSON.parse(savedToken):null;
   const uid=savedUid?JSON.parse(savedUid):null;
   if(token&&uid){
-    gdToken=token;gdUserId=uid;
-    LS._uid=uid;
-    // טען נתוני המשתמש הספציפי
-    recs=LS.get('ev4_recs',recs);
-    cos=LS.get('ev4_cos',cos);
-    homeRates=LS.get('ev4_hr',homeRates);
-    fuelRates=LS.get('ev4_fuel',fuelRates);
-    st=LS.get('ev4_st',st);
-    expenses=LS.get('ev4_expenses',expenses);
-    tblExpandY=LS.get('ev4_tblY',{});tblExpandM=LS.get('ev4_tblM',{});
-    const _th=LS.get('ev4_theme','dark');document.body.classList.toggle('light',_th==='light');syncThemeBtns();
-    recalc();renderAll();
+    // משתמש מחובר — הגדר uid ב-LS לפני הכל
+    gdToken=token;gdUserId=uid;LS._uid=uid;
     gdLoadUserIds();
-    gdSetStatus('🔄 מתחבר...','var(--ac2)');
+    gdSetStatus('🔄 מתחבר...','var(--ac2)');gdSetHdrStatus('🔄 מתחבר...');
     gdSetBtn('התנתק',gdLogout,'var(--er)');
+    // טען מהענן — אם אין קובץ ענן, השתמש במה שב-localStorage
     gdSync();
+  } else {
+    // לא מחובר — הצג כפתור התחברות
+    gdSetStatus('☁️ לא מחובר','var(--tx2)');
+    gdSetHdrStatus('☁️ לא מחובר');
+    gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
   }
 })();
 
