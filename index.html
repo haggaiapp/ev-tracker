@@ -1158,6 +1158,15 @@ function lsClearAll(){
   });
 }
 async function clearRecs(){
+  // שלב 1: הצע גיבוי
+  const wantBackup=await confirmAsync('לפני המחיקה — לייצא גיבוי JSON?');
+  if(wantBackup){
+    const out={recs,cos,homeRates,fuelRates,st,expenses};
+    dl(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),`ev_backup_${today()}.json`);
+    toast('📦 גיבוי יוצא');
+    await new Promise(r=>setTimeout(r,800));
+  }
+  // שלב 2: אישור מחיקה
   if(!await confirmAsync('למחוק את כל היסטוריית הטעינות?'))return;
   recs=[];
   LS.set('ev4_recs',[]);
