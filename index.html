@@ -747,7 +747,7 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         </label>
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.87rem">
           <span style="flex:1">הוצאות רכב</span>
-          <div class="chk-wrap" onclick="toggleChk('del_exp')"><div class="chk-box chk-red" id="del_exp" data-on="1"></div></div>
+          <div class="chk-wrap" onclick="toggleChk('del_exp')"><div class="chk-box chk-red" id="del_exp" data-on="0"></div></div>
         </label>
       </div>
       <div style="display:flex;gap:8px">
@@ -3224,7 +3224,7 @@ async function delSelected(cloud){
   if(doC){cos=COS_DEF;ck('ev4_cos');}
   if(doRt){homeRates=[];fuelRates=[];ck('ev4_hr');ck('ev4_fuel');ck('ev4_hr_init');}
   if(doS){st=Object.assign({},ST_DEF);ck('ev4_st');ck('ev4_bat');ck('ev4_eff');}
-  if(doExp){expenses=[];ck('ev4_expenses');}
+  if(doExp){expenses=[];ck('ev4_expenses');LS.set('ev4_expenses',[]);}
   recalc();renderAll();renderExp();
   if(cloud&&gdToken){
     try{
@@ -4212,7 +4212,16 @@ function gdSetBtn(label,fn,color){
 }
 
 function gdLogin(){
-  if(!window.google){toast('⚠️ Google לא נטען, נסה שוב','e');return;}
+  if(!window.google){
+    // המתן עד שה-script נטען (עד 5 שניות)
+    let tries=0;
+    const wait=setInterval(()=>{
+      tries++;
+      if(window.google){clearInterval(wait);gdLogin();}
+      else if(tries>10){clearInterval(wait);toast('⚠️ Google לא נטען, נסה שוב','e');}
+    },500);
+    return;
+  }
   const client=google.accounts.oauth2.initTokenClient({
     client_id:GD_CLIENT_ID,
     scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
@@ -4284,7 +4293,11 @@ async function gdSaveData(){
     await gdSaveHTML();
     const now=new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
-  } catch(e){gdSetStatus('❌ שגיאת שמירה','var(--er)');}
+  } catch(e){
+    const is401=e&&(e.status===401||String(e).includes('401'));
+    if(is401){gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');}
+    else gdSetStatus('❌ שגיאת שמירה','var(--er)');
+  }
   gdSyncing=false;
   if(gdDirty)gdSaveData();
 }
@@ -4294,7 +4307,7 @@ async function gdSaveHTML(){
   if(!gdToken)return;
   const htmlContent=document.documentElement.outerHTML;
   const blob=new Blob([htmlContent],{type:'text/html'});
-  const meta={name:GD_HTML_FILE,parents:gdHtmlFileId?undefined:['appDataFolder']};
+  const meta={name:GD_HTML_FILE,...(!gdHtmlFileId&&{parents:['appDataFolder']})};
   if(gdHtmlFileId){
     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdHtmlFileId}?uploadType=media`,{
       method:'PATCH',headers:{'Authorization':'Bearer '+gdToken,'Content-Type':'text/html'},body:blob});
@@ -4319,12 +4332,12 @@ async function gdLoadData(){
     const d=await r.json();
     // השווה לפי timestamp — מי עודכן לאחרונה מנצח
     const cloudTs=d._savedAt||0;
-    if(d.recs)recs=d.recs;
-    if(d.cos)cos=d.cos;
-    if(d.homeRates)homeRates=d.homeRates;
-    if(d.fuelRates)fuelRates=d.fuelRates;
+    if(Array.isArray(d.recs))recs=d.recs;
+    if(Array.isArray(d.cos))cos=d.cos;
+    if(Array.isArray(d.homeRates))homeRates=d.homeRates;
+    if(Array.isArray(d.fuelRates))fuelRates=d.fuelRates;
     if(d.st){st=Object.assign({},ST_DEF,d.st);LS.set('ev4_st',st);}
-    if(d.expenses){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
+    if(Array.isArray(d.expenses)){expenses=d.expenses;LS.set('ev4_expenses',expenses);}
     if(d.carBattery)LS.set('ev4_bat',d.carBattery);
     if(d.carEff)LS.set('ev4_eff',d.carEff);
     LS.set('ev4_savedAt',cloudTs);
@@ -4361,12 +4374,12 @@ async function gdSync(){
       if(cloudTs>localTs){
         // ענן חדש יותר — טען ממנו
         const loaded=await gdLoadData();
-        if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר','נטען מהענן');}
+        if(loaded){toast('☁️ נתונים נטענו מהענן');gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר','נטען מהענן');gdSetBtn('התנתק',gdLogout,'var(--er)');}
         else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
       } else {
         // מקומי חדש יותר (או שווה) — שמור לענן
         await gdSaveData();
-        gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר');
+        gdSetStatus('✅ מסונכרן','var(--ac)');gdSetHdrStatus('✅ מחובר');gdSetBtn('התנתק',gdLogout,'var(--er)');
       }
     } else {
       // אין קובץ ענן
@@ -4376,7 +4389,7 @@ async function gdSync(){
         await gdSaveData();
         toast('☁️ גיבוי נשמר בענן');
       }
-      gdSetStatus('✅ מחובר','var(--ac)');
+      gdSetStatus('✅ מחובר','var(--ac)');gdSetBtn('התנתק',gdLogout,'var(--er)');
     }
   } catch(e){
     // בדוק אם הטוקן פג תוקף (401)
