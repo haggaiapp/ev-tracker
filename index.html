@@ -928,6 +928,15 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
     </div>
   </div>
 </div>
+<div id="confirmModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;max-width:320px;width:90%;text-align:center;">
+    <div id="confirmMsg" style="font-size:.95rem;color:var(--tx);margin-bottom:20px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="confirmNo" style="flex:1;padding:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx2);border-radius:8px;font-size:.85rem;cursor:pointer;font-family:var(--fn);">ביטול</button>
+      <button id="confirmYes" style="flex:1;padding:10px;border:none;background:var(--er);color:#fff;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:var(--fn);">אישור</button>
+    </div>
+  </div>
+</div>
 </div><!-- /app-layout -->
 
 <div class="toast" id="toast"></div>
@@ -1115,9 +1124,9 @@ function saveRec(){
   sw('log', null);
 }
 
-function delRec(id,e){
+async function delRec(id,e){
   e.stopPropagation();
-  if(!confirm('למחוק?'))return;
+  if(!await confirmAsync('למחוק?'))return;
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
 const DATA_KEYS=['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff','ev4_hr_init','ev4_tblY','ev4_tblM','ev4_openYears','ev4_openMonths','ev4_openCos','ev4_insYearOpen'];
@@ -1127,18 +1136,18 @@ function lsClearAll(){
     if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);
   });
 }
-function clearAll(){
-  if(!confirm('למחוק את כל הנתונים המקומיים?'))return;
+async function clearAll(){
+  if(!await confirmAsync('למחוק את כל הנתונים המקומיים?'))return;
   recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
   lsClearAll();
-  recalc();renderAll();renderExp();toast('🗑️ הכל נמחק');
+  recalc();renderAll();renderExp();toast('🗑️ הכל נמחק');setTimeout(()=>location.reload(),800);
 }
 async function clearAllCloud(){
-  if(!confirm('למחוק את כל הנתונים — גם מקומית וגם מהענן?\nלא ניתן לשחזר!'))return;
+  if(!await confirmAsync('למחוק את כל הנתונים — גם מקומית וגם מהענן?'))return;
   recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];homeRates=[];fuelRates=[];st=Object.assign({},ST_DEF);
   lsClearAll();
   recalc();renderAll();renderExp();
-  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');return;}
+  if(!gdToken){toast('🗑️ נמחק מקומית (אין חיבור לענן)');setTimeout(()=>location.reload(),800);return;}
   try{
     if(gdDataFileId){
       await fetch(`https://www.googleapis.com/drive/v3/files/${gdDataFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
@@ -1148,8 +1157,8 @@ async function clearAllCloud(){
       await fetch(`https://www.googleapis.com/drive/v3/files/${gdHtmlFileId}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
       gdHtmlFileId=null;if(gdUserId)LS.set(gdUserKey('gd_html_fid'),null);
     }
-    toast('🗑️ נמחק מקומית ומהענן');
-  }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');}
+    toast('🗑️ נמחק מקומית ומהענן');setTimeout(()=>location.reload(),800);
+  }catch{toast('🗑️ נמחק מקומית, שגיאה במחיקת ענן','w');setTimeout(()=>location.reload(),800);}
 }
 function recalc(){
   let c=0;
@@ -3011,7 +3020,7 @@ function saveFuel(){
   fuelRates.sort((a,b)=>a.date.localeCompare(b.date));
   LS.set('ev4_fuel',fuelRates);closeModal('mFuel');renderFuelHist();toast('✅ מחיר דלק עודכן');
 }
-function delFuel(d){if(!confirm('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
+async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
 
 // ══════════════════════════════════════════
 // COMPANIES
@@ -3040,7 +3049,7 @@ function saveCo(){
   else{const id='c'+Date.now();cos.push({id,name,type,rate,isDefault:isDef});}
   LS.set('ev4_cos',cos);closeModal('mCo');renderCoBtns();renderCoList();toast('✅ נשמר');gdAutoSave();
 }
-function rmCo(i){if(!confirm('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
+async function rmCo(i){if(!await confirmAsync('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
 
 // ══════════════════════════════════════════
 // SETTINGS
@@ -3217,7 +3226,7 @@ async function delSelected(cloud){
   const doR=isChk('del_recs'),doC=isChk('del_cos'),doRt=isChk('del_rates'),doS=isChk('del_st'),doExp=isChk('del_exp');
   if(!doR&&!doC&&!doRt&&!doS&&!doExp){toast('⚠️ לא נבחר כלום','e');return;}
   const items=[doR&&'היסטוריה',doC&&'חברות',doRt&&'תעריפים',doS&&'הגדרות',doExp&&'הוצאות'].filter(Boolean).join(', ');
-  if(!confirm(`למחוק: ${items}${cloud?' + ענן':''}?\nלא ניתן לשחזר!`))return;
+  if(!await confirmAsync(`למחוק: ${items}${cloud?' + ענן':''}?`))return;
   const ck=(k)=>{localStorage.removeItem(k);if(gdUserId)localStorage.removeItem('u'+gdUserId+'_'+k);};
   const COS_DEF=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true},{id:'public',name:'ציבורי',type:'fixed',rate:1.20,isDefault:false}];
   if(doR){recs=[];ck('ev4_recs');ck('ev4_savedAt');}
@@ -3238,12 +3247,12 @@ async function delSelected(cloud){
       }
       gdSetStatus('✅ מחובר','var(--ac)');gdSetHdrStatus('✅ מחובר');
       gdSetBtn('התנתק',gdLogout,'var(--er)');
-      toast('🗑️ נמחק מקומית ומהענן');
-    }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');}
+      toast('🗑️ נמחק מקומית ומהענן');setTimeout(()=>location.reload(),800);
+    }catch{toast('🗑️ נמחק מקומית, שגיאה בענן','w');setTimeout(()=>location.reload(),800);}
   } else {
     // מחיקה מקומית בלבד — שמור לענן את הנתונים החדשים (הריקים)
     if(gdToken)gdAutoSave();
-    toast('🗑️ נמחק מקומית');
+    toast('🗑️ נמחק מקומית');setTimeout(()=>location.reload(),800);
   }
 }
 
@@ -3270,10 +3279,10 @@ function impJSON(e){
 // ══════════════════════════════════════════
 // IMPORT CSV
 // ══════════════════════════════════════════
-function impCSV(e){
+async function impCSV(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{
+  r.onload=async ev=>{
     try{
       const lines=ev.target.result.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
       const hdr=lines[0].split(',');
@@ -3291,7 +3300,7 @@ function impCSV(e){
         imported.push({id:Date.now()+i,date:ds,kmLeft:parseFloat(c[iKl])||0,kmTotal:parseFloat(c[iKt])||0,kmDriven:c[iKd]?parseFloat(c[iKd])||null:null,kwh:kw,kwhAdd:parseFloat(c[iKwa])||0,kwhCumul:parseFloat(c[iKwC])||0,companyId:coId,companyName:coName,rate:parseFloat(c[iRate])||0,cost:parseFloat(c[iCost])||0,note:(c[iNote]||'').trim()});
       }
       if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
-      if(confirm(`ייבוא ${imported.length} רשומות מ-CSV?\n(ימחקו הנתונים הקיימים)`)){
+      if(await confirmAsync(`ייבוא ${imported.length} רשומות מ-CSV?`)){
         recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast('✅ יובאו '+imported.length+' רשומות');
       }
     }catch(err){toast('⚠️ שגיאה: '+err.message,'e');}
@@ -3302,7 +3311,7 @@ function impCSV(e){
 // ══════════════════════════════════════════
 // IMPORT XLSM
 // ══════════════════════════════════════════
-function impXLSM(e){
+async function impXLSM(e){
   const f=e.target.files[0];if(!f)return;
   setImpBar(true,'טוען ספריית Excel...',10);
   if(window.XLSX){_doXLSM(f);return;}
@@ -3316,7 +3325,7 @@ function impXLSM(e){
 
 function _doXLSM(file){
   const reader=new FileReader();
-  reader.onload=ev=>{
+  reader.onload=async ev=>{
     try{
       setImpBar(true,'מנתח גיליון...',50);
       const data=new Uint8Array(ev.target.result);
@@ -3368,7 +3377,7 @@ function _doXLSM(file){
       }
       setImpBar(false);
       if(!imported.length){toast('⚠️ לא נמצאו שורות תקינות','e');return;}
-      if(confirm(`ייבוא ${imported.length} רשומות מ-Excel?\n(ימחקו הנתונים הקיימים)`)){
+      if(await confirmAsync(`ייבוא ${imported.length} רשומות מ-Excel?`)){
         recs=imported;recalc();LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);renderAll();toast(`✅ יובאו ${imported.length} רשומות מ-Excel`);
       }
     }catch(err){setImpBar(false);toast('⚠️ שגיאה: '+err.message,'e');console.error(err);}
@@ -4159,8 +4168,8 @@ function saveExp(){
   else expenses.push(obj);
   saveExpLS();closeModal('mExp');renderExp();toast('✅ נשמר');
 }
-function delExp(id){
-  if(!confirm('למחוק?'))return;
+async function delExp(id){
+  if(!await confirmAsync('למחוק?'))return;
   expenses=expenses.filter(e=>e.id!==id);saveExpLS();renderExp();toast('🗑️ נמחק');
 }
 
@@ -4211,6 +4220,17 @@ function gdSetBtn(label,fn,color){
   const bs=$('gdSideBtn');if(bs){bs.textContent=label;bs.onclick=fn;bs.style.background=color||'var(--ac2)';}
 }
 
+function confirmAsync(msg){
+  return new Promise(resolve=>{
+    const modal=$('confirmModal');
+    $('confirmMsg').textContent=msg;
+    modal.style.display='flex';
+    const yes=$('confirmYes'),no=$('confirmNo');
+    const done=(v)=>{modal.style.display='none';yes.onclick=null;no.onclick=null;resolve(v);};
+    yes.onclick=()=>done(true);
+    no.onclick=()=>done(false);
+  });
+}
 function gdLogin(){
   if(!window.google){
     // המתן עד שה-script נטען (עד 5 שניות)
