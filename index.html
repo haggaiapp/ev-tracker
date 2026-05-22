@@ -2885,13 +2885,7 @@ function renderDashboard(){
   const kmCardEl=$('dashKmCard');
   const botEl=$('dashBottom');
 
-  if(!recs.length){
-    kpiEl.innerHTML='<div class="mpty" style="grid-column:1/-1"><div class="mpty-i">⚡</div><p>אין טעינות עדיין<br>הזן נתונים ביומן</p></div>';
-    [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='none';});
-    const kca=$('kpiChartArea');if(kca)kca.innerHTML='';
-    return;
-  }
-  [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='';});
+  [savCardEl,gauCardEl,kmCardEl,botEl].forEach(e=>{if(e)e.style.display='';});;
 
   // ─── חישובים ───
   const dr=recs.filter(r=>r.kmDriven!=null&&r.kmDriven>0);
@@ -3236,7 +3230,26 @@ function drawSavingChart(){
       pts.push({x:r.date,saved:cumSaved,elec:cumElec});
     }
   }
-  if(pts.length<2){$('dashSavingCard').style.display='none';return;}
+  if(pts.length<2){
+    $('dashSavingCard').style.display='';
+    // צייר גרף ריק עם ציר X בלבד
+    const canvas=$('dashSavingCard').querySelector('canvas');
+    if(canvas){
+      const ctx2=canvas.getContext('2d');
+      ctx2.clearRect(0,0,canvas.width,canvas.height);
+      ctx2.strokeStyle='rgba(128,128,128,.2)';
+      ctx2.lineWidth=1;
+      ctx2.beginPath();
+      ctx2.moveTo(50,canvas.height-20);
+      ctx2.lineTo(canvas.width-10,canvas.height-20);
+      ctx2.stroke();
+      ctx2.fillStyle='rgba(128,128,128,.4)';
+      ctx2.font='12px Heebo,sans-serif';
+      ctx2.textAlign='center';
+      ctx2.fillText('נדרשות לפחות 2 רשומות',canvas.width/2,canvas.height/2);
+    }
+    return;
+  }
   $('dashSavingCard').style.display='';
 
   // ─── מקרא מעל הגרף ─── שני פריטים: ריבוע + רווח + טקסט, משמאל לימין
@@ -3442,7 +3455,11 @@ function drawTrendChart(){
       byY[y].push(r);
     }
     const years=Object.keys(byY).sort();
-    if(!years.length){el.style.display='none';return;}
+    if(!years.length){
+      el.style.display='';
+      el.innerHTML='<div class="ct"><div class="ctb"></div>מגמת הוצאה</div><div style="display:flex;align-items:center;justify-content:center;height:80px;color:var(--tx3);font-size:.82rem;">אין נתונים עדיין</div>';
+      return;
+    }
     el.style.display='';
     _trendLevel._yList=years;
     for(const y of years){
@@ -3586,7 +3603,15 @@ function drawKmChart(){
     byM[ym]+=(r.kmDriven>0?r.kmDriven:0);
   }
   const allKeys=Object.keys(byM).sort();
-  if(!allKeys.length){$('dashKmCard').style.display='none';return;}
+  if(!allKeys.length){
+    $('dashKmCard').style.display='';
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(128,128,128,.2)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(50,H-20);ctx.lineTo(W-10,H-20);ctx.stroke();
+    ctx.fillStyle='rgba(128,128,128,.4)';ctx.font='12px Heebo,sans-serif';ctx.textAlign='center';
+    ctx.fillText('אין נתונים עדיין',W/2,H/2);
+    return;
+  }
   $('dashKmCard').style.display='';
 
   const PAGE=6;
@@ -5533,72 +5558,22 @@ function confirmAsync(msg){
     no.onclick=()=>done(false);
   });
 }
-// ── Google Login ──────────────────────────────────────────────────────────────
-// הבעיה: GSI popup נחסם ב-Chrome מובייל (confirmed: "Failed to open popup window")
-// הפתרון: redirect באותו tab — ניווט ל-Google, חזרה עם טוקן ב-hash
-// בדסקטופ: GSI popup כרגיל
-
-const GD_REDIRECT_URI='https://ev-tracker-lemon.vercel.app';
-
-// טיפול בחזרה מ-redirect — רץ מיד בטעינת הדף
-(function gdHandleOAuthReturn(){
-  const hash=window.location.hash;
-  if(!hash||!hash.includes('access_token'))return;
-  const params=new URLSearchParams(hash.replace(/^#/,''));
-  const token=params.get('access_token');
-  if(!token)return;
-  // נקה hash מה-URL
-  history.replaceState(null,'',window.location.pathname+window.location.search);
-  // שמור ועבד את הטוקן
-  _gdProcessToken(token);
-})();
-
-async function _gdProcessToken(token){
-  gdToken=token;
-  localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
-  try{
-    const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
-    const u=await r.json();
-    gdUserId=u.id;
-    localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
-    LS._uid=gdUserId;
-  }catch{}
-  gdLoadUserIds();
-  gdSetStatus('✅ מחובר','var(--ac)');
-  gdSetHdrStatus('✅ מחובר');
-  gdSetBtn('התנתק',gdLogout,'var(--er)');
-  gdSync();
-}
-
 function gdLogin(){
+  // עדכן כפתור מיידית כדי לתת פידבק ויזואלי
   gdSetBtn('⏳ מתחבר...','gdLogin','var(--ac2)');
-  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if(isMobile){
-    // מובייל: redirect באותו tab — אין popup, עובד תמיד
-    const url='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({
-      client_id:GD_CLIENT_ID,
-      redirect_uri:GD_REDIRECT_URI,
-      response_type:'token',
-      scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
-      prompt:'select_account'
-    });
-    window.location.href=url;
-  } else {
-    // דסקטופ: GSI popup כרגיל
-    if(!window.google||!window.google.accounts){
-      let tries=0;
-      const wait=setInterval(()=>{
-        tries++;
-        if(window.google&&window.google.accounts){clearInterval(wait);_doGdLoginDesktop();}
-        else if(tries>16){clearInterval(wait);gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');toast('⚠️ Google לא נטען — נסה לרענן את הדף','e');}
-      },500);
-      return;
-    }
-    _doGdLoginDesktop();
+  if(!window.google||!window.google.accounts){
+    // המתן עד שה-script נטען (עד 8 שניות)
+    let tries=0;
+    const wait=setInterval(()=>{
+      tries++;
+      if(window.google&&window.google.accounts){clearInterval(wait);_doGdLogin();}
+      else if(tries>16){clearInterval(wait);gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');toast('⚠️ Google לא נטען — נסה לרענן את הדף','e');}
+    },500);
+    return;
   }
+  _doGdLogin();
 }
-
-function _doGdLoginDesktop(){
+function _doGdLogin(){
   try{
     const client=google.accounts.oauth2.initTokenClient({
       client_id:GD_CLIENT_ID,
@@ -5606,7 +5581,21 @@ function _doGdLoginDesktop(){
       prompt:'select_account',
       callback:async(resp)=>{
         if(resp.error){gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');gdSetStatus('❌ שגיאת התחברות','var(--er)');return;}
-        await _gdProcessToken(resp.access_token);
+        gdToken=resp.access_token;
+        localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
+        try{
+          const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
+          const u=await r.json();
+          gdUserId=u.id;
+          localStorage.setItem('ev4_gd_uid',JSON.stringify(gdUserId));
+          LS._uid=gdUserId;
+        }catch{}
+        gdLoadUserIds();
+        gdSetStatus('✅ מחובר','var(--ac)');
+        gdSetHdrStatus('✅ מחובר');
+        gdSetBtn('התנתק',gdLogout,'var(--er)');
+        // התחברות חדשה — תמיד טען מהענן (ענן מנצח מקומי)
+        gdSync();
       }
     });
     client.requestAccessToken();
