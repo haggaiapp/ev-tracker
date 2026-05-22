@@ -5606,11 +5606,15 @@ function _doGdLogin(){
 }
 
 function gdLogout(){
-  // התנתקות — שמור נתונים מקומית תחת uid, אחר כך נקה session
+  // התנתקות — נקה session ואפס את כל הנתונים בזיכרון
   gdToken=null;gdUserId=null;gdDataFileId=null;gdHtmlFileId=null;
   LS._uid=null;
   localStorage.setItem('ev4_gd_token',JSON.stringify(null));
   localStorage.setItem('ev4_gd_uid',JSON.stringify(null));
+  // אפס את כל הנתונים בזיכרון ו-localStorage
+  recs=[];expenses=[];cos=[{id:'home',name:'ביתי',type:'home',rate:null,isDefault:true}];homeRates=[];fuelRates=[];st={};
+  ['ev4_recs','ev4_cos','ev4_hr','ev4_fuel','ev4_savedAt','ev4_expenses'].forEach(k=>localStorage.removeItem(k));
+  renderAll();
   gdSetStatus('☁️ לא מחובר','var(--tx2)');
   gdSetHdrStatus('☁️ לא מחובר');
   gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
