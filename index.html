@@ -136,7 +136,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .tab{flex-shrink:0;padding:9px 14px;font-family:var(--fn);font-size:0.85rem;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;}
 .tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s;}
 .tab.active{color:var(--ac);}.tab.active::after{transform:scaleX(1);}
-.wrap{max-width:560px;margin:0 auto;padding:14px;padding-top:52px;}
+.wrap{max-width:560px;margin:0 auto;padding:14px;padding-top:10px;}
 @media(min-width:900px){
   body{display:flex;flex-direction:column;}
   .app-layout{display:flex;flex:1;align-items:flex-start;gap:0;max-width:1300px;margin:0 auto;width:100%;}
@@ -180,10 +180,44 @@ select option{background:#1c2330;}
 .sg{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
 @media(min-width:480px){.sg{grid-template-columns:repeat(4,1fr);}}
 .sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px;}
-.sc[data-ekey]{cursor:pointer;transition:border-color .18s;}
-.sc[data-ekey]:hover{border-color:rgba(255,255,255,.18);}
+.sc[data-ekey]{cursor:pointer;transition:border-color .18s,transform .15s;}
+.sc[data-ekey]:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px);}
 body.light .sc[data-ekey]:hover{border-color:rgba(0,0,0,.18);}
 .sc.kpi-open{border-color:var(--ac)!important;}
+/* Expense card visual variants */
+.sc{position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;background:transparent;}
+.sc.ec-red::before{background:var(--er);}
+.sc.ec-amber::before{background:var(--ac3);}
+.sc.ec-blue::before{background:var(--ac2);}
+.sc.ec-green::before{background:var(--ac);}
+.sc.ec-wide{grid-column:span 2;}
+/* expense card inner layout */
+.ec-label{font-size:.6rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.ec-value{font-size:1.22rem;font-weight:900;line-height:1.1;}
+.ec-sub{font-size:.6rem;color:var(--tx3);margin-top:3px;}
+.ec-bar-track{height:4px;background:var(--sf3);border-radius:2px;margin-top:7px;overflow:hidden;}
+.ec-bar-fill{height:100%;border-radius:2px;}
+.ec-inline{display:flex;align-items:center;gap:8px;}
+.ec-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.ec-split{display:flex;flex-direction:column;gap:3px;margin-top:5px;}
+.ec-split-row{display:flex;align-items:center;gap:5px;}
+.ec-split-lbl{font-size:.58rem;color:var(--tx3);width:44px;flex-shrink:0;text-align:right;}
+.ec-split-bar{flex:1;height:5px;background:var(--sf3);border-radius:2px;overflow:hidden;}
+.ec-split-fill{height:100%;border-radius:2px;}
+.ec-split-val{font-size:.6rem;font-weight:700;width:36px;text-align:left;}
+/* year-grouped expense table */
+.exp-year-group{margin-bottom:8px;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.exp-year-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sf2);cursor:pointer;user-select:none;}
+.exp-year-hdr:hover{background:var(--sf3);}
+.exp-year-title{font-size:.8rem;font-weight:700;color:var(--tx);}
+.exp-year-sum{font-size:.78rem;font-weight:700;color:var(--er);}
+.exp-year-arrow{font-size:.7rem;color:var(--tx3);transition:transform .2s;}
+.exp-year-arrow.open{transform:rotate(180deg);}
+.exp-year-body{display:none;}
+.exp-year-body.open{display:block;}
+.exp-year-body .exp-year-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.exp-year-body table{width:100%;min-width:400px;border-collapse:collapse;}
 .sv{font-size:1.35rem;font-weight:900;color:var(--ac);line-height:1.1;}
 .sv.b{color:var(--ac2);}.sv.g{color:var(--ac3);}
 .sl{font-size:.75rem;color:var(--tx2);margin-top:3px;font-weight:500;}
@@ -204,7 +238,7 @@ thead th{padding:8px 8px;text-align:right;font-weight:700;color:var(--tx3);font-
 .cr{color:var(--tx3);font-size:.68rem;}
 .badge{display:inline-block;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:20px;background:rgba(59,130,246,.12);color:var(--ac2);}
 .badge.h{background:rgba(0,200,150,.1);color:var(--ac);}
-.bdl{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.9rem;padding:3px 7px;border-radius:4px;transition:all .15s;}
+.bdl{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.9rem;padding:6px 10px;border-radius:4px;transition:all .15s;min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;}
 .bdl:hover{color:var(--er);background:rgba(239,68,68,.1);}
 .mpty{text-align:center;padding:36px 20px;color:var(--tx3);}
 .mpty-i{font-size:2.5rem;margin-bottom:10px;opacity:.35;}
@@ -300,15 +334,25 @@ body.light .tip-btn:hover{background:var(--ac);border-color:var(--ac);}
 .rd-val.g{color:var(--ac);}.rd-val.b{color:var(--ac2);}.rd-val.y{color:var(--ac3);}.rd-val.r{color:var(--er);}
 
 /* ═══ DASHBOARD ═══ */
-.dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px;}
+.dash-kpis{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;margin-bottom:14px;
+}
 @media(min-width:480px){.dash-kpis{grid-template-columns:repeat(4,1fr);}}
-.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px 14px;position:relative;overflow:hidden;}
-.kpi.kpi-clickable{cursor:pointer;transition:border-color .18s;}
-.kpi.kpi-clickable:hover{border-color:rgba(255,255,255,.18);}
+
+/* ── KPI BASE ── */
+.kpi{
+  background:var(--sf);border:1px solid var(--bd);
+  border-radius:var(--r);padding:13px 13px 11px;
+  position:relative;overflow:hidden;
+}
+.kpi.kpi-clickable{cursor:pointer;transition:border-color .18s,transform .15s;}
+.kpi.kpi-clickable:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px);}
 body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
 .kpi.kpi-open{border-color:var(--ac)!important;}
-.kpi-hint{font-size:.58rem;color:var(--tx3);margin-bottom:3px;opacity:.7;}
-/* KPI chart: full-width panel injected into grid */
+.kpi-hint{font-size:.55rem;color:var(--tx3);margin-bottom:3px;opacity:.6;letter-spacing:.2px;}
+/* KPI chart panels */
 .kpi-chart-row{grid-column:1/-1;animation:fi .2s ease;}
 .kpi-chart-panel-full{background:var(--sf);border:1px solid var(--ac);border-radius:var(--r);padding:14px 14px 10px;}
 .kpi-chart-panel-full canvas{width:100%!important;display:block;touch-action:none;}
@@ -323,32 +367,98 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
 .exp-chart-row{grid-column:1/-1;animation:fi .2s ease;}
 .kpi-chart-close{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.85rem;padding:2px 7px;border-radius:4px;font-family:var(--fn);}
 .kpi-chart-close:hover{color:var(--tx);background:var(--sf2);}
+
+/* ── VISUAL KPI CARDS ── */
+/* wide spans 2 cols */
+.kpi-wide2{grid-column:span 2;}
+
+/* label + value shared */
+.kv-label{font-size:.6rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.kv-value{font-size:1.25rem;font-weight:900;line-height:1;margin-bottom:2px;}
+.kv-sub{font-size:.6rem;color:var(--tx3);margin-top:3px;}
+.kv-green{color:var(--ac);}
+.kv-blue{color:var(--ac2);}
+.kv-yellow{color:var(--ac3);}
+.kv-red{color:var(--er);}
+.kv-ok{color:var(--ok);}
+
+/* top accent line */
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;}
 .kpi.green::before{background:var(--ac);}
 .kpi.blue::before{background:var(--ac2);}
 .kpi.yellow::before{background:var(--ac3);}
 .kpi.red::before{background:var(--er);}
 .kpi.ok::before{background:var(--ok);}
-.kpi-label{font-size:.67rem;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
-.kpi-value{font-size:1.4rem;font-weight:900;line-height:1.1;color:var(--tx);}
-.kpi-value.green{color:var(--ac);}
-.kpi-value.blue{color:var(--ac2);}
-.kpi-value.yellow{color:var(--ac3);}
-.kpi-value.red{color:var(--er);}
-.kpi-value.ok{color:var(--ok);}
-.kpi-sub{font-size:.65rem;color:var(--tx3);margin-top:3px;}
-.kpi-delta{display:inline-flex;align-items:center;font-size:.65rem;font-weight:700;margin-top:4px;padding:2px 6px;border-radius:20px;}
-.kpi-delta.up{background:rgba(34,197,94,.12);color:var(--ok);}
-.kpi-delta.dn{background:rgba(239,68,68,.12);color:var(--er);}
+
+/* SAVING — coin stack layout */
+.sv-body{display:flex;align-items:center;gap:10px;}
+.sv-coins{display:flex;flex-direction:column-reverse;gap:2px;align-items:flex-end;}
+.sv-coin{height:6px;border-radius:3px;background:var(--ok);opacity:.85;}
+
+/* COST — burn bar */
+.cb-track{height:6px;background:var(--sf3);border-radius:3px;margin-top:8px;overflow:hidden;}
+.cb-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--er),#ff6b6b);}
+
+/* RANGE — battery */
+.bat-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.bat-body{flex:1;height:14px;background:var(--sf3);border-radius:3px;border:1.5px solid rgba(255,255,255,.12);position:relative;overflow:hidden;}
+body.light .bat-body{border-color:rgba(0,0,0,.12);}
+.bat-fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;transition:width .5s ease;}
+.bat-tip{width:4px;height:8px;background:rgba(255,255,255,.25);border-radius:0 2px 2px 0;flex-shrink:0;}
+body.light .bat-tip{background:rgba(0,0,0,.18);}
+.bat-pct{font-size:.65rem;font-weight:700;color:var(--tx2);flex-shrink:0;width:28px;text-align:right;}
+
+/* EFFICIENCY — arc gauge */
+.arc-wrap{display:flex;flex-direction:column;align-items:center;margin-top:2px;}
+
+/* COST-KM — two bars comparison */
+.cmp-row{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.cmp-item{display:flex;align-items:center;gap:6px;}
+.cmp-lbl{font-size:.58rem;color:var(--tx3);width:50px;text-align:right;flex-shrink:0;}
+.cmp-bar-track{flex:1;height:6px;background:var(--sf3);border-radius:3px;overflow:hidden;}
+.cmp-bar-fill{height:100%;border-radius:3px;}
+.cmp-val{font-size:.62rem;font-weight:700;width:38px;text-align:left;flex-shrink:0;}
+
+/* KWH — lightning bolt fill */
+.bolt-wrap{display:flex;align-items:flex-end;gap:6px;margin-top:4px;}
+.bolt-bars{display:flex;align-items:flex-end;gap:2px;}
+.bolt-bar{width:6px;border-radius:2px 2px 0 0;}
+
+/* KM — odometer digits */
+.odo-wrap{display:flex;gap:2px;margin-top:6px;justify-content:flex-start;}
+.odo-digit{
+  background:var(--sf3);border:1px solid var(--bd);
+  border-radius:3px;padding:2px 4px;
+  font-size:.95rem;font-weight:900;font-family:monospace;
+  color:var(--ac2);min-width:18px;text-align:center;
+}
+
+/* PER100 — two car icons + bar */
+.p100-cars{display:flex;align-items:center;gap:4px;margin-top:6px;}
+.p100-lbl{font-size:.58rem;color:var(--tx3);}
+
+/* RATE — speedometer ticks */
+.rate-wrap{margin-top:4px;}
+
+/* CHARGES — dot grid */
+.dots-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;max-width:100%;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ac2);opacity:.7;}
+.dot.full{opacity:1;}
+.dot.empty{opacity:.2;}
+
+
+/* ── DASH ROW (chart cards) ── */
 .dash-row{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px;}
 @media(min-width:640px){.dash-row{grid-template-columns:1fr 1fr;}}
 .dash-card{margin-bottom:0!important;}
 .dash-card canvas{width:100%!important;display:block;}
+
 /* gauge */
 .gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 4px;}
 .gauge-svg{overflow:visible;}
 .gauge-label{font-size:1.6rem;font-weight:900;margin-top:-8px;}
 .gauge-sub{font-size:.7rem;color:var(--tx3);margin-top:2px;}
+
 /* bottom info strip */
 .info-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 @media(min-width:480px){.info-strip{grid-template-columns:repeat(5,1fr);}}
@@ -436,10 +546,14 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
     <div class="ct"><div class="ctb"></div>הזנת טעינה חדשה</div>
     <div class="fr">
       <div class="f"><label>📅 תאריך</label><input type="date" id="inDate"></div>
-      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="inKmLeft" placeholder="150" inputmode="numeric"></div>
+      <div class="f"><label>🕐 שעת טעינה</label>
+        <input type="time" id="inChargeTime" oninput="onChargeTimeInput(this.value)">
+        <div class="hint" id="inChargeTimeHint"></div>
+      </div>
     </div>
+    <div class="f"><label style="font-size:.95rem;font-weight:700">🛣️ אודומטר</label><input type="number" id="inKmTotal" placeholder="15430" inputmode="numeric" style="font-size:1.1rem;padding:13px 14px"><div class="hint">ק"מ מצטבר ברכב</div></div>
     <div class="fr">
-      <div class="f"><label>🛣️ אודומטר</label><input type="number" id="inKmTotal" placeholder="15430" inputmode="numeric"><div class="hint">ק"מ מצטבר ברכב</div></div>
+      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="inKmLeft" placeholder="150" inputmode="numeric"></div>
       <div class="f"><label>⚡ קו"ש שנטענו</label><input type="number" id="inKwh" placeholder="45.2" step="0.01" inputmode="decimal"></div>
     </div>
     <div class="f">
@@ -510,7 +624,7 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
   <div class="card"><div class="ct"><div class="ctb"></div>לפי חברה</div><div id="stCo"></div></div>
   <div class="card"><div class="ct"><div class="ctb"></div>מדדי יעילות ונסיעה</div><div id="stKm"></div></div>
   <div class="card"><div class="ct"><div class="ctb"></div>חיסכון מול דלק</div><div id="stFuel"></div></div>
-  <div class="card"><div class="ct"><div class="ctb" style="background:var(--ac3)"></div>פילוח חודשי — חשמל ודלק</div><div id="stMonthly"></div></div>
+  <div class="card"><div class="lrow" style="align-items:center"><div class="ct" style="margin-bottom:0"><div class="ctb" style="background:var(--ac3)"></div>פילוח חודשי — חשמל ודלק</div><button class="gbtn" id="monthlyCoOnlyBtn" onclick="toggleMonthlyCoOnly()" style="font-size:.72rem;padding:5px 10px">🏢 חברות בלבד</button></div><div id="stMonthly"></div></div>
 </div>
 
 <!-- ═══ תעריפים ═══ -->
@@ -529,6 +643,18 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
         <div class="mr-lb">⛽ דלק (₪/ליטר)</div>
         <div class="mr-v" id="mrFuelDisp" style="color:var(--ac3)">—</div>
       </div>
+    </div>
+  </div>
+  <!-- תעריף דינמי — כרטיס נפרד מעל ההיסטוריות, ניתן לפתיחה/סגירה -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div onclick="toggleDynRateCard()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none">
+      <div class="ct" style="margin:0"><div class="ctb" style="background:var(--ac3)"></div>⏰ תעריף דינמי לפי שעות</div>
+      <span id="dynRateArrow" style="font-size:.8rem;color:var(--tx3);margin-right:2px">▸</span>
+    </div>
+    <div id="dynRateBody" style="display:none;padding:0 14px 14px">
+      <div style="font-size:.72rem;color:var(--tx2);margin-bottom:10px">תעריף מחושב ביחס לתעריף הביתי הבסיסי כשמזינים שעת טעינה</div>
+      <div id="dynRateTable"></div>
+      <button class="gbtn g" onclick="addDynRate()" style="margin-top:10px;font-size:.78rem;padding:6px 14px">+ הוסף תעריף</button>
     </div>
   </div>
   <div class="card">
@@ -584,10 +710,33 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
       <div class="ct" style="margin-bottom:0"><div class="ctb" style="background:var(--er)"></div>הוצאות רכב</div>
       <button class="gbtn g" onclick="openAddExp()">+ הוסף</button>
     </div>
-    <div class="tw" style="max-height:50vh">
-      <table id="expTbl">
+    <!-- חיפוש וסינון הוצאות -->
+    <div style="display:flex;gap:7px;margin-bottom:8px;align-items:center">
+      <div class="search-wrap" style="flex:1;margin-bottom:0">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="expSearchQ" placeholder="חיפוש תיאור, הערה, קטגוריה..." oninput="renderExpTable()" style="padding-right:36px">
+        <button class="search-clear" id="expSearchClear" onclick="$('expSearchQ').value='';$('expSearchClear').style.display='none';renderExpTable()">✕</button>
+      </div>
+      <select id="expCatFilter" onchange="renderExpTable()" style="width:auto;flex-shrink:0;font-size:.8rem;padding:10px 10px">
+        <option value="">כל הקטגוריות</option>
+        <option value="ביטוח">🛡️ ביטוח</option>
+        <option value="טיפול">🔧 טיפול</option>
+        <option value="צמיגים">🔄 צמיגים</option>
+        <option value="אגרה">📋 אגרה</option>
+        <option value="איתורן">📍 איתורן</option>
+        <option value="שטיפה">🚿 שטיפה</option>
+        <option value="תשלום חודשי">💳 תשלום חודשי</option>
+        <option value="אחר">📦 אחר</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-height:50vh;overflow-y:auto;border-radius:var(--rs);border:1px solid var(--bd)">
+      <table id="expTbl" style="width:100%;min-width:420px;border-collapse:collapse">
         <thead><tr>
-          <th>תיאור</th><th>סכום ₪</th><th>קטגוריה</th><th>תאריך</th><th></th>
+          <th style="min-width:120px">תיאור</th>
+          <th style="min-width:80px;white-space:nowrap">סכום ₪</th>
+          <th style="min-width:80px">קטגוריה</th>
+          <th style="min-width:80px;white-space:nowrap">תאריך</th>
+          <th style="min-width:56px"></th>
         </tr></thead>
         <tbody id="expBody"></tbody>
       </table>
@@ -614,14 +763,9 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
       <div class="f"><label>🔋 קיבולת סוללה (קו"ש)</label><input type="number" id="sBatt" placeholder="70" oninput="saveSt()"></div>
       <div class="f"><label>🛣️ טווח מוצהר (ק"מ)</label><input type="number" id="sRange" placeholder="485" oninput="saveSt()"></div>
     </div>
-    <div class="f">
-      <label>⚡ קו"ש טעינה בפועל <span style="font-size:.68rem;color:var(--tx3);font-weight:400">(ברירת מחדל: כמו קיבולת סוללה)</span></label>
-      <input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()">
-      <div class="hint">לדוגמה: סוללה 70 קו"ש אך בטעינה מלאה מגיע ל-80 קו"ש — הזן 80</div>
-    </div>
     <div class="fr">
-      <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="מחושב אוטומטית" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= קיבולת סוללה ÷ טווח × 100</div></div>
-      <div class="f"><label>🏎️ כ"ס</label><input type="number" id="sKw" placeholder="204" oninput="saveSt()"></div>
+      <div class="f"><label>⚡ קו"ש טעינה בפועל</label><input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()"><div class="hint">בטעינה מלאה (לדוג': 80)</div></div>
+      <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="אוטומטי" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= סוללה ÷ טווח × 100</div></div>
     </div>
     <div class="fr">
       <div class="f"><label>⛽ ק"מ לליטר (שקילות)</label><input type="number" id="sKpl" placeholder="12.125" step="0.001" oninput="saveSt()"></div>
@@ -753,28 +897,7 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
 </div>
 
 
-<!-- MODAL: עריכת רשומה -->
-<div class="mov" id="mEdit">
-  <div class="modal">
-    <div class="mt">✏️ עריכת טעינה</div>
-    <input type="hidden" id="editId">
-    <div class="fr">
-      <div class="f"><label>📅 תאריך</label><input type="date" id="editDate"></div>
-      <div class="f"><label>🔋 ק"מ נשאר</label><input type="number" id="editKmLeft" inputmode="numeric"></div>
-    </div>
-    <div class="fr">
-      <div class="f"><label>🛣️ אודומטר</label><input type="number" id="editKmTotal" inputmode="numeric"></div>
-      <div class="f"><label>⚡ קו"ש</label><input type="number" id="editKwh" step="0.01" inputmode="decimal"></div>
-    </div>
-    <div class="f">
-      <label>💰 תעריף ₪/קו"ש</label>
-      <input type="number" id="editRate" step="0.001" inputmode="decimal">
-    </div>
-    <div class="f"><label>🏢 חברה</label><select id="editCo"></select></div>
-    <div class="f"><label>📝 הערה</label><input type="text" id="editNote"></div>
-    <div class="mbs"><div class="mcan" onclick="closeModal('mEdit')">ביטול</div><button class="btn" onclick="saveEdit()">שמור שינויים</button></div>
-  </div>
-</div>
+
 <!-- MODAL: הוצאה -->
 <div class="mov" id="mExp">
   <div class="modal">
@@ -803,6 +926,29 @@ body.light .kpi.kpi-clickable:hover{border-color:rgba(0,0,0,.18);}
     </div>
     <div class="f"><label>הערה</label><input type="text" id="expNote" placeholder="פרטים נוספים..."></div>
     <div class="mbs"><div class="mcan" onclick="closeModal('mExp')">ביטול</div><button class="btn" onclick="saveExp()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: תעריף דינמי -->
+<div class="mov" id="mDynRate">
+  <div class="modal">
+    <div class="mt">⏰ עריכת תעריף דינמי</div>
+    <input type="hidden" id="dynModalIdx">
+    <div class="fr">
+      <div class="f" style="flex:0 0 70px"><label>אמוג'י</label><input type="text" id="dynModalEmoji" placeholder="⏰" maxlength="2"></div>
+      <div class="f"><label>שם</label><input type="text" id="dynModalLabel" placeholder="לילה, יום, שעות עומס..."></div>
+    </div>
+    <div class="f"><label>תיאור שעות (לתצוגה)</label><input type="text" id="dynModalHours" placeholder="23:00–07:00"></div>
+    <div class="fr">
+      <div class="f"><label>משעה (0–23)</label><input type="number" id="dynModalFrom" min="0" max="23" placeholder="23" inputmode="numeric"></div>
+      <div class="f"><label>עד שעה (0–24)</label><input type="number" id="dynModalTo" min="0" max="24" placeholder="7" inputmode="numeric"></div>
+    </div>
+    <div class="f"><label>שינוי אחוז מהתעריף הבסיסי</label>
+      <input type="number" id="dynModalPct" step="0.1" placeholder="-28" inputmode="decimal">
+      <div class="hint">שלילי = הנחה, חיובי = תוספת. לדוגמה: −28 ללילה, +15 לשעות עומס</div>
+    </div>
+    <div class="f"><div class="trow"><div style="font-size:.85rem;font-weight:600">חל בשבת (ללא תלות בשעה)</div><label class="tgl"><input type="checkbox" id="dynModalShabbat"><div class="tsl"></div></label></div></div>
+    <div class="mbs"><div class="mcan" onclick="closeModal('mDynRate')">ביטול</div><button class="btn" onclick="saveDynRate()">שמור</button></div>
   </div>
 </div>
 
@@ -1081,6 +1227,134 @@ function onRateInput2(v){
   else{tag.className='rate-auto';tag.textContent='ברירת מחדל';const ac=$('inAddCo');$('inRate2').placeholder=coRate(ac?.value||'home',today()).toFixed(3);}
 }
 
+// תעריף דינמי לפי שעה — הגדרות ניתנות לעריכה
+const DYN_RATE_DEF = [
+  {emoji:'🌙',label:'לילה',       hours:'23:00–07:00', pct:-28, from:23, to:7,  shabbat:false},
+  {emoji:'☀️',label:'יום',        hours:'07:00–17:00', pct:0,   from:7,  to:17, shabbat:false},
+  {emoji:'⚡',label:'שעות עומס',  hours:'17:00–23:00', pct:15,  from:17, to:23, shabbat:false},
+  {emoji:'🕍',label:'שבת',        hours:'כל היום',     pct:10,  from:0,  to:24, shabbat:true},
+];
+let dynRates = LS.get('ev4_dynRates', null);
+// migrate from old object format if needed
+if(!Array.isArray(dynRates)) dynRates = JSON.parse(JSON.stringify(DYN_RATE_DEF));
+
+function dynamicRate(baseRate, timeStr, dateStr) {
+  if(!timeStr||!dynRates.length) return {rate: baseRate, label: ''};
+  const [hh] = timeStr.split(':').map(Number);
+  const d = new Date((dateStr||today())+'T12:00:00');
+  const dow = d.getDay(); // 0=ראשון,6=שבת
+  const isShabbat = (dow === 6);
+  // שבת קודמת
+  const shabbatRule = dynRates.find(r=>r.shabbat);
+  if(isShabbat && shabbatRule){
+    const pct=shabbatRule.pct;
+    return {rate:+(baseRate*(1+pct/100)).toFixed(3), label:`${shabbatRule.emoji} ${shabbatRule.label} (${pct>=0?'+':''}${pct}%)`};
+  }
+  // חוק לפי שעה (non-shabbat)
+  for(const r of dynRates){
+    if(r.shabbat) continue;
+    const {from:f,to:t} = r;
+    // from > to means overnight (e.g. 23–7)
+    const match = f>t ? (hh>=f || hh<t) : (hh>=f && hh<t);
+    if(match){
+      return {rate:+(baseRate*(1+r.pct/100)).toFixed(3), label:`${r.emoji} ${r.label} (${r.pct>=0?'+':''}${r.pct}%)`};
+    }
+  }
+  return {rate: baseRate, label: '(רגיל)'};
+}
+
+function toggleDynRateCard(){
+  const body=$('dynRateBody'),arrow=$('dynRateArrow');
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.textContent=open?'▸':'▾';
+  if(!open)renderDynRateTable();
+}
+
+function renderDynRateTable(){
+  const el=$('dynRateTable');if(!el)return;
+  const baseRate=homeRate(today())||0.643;
+  if(!dynRates||!dynRates.length){el.innerHTML='<div style="font-size:.78rem;color:var(--tx3);padding:8px 0">אין תעריפים מוגדרים</div>';return;}
+  el.innerHTML=dynRates.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid rgba(42,53,71,.35)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.82rem;font-weight:700">${r.emoji||'⏰'} ${r.label}</div>
+        <div style="font-size:.67rem;color:var(--tx3)">${r.hours}</div>
+      </div>
+      <div style="text-align:center;min-width:46px">
+        <div style="font-size:.68rem;color:var(--tx3)">שינוי</div>
+        <div style="font-size:.85rem;font-weight:700;color:${r.pct<0?'var(--ac)':r.pct>0?'var(--er)':'var(--tx)'}">${r.pct>=0?'+':''}${r.pct}%</div>
+      </div>
+      <div style="text-align:center;min-width:58px">
+        <div style="font-size:.68rem;color:var(--tx3)">תעריף</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--ac3)">${(baseRate*(1+r.pct/100)).toFixed(3)}</div>
+      </div>
+      <button class="gbtn" onclick="editDynRate(${i})" style="font-size:.7rem;padding:4px 8px">✎</button>
+      <button class="gbtn d" onclick="delDynRate(${i})" style="font-size:.7rem;padding:4px 8px">✕</button>
+    </div>`).join('')
+  +`<div style="font-size:.68rem;color:var(--tx3);margin-top:7px">בסיס: ${baseRate.toFixed(3)} ₪/קו"ש (תעריף ביתי נוכחי)</div>`;
+}
+
+function addDynRate(){
+  openDynRateModal(-1,{emoji:'⏰',label:'',hours:'',pct:0,shabbat:false,from:0,to:24});
+}
+function editDynRate(i){
+  openDynRateModal(i,dynRates[i]);
+}
+function delDynRate(i){
+  dynRates.splice(i,1);
+  LS.set('ev4_dynRates',dynRates);
+  renderDynRateTable();
+  toast('🗑️ נמחק');
+}
+function openDynRateModal(idx,r){
+  $('dynModalIdx').value=idx;
+  $('dynModalEmoji').value=r.emoji||'⏰';
+  $('dynModalLabel').value=r.label||'';
+  $('dynModalHours').value=r.hours||'';
+  $('dynModalPct').value=r.pct||0;
+  $('dynModalFrom').value=r.from!=null?r.from:'';
+  $('dynModalTo').value=r.to!=null?r.to:'';
+  $('dynModalShabbat').checked=!!r.shabbat;
+  openModal('mDynRate');
+}
+function saveDynRate(){
+  const idx=parseInt($('dynModalIdx').value);
+  const obj={
+    emoji:$('dynModalEmoji').value.trim()||'⏰',
+    label:$('dynModalLabel').value.trim(),
+    hours:$('dynModalHours').value.trim(),
+    pct:parseFloat($('dynModalPct').value)||0,
+    from:parseFloat($('dynModalFrom').value)||0,
+    to:parseFloat($('dynModalTo').value)||24,
+    shabbat:$('dynModalShabbat').checked,
+  };
+  if(!obj.label){toast('⚠️ נא להזין שם','e');return;}
+  if(idx<0)dynRates.push(obj);
+  else dynRates[idx]=obj;
+  LS.set('ev4_dynRates',dynRates);
+  closeModal('mDynRate');
+  renderDynRateTable();
+  toast('✅ נשמר');
+}
+
+function onChargeTimeInput(v) {
+  const hint = $('inChargeTimeHint'); if(!hint) return;
+  if(!v) { hint.textContent = ''; return; }
+  const co = selCo; const ds = $('inDate').value || today();
+  const base = coRate(co, ds);
+  if(!base) { hint.textContent = ''; return; }
+  const {rate, label} = dynamicRate(base, v, ds);
+  hint.textContent = label ? `${label} → תעריף: ${rate.toFixed(3)} ₪/קו"ש` : '';
+  // עדכן תעריף אם לא הוזן ידנית
+  const ri = $('inRate');
+  if(ri && (!ri.value || ri.dataset.wasAuto === '1')) {
+    ri.placeholder = rate.toFixed(3);
+    ri.dataset.wasAuto = '1';
+  }
+}
+
 function lastCoRate(cid){
   // תעריף אחרון שהוזן ביומן לחברה זו
   const coRecs=recs.filter(r=>r.companyId===cid&&r.rate>0).sort((a,b)=>b.date.localeCompare(a.date));
@@ -1125,7 +1399,10 @@ function saveRec(){
   }
   if(recs.length>0&&ds<recs[recs.length-1].date){toast('⚠️ התאריך מוקדם מהרשומה האחרונה','e');return;}
   const manR=parseFloat($('inRate').value);
-  const r1=(!isNaN(manR)&&manR>0)?manR:coRate(selCo,ds);
+  const baseR=coRate(selCo,ds);
+  const timeStr=$('inChargeTime')?.value||'';
+  const dynamicR=timeStr?dynamicRate(baseR,timeStr,ds).rate:baseR;
+  const r1=(!isNaN(manR)&&manR>0)?manR:dynamicR;
   const hasA=!!($('hasAdd')?.checked);
   const kwa=hasA?(parseFloat($('inAddKwh').value)||0):0;
   const addCid=hasA?$('inAddCo').value:null;
@@ -1136,7 +1413,8 @@ function saveRec(){
   const cost=kw*r1+kwa*r2;
   recs.push({id:Date.now(),date:ds,kmLeft:kl,kmTotal:kt,kmDriven:kmD,kwh:kw,kwhAdd:kwa,kwhCumul:kwhC,companyId:selCo,addCoId:addCid,rate:r1,rateAdd:r2,cost,note,companyName:cos.find(c=>c.id===selCo)?.name||selCo});
   LS.set('ev4_recs',recs);
-  ['inKmLeft','inKmTotal','inKwh','inNote','inAddKwh','inRate','inRate2'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['inKmLeft','inKmTotal','inKwh','inNote','inAddKwh','inRate','inRate2','inChargeTime'].forEach(id=>{const el=$(id);if(el){el.value='';if(el.dataset&&el.dataset.wasAuto)delete el.dataset.wasAuto;}});
+  const _cht=$('inChargeTimeHint');if(_cht)_cht.textContent='';
   onRateInput('');onRateInput2('');
   if($('hasAdd')){$('hasAdd').checked=false;$('addF').style.display='none';}
   kmOffsetDirty=false;
@@ -1478,12 +1756,24 @@ function buildDetail(r){
 // ══════════════════════════════════════════
 // MONTHLY BREAKDOWN
 // ══════════════════════════════════════════
+let _monthlyCoOnly=false;
+function toggleMonthlyCoOnly(){
+  _monthlyCoOnly=!_monthlyCoOnly;
+  const btn=$('monthlyCoOnlyBtn');
+  if(btn){btn.classList.toggle('on',_monthlyCoOnly);btn.style.color=_monthlyCoOnly?'var(--ac2)':'';}
+  renderMonthly();
+}
+
 function renderMonthly(){
   const el=$('stMonthly');
   if(!el||recs.length<2){if(el)el.innerHTML='<p style="color:var(--tx3);font-size:.8rem">נדרשות לפחות 2 רשומות</p>';return;}
+  // סינון: רק חברות (לא ביתי) אם מופעל
+  const srcRecs = _monthlyCoOnly
+    ? recs.filter(r=>{ const co=cos.find(c=>c.id===r.companyId); return co&&co.type!=='home'; })
+    : recs;
 
   const byYear={};
-  for(const r of recs){
+  for(const r of srcRecs){
     const y=r.date.slice(0,4),ym=r.date.slice(0,7);
     if(!byYear[y])byYear[y]={kwh:0,cost:0,km:0,fuelCost:0,months:{}};
     if(!byYear[y].months[ym])byYear[y].months[ym]={kwh:0,cost:0,km:0,fuelCost:0,days:{}};
@@ -1494,10 +1784,10 @@ function renderMonthly(){
     byYear[y].months[ym].days[r.date].kwh+=(r.kwh||0);byYear[y].months[ym].days[r.date].cost+=(r.cost||0);byYear[y].months[ym].days[r.date].km+=km;byYear[y].months[ym].days[r.date].fuelCost+=fc;
   }
 
-  const totKwh=recs.reduce((s,r)=>s+(r.kwh||0),0);
-  const totCost=recs.reduce((s,r)=>s+(r.cost||0),0);
-  const totKm=recs.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
-  let totFuel=0;for(const r of recs){if(r.kmDriven>0)totFuel+=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));}
+  const totKwh=srcRecs.reduce((s,r)=>s+(r.kwh||0),0);
+  const totCost=srcRecs.reduce((s,r)=>s+(r.cost||0),0);
+  const totKm=srcRecs.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
+  let totFuel=0;for(const r of srcRecs){if(r.kmDriven>0)totFuel+=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));}
   const years=Object.keys(byYear).sort().reverse();
 
   // ── Single flat table, all rows share the same columns ──
@@ -1699,26 +1989,6 @@ function editRec(id,e){
   $('editCo').innerHTML=cos.map(c=>`<option value="${c.id}" ${c.id===r.companyId?'selected':''}>${c.name}</option>`).join('');
   openModal('mEdit');
 }
-function saveEdit(){
-  const id=parseInt($('editId').value);
-  const idx=recs.findIndex(r=>r.id===id);
-  if(idx<0)return;
-  const r=recs[idx];
-  const ds=$('editDate').value;
-  const kl=parseFloat($('editKmLeft').value)||r.kmLeft;
-  const kt=parseFloat($('editKmTotal').value)||r.kmTotal;
-  const kw=parseFloat($('editKwh').value)||r.kwh;
-  const rate=parseFloat($('editRate').value)||r.rate;
-  const cid=$('editCo').value;
-  const note=$('editNote').value.trim();
-  recs[idx]={...r,date:ds,kmLeft:kl,kmTotal:kt,kwh:kw,rate:rate,
-    cost:kw*rate,companyId:cid,companyName:cos.find(c=>c.id===cid)?.name||cid,note};
-  recalc();
-  LS.set('ev4_recs',recs);
-  closeModal('mEdit');
-  renderAll();
-  toast('✅ הרשומה עודכנה');
-}
 
 function renderAll(hl=false){renderMini();renderTable(hl);renderStats();renderMonthly();renderCoBtns();renderCoList();renderRates();renderFuelHist();renderHdr();loadSt();if($('tab-exp2')&&$('tab-exp2').classList.contains('active'))renderExp();}
 
@@ -1750,6 +2020,7 @@ const KPI_META={
   km:     {label:'סה"כ ק"מ חודשי',color:'#00c896',fmt:v=>fmtNum(v,0)+' ק"מ',invertedGood:false},
   saving: {label:'חיסכון מדלק חודשי',color:'#22c55e',fmt:v=>fmtILS(v,0),invertedGood:false},
   cost:   {label:'עלות חשמל חודשית',color:'#ef4444',fmt:v=>fmtILS(v,0),invertedGood:true},
+  charges:{label:'טעינות מלאות חודשיות',color:'#3b82f6',fmt:v=>fmtNum(v,2),invertedGood:false},
 };
 
 function calcKpiMonthly(key){
@@ -1773,6 +2044,7 @@ function calcKpiMonthly(key){
     else if(key==='km')val=d.km>0?d.km:null;
     else if(key==='saving')val=d.fuelCost-d.cost;
     else if(key==='cost')val=d.cost>0?d.cost:null;
+    else if(key==='charges')val=d.kwh>0?d.kwh/chargeCap:null;
     if(val!=null)pts.push({ym,val});
   }
   return pts;
@@ -1801,7 +2073,7 @@ function _syncKpiChart(){
   row.className='kpi-chart-row';
   row.dataset.kkey=openKpiKey;
   const meta=KPI_META[openKpiKey];
-  const TREE_KEYS=['kwh','km','saving','cost'];
+  const TREE_KEYS=['kwh','km','saving','cost','charges'];
   if(TREE_KEYS.includes(openKpiKey)){
     row.innerHTML=`<div class="kpi-chart-panel-full">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -1849,14 +2121,30 @@ function _syncKpiChart(){
 }
 
 function _insertRow(grid,row){
-  const allChildren=Array.from(grid.children).filter(el=>el.classList.contains('kpi'));
-  allChildren.forEach((el,i)=>{el.style.order=String(i*2);});
-  const cardIdx=allChildren.findIndex(el=>el.dataset.kkey===openKpiKey);
+  const old=grid.querySelector('.kpi-chart-row');
+  if(old&&old!==row)old.remove();
+  const cards=Array.from(grid.children).filter(el=>el.classList.contains('kpi'));
+  const clickedIdx=cards.findIndex(el=>el.dataset.kkey===openKpiKey);
+  if(clickedIdx<0){grid.appendChild(row);return;}
   const colsStr=getComputedStyle(grid).gridTemplateColumns;
   const cols=colsStr.trim().split(/\s+/).length||2;
-  const rowEnd=Math.min(allChildren.length-1,cardIdx+(cols-1-(cardIdx%cols)));
-  row.style.order=String(rowEnd*2+1);
-  grid.appendChild(row);
+  // walk cards tracking column fill, find last card in clicked card's row
+  let col=0,clickedRowStart=0,i=0;
+  for(;i<=clickedIdx;i++){
+    const span=(cards[i].classList.contains('kpi-featured')||cards[i].classList.contains('kpi-wide2'))?2:1;
+    if(col+span>cols){col=span;clickedRowStart=i;}
+    else col+=span;
+  }
+  // fill rest of the row
+  let rowEnd=clickedIdx;
+  let filledCol=col;
+  for(let j=clickedIdx+1;j<cards.length;j++){
+    const sp=(cards[j].classList.contains('kpi-featured')||cards[j].classList.contains('kpi-wide2'))?2:1;
+    if(filledCol+sp>cols)break;
+    filledCol+=sp;
+    rowEnd=j;
+  }
+  cards[rowEnd].after(row);
 }
 
 // ── Tree data ──
@@ -1878,6 +2166,7 @@ function _treeVal(key,d){
   if(key==='km')return d.km||0;
   if(key==='cost')return d.cost||0;
   if(key==='saving')return(d.fuelCost||0)-(d.cost||0);
+  if(key==='charges'){const cap=st.chargeKwh||stV('batt')||1;return(d.kwh||0)/cap;}
   return 0;
 }
 function _treeSum(key,days){
@@ -1994,7 +2283,7 @@ function _drawTreeBar(key,labels,vals,meta,level,byY,canDrill){
     if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
     else ctx.fillRect(x,y,bw,barH);
     if(barH>14){
-      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
+      ctx.fillStyle=chartBarLabelColor();ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
       ctx.fillText(fmtBar(v),x+bw/2,isNeg?y+barH-4:y+11);
     }
     ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
@@ -2270,28 +2559,246 @@ function renderDashboard(){
   const avgElecMini=tkw>0?tco/tkw:homeRate(today());
   const per100fuel=tkm>0&&tkw>0?(1/(tkw/tkm))*(curFuelMini/avgElecMini):null;
 
+  let s1,s2,s3,s4,s5,s6,s7,s8,s9,s10;
   // ─── KPI cards ───
-  function kpi(label,value,sub,colorClass,key=''){
+  // shared wrapper (keeps chart toggle + open state)
+  function _kpiWrap(colorClass,key,extraClass,inner){
     const isOpen=openKpiKey===key;
     const clickable=!!key;
-    return `<div class="kpi ${colorClass}${clickable?' kpi-clickable':''}${isOpen?' kpi-open':''}" ${clickable?`onclick="toggleKpiChart('${key}')" data-kkey="${key}"`:''}>${clickable?`<div class="kpi-hint">📈 לחץ לגרף מגמה</div>`:''}
-      <div class="kpi-label">${label}</div>
-      <div class="kpi-value ${colorClass}">${value}</div>
-      ${sub?`<div class="kpi-sub">${sub}</div>`:''}
-    </div>`;
+    return `<div class="kpi ${colorClass}${extraClass?' '+extraClass:''}${clickable?' kpi-clickable':''}${isOpen?' kpi-open':''}" ${clickable?`onclick="toggleKpiChart('${key}')" data-kkey="${key}"`:''}>${clickable?`<div class="kpi-hint">📈 גרף מגמה</div>`:''}${inner}</div>`;
   }
+
+  // ── helpers ──
+  function _arcSVG(pct,color,size){
+    const r=size/2-4,cx=size/2,cy=size/2+4;
+    const a=Math.PI;const start={x:cx-r,y:cy};const end={x:cx+r,y:cy};
+    const angle=a*Math.min(1,Math.max(0,pct/100));
+    const ex=cx+r*Math.cos(Math.PI+angle);const ey=cy+r*Math.sin(Math.PI+angle);
+    const lg=angle>Math.PI?1:0;
+    return `<svg width="${size}" height="${Math.round(size/2)+6}" viewBox="0 0 ${size} ${Math.round(size/2)+6}" style="display:block;overflow:visible">
+      <path d="M${start.x},${cy} A${r},${r} 0 0 1 ${end.x},${cy}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M${start.x},${cy} A${r},${r} 0 0 1 ${ex},${ey}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
+      </svg>`;
+  }
+
   const savedColor=saved>=0?'ok':'red';
-  kpiEl.innerHTML=
-    kpi('סה"כ עלות חשמל',fmtILS(tco,0),'מתחילת המעקב','red','cost')+
-    kpi('חיסכון מדלק',fuelTotal>0?fmtILS(saved,0):'—','לעומת דלק שקילה',savedColor,'saving')+
-    kpi('₪ לק"מ',ckm>0?fmtILS(ckm,4):'—',curFuel>0?`דלק: ${fmtILS(curFuel/(stV("kpl")),4)}/ק"מ`:'','yellow','costKm')+
-    kpi('סה"כ ק"מ',fmtNum(tkm,0),'שנסעו ברכב','blue','km')+
-    kpi('סה"כ קו"ש',fmtNum(tkw,1),'שנטענו','green','kwh')+
-    kpi('1 ל-100 שקילות',per100fuel!=null?fmtNum(per100fuel,1):'—','שקילות לרכב דלק','yellow','per100')+
-    kpi('צריכת חשמל ל-100 ק"מ',qkm>0?fmtNum(qkm*100,2)+' קו"ש':'—','','blue','kwh100')+
-    kpi('טווח ממוצע מחושב',avgRange>0?Math.round(avgRange)+' ק"מ':'—',st.range?`מוצהר: ${st.range} ק"מ`:'','green','range')+
-    kpi('תעריף ממוצע',avgRate>0?avgRate.toFixed(3)+' ₪':'—','₪ לקו"ש','green','rate')+
-    kpi('חיבורים',fmtNum(recs.length,0),`${(tkw/(stV('chargeKwh')||stV('batt'))).toFixed(1)} טעינות מלאות`,'blue');
+  const accentOk='#22c55e',accentRed='#ef4444',accentBlue='#3b82f6',accentTeal='#00c896',accentAmber='#f59e0b';
+
+  // ── s1: חיסכון — coin stack + big number ──
+  (function(){
+    const color=saved>=0?accentOk:accentRed;
+    const coins=Math.min(8,Math.max(1,Math.round(Math.abs(saved)/5000)));
+    let coinHtml='';
+    for(let i=0;i<8;i++){
+      const w=16+i*6;
+      coinHtml+=`<div class="sv-coin" style="width:${w}px;background:${i<coins?color:'rgba(255,255,255,.08)'}"></div>`;
+    }
+    s1=_kpiWrap(saved>=0?'ok':'red','saving','kpi-wide2',`
+      <div class="kv-label">חיסכון מצטבר מדלק</div>
+      <div class="sv-body">
+        <div style="flex:1">
+          <div class="kv-value kv-${saved>=0?'ok':'red'}" style="font-size:1.6rem">${fuelTotal>0?fmtILS(saved,0):'—'}</div>
+          <div class="kv-sub">לעומת רכב דלק שקילה</div>
+        </div>
+        <div class="sv-coins">${coinHtml}</div>
+      </div>`);
+  })();
+
+  // ── s2: עלות כוללת — burn bar + אחוז חיסכון ──
+  (function(){
+    const pct=fuelTotal>0?Math.min(100,(tco/fuelTotal)*100):50;
+    const savPct=fuelTotal>0?Math.round((1-(tco/fuelTotal))*100):null;
+    const savColor=savPct!=null&&savPct>0?accentOk:accentRed;
+    s2=_kpiWrap('red','cost','kpi-wide2',`
+      <div class="kv-label">סה"כ עלות חשמל</div>
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <div class="kv-value kv-red" style="font-size:1.6rem">${fmtILS(tco,0)}</div>
+        ${savPct!=null?`<div style="font-size:.85rem;font-weight:800;color:${savColor}">${savPct>0?'חסכת '+savPct+'%':'הפסד '+Math.abs(savPct)+'%'}</div>`:''}
+      </div>
+      <div class="kv-sub">מתחילת המעקב · ${fuelTotal>0?'דלק שקילה: '+fmtILS(fuelTotal,0):''}</div>
+      <div class="cb-track"><div class="cb-fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px">
+        <span style="font-size:.55rem;color:var(--tx3)">חשמל</span>
+        <span style="font-size:.55rem;color:var(--tx3)">${fuelTotal>0?fmtILS(fuelTotal,0)+' דלק':''}</span>
+      </div>`);
+  })();
+
+  // ── s3: ₪ לק"מ — השוואת שתי שורות ──
+  (function(){
+    const elecVal=ckm>0?ckm:0;
+    const fuelVal=curFuel>0?(curFuel/stV("kpl")):0;
+    const maxV=Math.max(elecVal,fuelVal,0.001);
+    const ep=Math.round((elecVal/maxV)*100);const fp=Math.round((fuelVal/maxV)*100);
+    s3=_kpiWrap('yellow','costKm','',`
+      <div class="kv-label">₪ לק"מ</div>
+      <div class="cmp-row">
+        <div class="cmp-item">
+          <div class="cmp-lbl">⚡ חשמל</div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${ep}%;background:${accentTeal}"></div></div>
+          <div class="cmp-val" style="color:${accentTeal}">${ckm>0?fmtILS(ckm,3):'—'}</div>
+        </div>
+        <div class="cmp-item">
+          <div class="cmp-lbl">⛽ דלק</div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${fp}%;background:${accentAmber}"></div></div>
+          <div class="cmp-val" style="color:${accentAmber}">${fuelVal>0?fmtILS(fuelVal,3):'—'}</div>
+        </div>
+      </div>`);
+  })();
+
+  // ── s4: ק"מ — אודומטר ──
+  (function(){
+    // format with commas, then split keeping commas as separators
+    const formatted=fmtNum(tkm,0); // e.g. "145,595"
+    const parts=formatted.split(',');
+    // build digit boxes per group, comma between groups
+    let odoHtml='';
+    parts.forEach((grp,gi)=>{
+      grp.split('').forEach(d=>{ odoHtml+=`<div class="odo-digit">${d}</div>`; });
+      if(gi<parts.length-1) odoHtml+=`<div style="color:var(--tx3);font-size:.8rem;font-weight:700;align-self:center;padding:0 1px">,</div>`;
+    });
+    s4=_kpiWrap('blue','km','',`
+      <div class="kv-label">סה"כ ק"מ</div>
+      <div class="odo-wrap" style="direction:ltr;justify-content:flex-start">${odoHtml}</div>
+      <div class="kv-sub">שנסעו ברכב</div>`);
+  })();
+
+  // ── s5: קו"ש — עמודות טעינה ──
+  (function(){
+    const months=calcKpiMonthly('kwh');
+    const maxKwh=months.length?Math.max(...months.map(m=>m.val)):tkw/Math.max(1,recs.length);
+    const last6=months.slice(-6);
+    let barsHtml='';
+    for(let i=0;i<6;i++){
+      const m=last6[i];
+      const pct=m&&maxKwh>0?Math.round((m.val/maxKwh)*100):0;
+      const h=Math.max(4,Math.round(pct/100*28));
+      barsHtml+=`<div class="bolt-bar" style="height:${h}px;background:${m?accentTeal:'rgba(255,255,255,.08)'}"></div>`;
+    }
+    s5=_kpiWrap('green','kwh','',`
+      <div class="kv-label">סה"כ קו"ש</div>
+      <div class="bolt-wrap">
+        <div>
+          <div class="kv-value kv-green">${fmtNum(tkw,0)}</div>
+          <div class="kv-sub">קו"ש נטענו</div>
+        </div>
+        <div class="bolt-bars" style="margin-right:auto;padding-right:4px;direction:ltr">${barsHtml}</div>
+      </div>`);
+  })();
+
+  // ── s6: 1 ל-100 שקילות — gauge מתוך 100 ──
+  (function(){
+    const val=per100fuel;
+    // val is "liters equivalent per 100km". gauge fills out of 100.
+    const pct=val!=null?Math.min(100,Math.max(0,val)):0;
+    const col=val&&val<40?accentOk:val&&val<70?accentTeal:accentAmber;
+    const arc=_arcSVG(pct,col,80);
+    s6=_kpiWrap('yellow','per100','',`
+      <div class="kv-label">1 ל-100 שקילות</div>
+      <div class="arc-wrap">
+        <div style="position:relative;width:80px">
+          ${arc}
+          <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:.95rem;font-weight:900;color:${col}">${val!=null?fmtNum(val,1):'—'}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;width:80px;margin-top:1px">
+          <span style="font-size:.52rem;color:var(--tx3)">100</span>
+          <span style="font-size:.52rem;color:var(--tx3)">0</span>
+        </div>
+        <div class="kv-sub" style="margin-top:2px">שקילות לדלק</div>
+      </div>`);
+  })();
+
+  // ── s7: קו"ש ל-100 ק"מ — חריגה ממוצהר ──
+  (function(){
+    const val=qkm>0?qkm*100:null;
+    const BENCH=st.declKwh100||(st.batt&&st.range?st.batt/st.range*100:null);
+    const diff=val!=null&&BENCH?val-BENCH:null;
+    const diffPct=diff!=null?Math.round((diff/BENCH)*100):null;
+    const rangeMin=BENCH?Math.max(5,BENCH-10):10;
+    const rangeMax=BENCH?BENCH+12:30;
+    const pct=val!=null?Math.min(100,Math.max(0,((val-rangeMin)/(rangeMax-rangeMin))*100)):50;
+    const col=diff==null?accentBlue:diff<-1?accentOk:diff<1?accentTeal:diff<4?accentAmber:accentRed;
+    const arc=_arcSVG(pct,col,80);
+    const diffLabel=diff==null?(BENCH?'':'אין נתון מוצהר'):diff<0?`${Math.abs(diffPct)}% טוב ממוצהר`:`${Math.abs(diffPct)}% מעל מוצהר`;
+    const diffCol=diff==null?accentBlue:diff<=0?accentOk:accentRed;
+    const benchLabel=BENCH?fmtNum(BENCH,1):'?';
+    s7=_kpiWrap('blue','kwh100','',`
+      <div class="kv-label">קו"ש ל-100 ק"מ</div>
+      <div class="arc-wrap">
+        <div style="position:relative;width:80px">
+          ${arc}
+          <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:.95rem;font-weight:900;color:${col}">${val!=null?fmtNum(val,1):'—'}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;width:80px;margin-top:1px">
+          <span style="font-size:.52rem;color:var(--tx3)">${fmtNum(rangeMax,0)}</span>
+          <span style="font-size:.52rem;color:var(--tx3);font-weight:700">⬥${benchLabel}</span>
+          <span style="font-size:.52rem;color:var(--tx3)">${fmtNum(rangeMin,0)}</span>
+        </div>
+        <div class="kv-sub" style="margin-top:2px;color:${diffCol}">${diffLabel}</div>
+      </div>`);
+  })();
+
+  // ── s8: טווח — סוללה ──
+  (function(){
+    const pct=st.range>0&&avgRange>0?Math.min(100,Math.round((avgRange/st.range)*100)):null;
+    const col=pct==null?accentTeal:pct>=85?accentOk:pct>=60?accentTeal:pct>=40?accentAmber:accentRed;
+    const fillW=pct!=null?pct:0;
+    s8=_kpiWrap('green','range','',`
+      <div class="kv-label">טווח מחושב</div>
+      <div class="kv-value kv-green">${avgRange>0?Math.round(avgRange)+' ק"מ':'—'}</div>
+      <div class="bat-wrap">
+        <div class="bat-body">
+          <div class="bat-fill" style="width:${fillW}%;background:${col}"></div>
+        </div>
+        <div class="bat-tip"></div>
+        <div class="bat-pct">${pct!=null?pct+'%':''}</div>
+      </div>
+      <div class="kv-sub">${st.range?'מוצהר: '+st.range+' ק"מ':''}</div>`);
+  })();
+
+  // ── s9: תעריף — מדד עם תווים ──
+  (function(){
+    // show monthly trend bars
+    const months=calcKpiMonthly('rate');
+    const maxR=months.length?Math.max(...months.map(m=>m.val)):1;
+    const last5=months.slice(-5);
+    let ticksHtml='';
+    for(let i=0;i<5;i++){
+      const m=last5[i];
+      const pct=m&&maxR>0?Math.round((m.val/maxR)*100):0;
+      const h=Math.max(3,Math.round(pct/100*22));
+      const isLast=(i===last5.length-1)&&m;
+      ticksHtml+=`<div class="bolt-bar" style="height:${h}px;background:${isLast?accentTeal:m?'rgba(0,200,150,.4)':'rgba(255,255,255,.08)'}"></div>`;
+    }
+    s9=_kpiWrap('green','rate','',`
+      <div class="kv-label">תעריף ממוצע</div>
+      <div class="bolt-wrap">
+        <div>
+          <div class="kv-value kv-green">${avgRate>0?avgRate.toFixed(3)+' ₪':'—'}</div>
+          <div class="kv-sub">₪ לקו"ש</div>
+        </div>
+        <div class="bolt-bars" style="margin-right:auto;padding-right:4px;direction:ltr">${ticksHtml}</div>
+      </div>`);
+  })();
+
+  // ── s10: חיבורים — dot grid ──
+  (function(){
+    const total=recs.length;
+    const full=parseFloat((tkw/(stV('chargeKwh')||stV('batt')||1)).toFixed(0))||0;
+    const displayN=Math.min(total,40);
+    const fullDots=Math.min(displayN,Math.round((full/Math.max(1,total))*displayN));
+    let dotsHtml='';
+    for(let i=0;i<displayN;i++){
+      dotsHtml+=`<div class="dot ${i<fullDots?'full':'empty'}"></div>`;
+    }
+    s10=_kpiWrap('blue','charges','',`
+      <div class="kv-label">חיבורים</div>
+      <div class="kv-value kv-blue">${fmtNum(total,0)}</div>
+      <div class="dots-wrap">${dotsHtml}</div>
+      <div class="kv-sub">${full.toFixed(1)} טעינות מלאות</div>`);
+  })();
+
+  kpiEl.innerHTML=s1+s2+s4+s5+s6+s10+s7+s8+s3+s9;
+
 
   renderKpiChartArea();
   drawSavingChart();
@@ -2329,6 +2836,7 @@ function isLight(){return document.body.classList.contains('light');}
 function chartGridColor(){return isLight()?'rgba(180,195,210,.5)':'rgba(42,53,71,.4)';}
 function chartLabelColor(){return isLight()?'rgba(80,100,120,.75)':'rgba(140,153,176,.75)';}
 function chartLabelColor2(){return isLight()?'rgba(80,100,120,.6)':'rgba(140,153,176,.6)';}
+function chartBarLabelColor(){return isLight()?'rgba(20,30,50,.85)':'rgba(255,255,255,.9)';}
 
 function getCanvasSize(id,h){
   const c=$(id);if(!c)return null;
@@ -2655,7 +3163,7 @@ function _drawTrendBars(labels,vals,canDrill){
     if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
     else ctx.fillRect(x,y,bw,barH);
     if(barH>14){
-      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
+      ctx.fillStyle=chartBarLabelColor();ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
       ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%',x+bw/2,v>=0?y+11:y+barH-4);
     }
     ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
@@ -2960,6 +3468,7 @@ function renderStats(){
     srow('חיסכון לכל 100 ק"מ',fmtILS((curFuelKm-ckm)*100,2),(curFuelKm-ckm)>=0?'g':'r','(עלות דלק לק"מ − עלות חשמל לק"מ) × 100');
 }
 function renderRates(){
+  renderDynRateTable();
   const el=$('rateHist'),em=$('ratesEmpty');
   const cur=homeRate(today());
   $('mrDisp').textContent='₪'+cur.toFixed(3);
@@ -3508,9 +4017,15 @@ function saveEdit(){
   const ds=$('editDate').value;
   const kl=parseFloat($('editKmLeft').value)||0;
   const kt=parseFloat($('editKmTotal').value)||0;
-  const kw=parseFloat($('editKwh').value)||0;
+  let kw=parseFloat($('editKwh').value);
+  // אם לא הוזן קו"ש — חשב אוטומטי לפי ק"מ נשאר
+  if(isNaN(kw)||kw<=0){
+    const chargeKwh=st.chargeKwh||80,range=st.range||485;
+    kw=(range-kl)*(chargeKwh/range);
+    if(kw<=0){toast('⚠️ לא ניתן לחשב קו"ש — הזן ידנית או עדכן ק"מ נשאר','e');return;}
+  }
   const rate=parseFloat($('editRate').value)||coRate($('editCo').value,ds);
-  if(!ds||kw<=0){toast('⚠️ נא למלא שדות חובה','e');return;}
+  if(!ds){toast('⚠️ נא למלא תאריך','e');return;}
   recs[idx]={...recs[idx],date:ds,kmLeft:kl,kmTotal:kt,kwh:kw,rate,
     companyId:$('editCo').value,
     companyName:cos.find(c=>c.id===$('editCo').value)?.name||'',
@@ -3668,20 +4183,98 @@ function renderExp(){
   renderExpCharts();
 }
 
+const _expYearOpen={};
 function renderExpTable(){
-  const tbody=$('expBody');if(!tbody)return;
-  if(!expenses.length){tbody.innerHTML=`<tr><td colspan="5" class="mpty"><div class="mpty-i">💸</div><p>אין הוצאות</p></td></tr>`;return;}
-  const sorted=[...expenses].sort((a,b)=>b.date.localeCompare(a.date));
-  tbody.innerHTML=sorted.map(e=>`<tr>
-    <td style="padding:7px 5px">${EXP_ICONS[e.cat]||'📦'} ${e.desc}${e.note?`<div style="font-size:.65rem;color:var(--tx3)">${e.note}</div>`:''}</td>
-    <td style="padding:7px 5px;color:var(--er);font-weight:700;white-space:nowrap">${fmtILS(e.amt,0)}</td>
-    <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${e.cat}</td>
-    <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${fd(e.date)}</td>
-    <td style="padding:7px 5px;white-space:nowrap">
-      <button class="bdl" style="color:var(--ac2)" onclick="editExp(${e.id})">✎</button>
-      <button class="bdl" onclick="delExp(${e.id})">✕</button>
-    </td>
-  </tr>`).join('');
+  const wrap=$('expTableWrap')||$('expBody')?.closest('table')?.parentElement;
+  const container=$('expTableContainer');
+  if(!container&&!$('expBody'))return;
+  const q=(($('expSearchQ')?.value)||'').trim().toLowerCase();
+  const catF=($('expCatFilter')?.value)||'';
+  const hasFilter=!!(q||catF);
+  // show/hide clear button
+  const clr=$('expSearchClear');if(clr)clr.style.display=q?'block':'none';
+  if(!expenses.length){
+    const t=$('expBody');if(t)t.innerHTML=`<tr><td colspan="5" class="mpty"><div class="mpty-i">💸</div><p>אין הוצאות</p></td></tr>`;return;
+  }
+  // filter
+  const filtered=expenses.filter(e=>{
+    if(catF&&e.cat!==catF)return false;
+    if(!q)return true;
+    return (e.desc||'').toLowerCase().includes(q)||(e.note||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q)||String(e.amt||'').includes(q);
+  });
+  // group by year
+  const byYear={};
+  const sorted=[...filtered].sort((a,b)=>b.date.localeCompare(a.date));
+  for(const e of sorted){
+    const y=e.date.slice(0,4);
+    if(!byYear[y])byYear[y]=[];
+    byYear[y].push(e);
+  }
+  const years=Object.keys(byYear).sort().reverse();
+  const curY=new Date().getFullYear().toString();
+  years.forEach(y=>{
+    if(_expYearOpen[y]===undefined)_expYearOpen[y]=(y===curY);
+    if(hasFilter)_expYearOpen[y]=true; // auto-open when searching
+  });
+
+  function rowsHtml(items){
+    return items.map(e=>`<tr>
+      <td style="padding:7px 5px">${EXP_ICONS[e.cat]||'📦'} ${e.desc}${e.note?`<div style="font-size:.65rem;color:var(--tx3)">${e.note}</div>`:''}</td>
+      <td style="padding:7px 5px;color:var(--er);font-weight:700;white-space:nowrap">${fmtILS(e.amt,0)}</td>
+      <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${e.cat}</td>
+      <td style="padding:7px 5px;color:var(--tx3);font-size:.72rem;white-space:nowrap">${fd(e.date)}</td>
+      <td style="padding:7px 5px;white-space:nowrap">
+        <button class="bdl" style="color:var(--ac2)" onclick="editExp(${e.id})">✎</button>
+        <button class="bdl" onclick="delExp(${e.id})">✕</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  const html=years.map(y=>{
+    const items=byYear[y];
+    const total=items.reduce((s,e)=>s+e.amt,0);
+    const isOpen=_expYearOpen[y];
+    return `<div class="exp-year-group">
+      <div class="exp-year-hdr" onclick="_toggleExpYear('${y}')">
+        <span class="exp-year-title">📅 ${y} <span style="font-size:.65rem;color:var(--tx3);font-weight:400">${items.length} פריטים</span></span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span class="exp-year-sum">${fmtILS(total,0)}</span>
+          <span class="exp-year-arrow${isOpen?' open':''}">▼</span>
+        </span>
+      </div>
+      <div class="exp-year-body${isOpen?' open':''}">
+        <div class="exp-year-tbl-wrap">
+        <table style="width:100%;min-width:400px;border-collapse:collapse">
+          <thead><tr>
+            <th style="padding:5px;font-size:.65rem;color:var(--tx3);text-align:right;font-weight:600;border-bottom:1px solid var(--bd)">תיאור</th>
+            <th style="padding:5px;font-size:.65rem;color:var(--tx3);text-align:right;font-weight:600;border-bottom:1px solid var(--bd)">סכום</th>
+            <th style="padding:5px;font-size:.65rem;color:var(--tx3);text-align:right;font-weight:600;border-bottom:1px solid var(--bd)">קטגוריה</th>
+            <th style="padding:5px;font-size:.65rem;color:var(--tx3);text-align:right;font-weight:600;border-bottom:1px solid var(--bd)">תאריך</th>
+            <th style="padding:5px;border-bottom:1px solid var(--bd)"></th>
+          </tr></thead>
+          <tbody>${rowsHtml(items)}</tbody>
+        </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // replace the entire table wrapper with year groups
+  const tbody=$('expBody');
+  if(tbody){
+    const tableEl=tbody.closest('table');
+    if(tableEl&&tableEl.parentElement){
+      // insert groups before table, hide original table
+      let groupWrap=tableEl.parentElement.querySelector('.exp-groups-wrap');
+      if(!groupWrap){groupWrap=document.createElement('div');groupWrap.className='exp-groups-wrap';tableEl.parentElement.insertBefore(groupWrap,tableEl);}
+      groupWrap.innerHTML=html;
+      tableEl.style.display='none';
+    }
+  }
+}
+function _toggleExpYear(y){
+  _expYearOpen[y]=!_expYearOpen[y];
+  renderExpTable();
 }
 
 function renderExpSummary(){
@@ -3733,18 +4326,169 @@ function renderExpSummary(){
   el.innerHTML=`
     <div class="ct"><div class="ctb" style="background:var(--er)"></div>סיכום הוצאות <span style="font-size:.68rem;color:var(--tx3);font-weight:400;margin-right:6px">${months} חודשי בעלות מ-${fd(firstDate)}</span></div>
     <div class="sg exp-sg" id="expSummaryGrid">
-      <div class="sc kpi-clickable" data-ekey="totalExp" onclick="toggleExpChart('totalExp')" style="cursor:pointer"><div class="sv" style="color:var(--er)">${fmtILS(totalEffective,0)}</div><div class="sl">סה"כ הוצאות (ללא חשמל) 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="totalAll" onclick="toggleExpChart('totalAll')" style="cursor:pointer"><div class="sv" style="color:var(--er)">${fmtILS(grandTotalEffective,0)}</div><div class="sl">סה"כ כולל חשמל 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="costKm" onclick="toggleExpChart('costKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac3)">${fmtILS(tkm>0?grandTotalEffective/tkm:0,4)}</div><div class="sl">עלות כוללת לק"מ 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="totalMonth" onclick="toggleExpChart('totalMonth')" style="cursor:pointer"><div class="sv" style="color:var(--ac3)">${fmtILS(grandTotalEffective/months,0)}</div><div class="sl">ממוצע לחודש 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="expKm" onclick="toggleExpChart('expKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac2)">${fmtILS(tkm>0?totalEffective/tkm:0,4)}</div><div class="sl">הוצאות (ללא חשמל) לק"מ 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="elecKm" onclick="toggleExpChart('elecKm')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecPerKm,4)}</div><div class="sl">חשמל לק"מ 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="elecMonth" onclick="toggleExpChart('elecMonth')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecPerMonth,0)}</div><div class="sl">עלות חשמל לחודש 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="totalElecPaid" onclick="toggleExpChart('totalElecPaid')" style="cursor:pointer"><div class="sv" style="color:var(--ac)">${fmtILS(elecTotal,0)}</div><div class="sl">סה"כ שולם על חשמל 📈</div></div>
-      <div class="sc kpi-clickable" data-ekey="insTotal" onclick="toggleExpChart('insTotal')" style="cursor:pointer"><div class="sv" style="color:var(--ac2)">${fmtILS(expenses.filter(e=>e.cat==='ביטוח').reduce((s,e)=>s+e.amt,0),0)}</div><div class="sl">סה"כ ביטוח 📊</div></div>
-      ${st.carCost?`<div class="sc"><div class="sv" style="color:var(--er)">${fmtILS(st.carCost,0)}</div><div class="sl">עלות הרכב</div></div>`:''}
-      ${st.monthly?`<div class="sc"><div class="sv" style="color:var(--ac2)">${fmtILS(st.monthly,0)}</div><div class="sl">תשלום חודשי (הגדרות)</div></div>`:''}
-      ${st.monthly?`<div class="sc"><div class="sv" style="color:var(--ac2)">${fmtILS(st.monthly*months,0)}</div><div class="sl">סה"כ תשלומים × ${months} חודשים</div></div>`:''}
+      <div class="sc ec-red ec-wide kpi-clickable" data-ekey="totalAll" onclick="toggleExpChart('totalAll')">
+        <div class="ec-label">💸 סה"כ כולל חשמל</div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div class="ec-value" style="color:var(--er)">${fmtILS(grandTotalEffective,0)}</div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--tx3)">${months} חודשים</div>
+        </div>
+        <div class="ec-bar-track"><div class="ec-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--er),#ff6b6b)"></div></div>
+        <div class="ec-sub">מ-${fd(firstDate)}</div>
+      </div>
+      <div class="sc ec-red kpi-clickable" data-ekey="totalExp" onclick="toggleExpChart('totalExp')">
+        <div class="ec-label">📈 סה"כ הוצאות (ללא חשמל)</div>
+        <div class="ec-value" style="color:var(--er)">${fmtILS(totalEffective,0)}</div>
+        <div class="ec-bar-track"><div class="ec-bar-fill" style="width:${grandTotalEffective>0?Math.round((totalEffective/grandTotalEffective)*100):0}%;background:var(--er)"></div></div>
+        <div class="ec-sub">${grandTotalEffective>0?Math.round((totalEffective/grandTotalEffective)*100)+'% מסך הכל':''}</div>
+      </div>
+      <div class="sc ec-green kpi-clickable" data-ekey="totalElecPaid" onclick="toggleExpChart('totalElecPaid')">
+        <div class="ec-label">🔌 סה"כ שולם חשמל</div>
+        <div class="ec-value" style="color:var(--ac)">${fmtILS(elecTotal,0)}</div>
+        <div class="ec-bar-track"><div class="ec-bar-fill" style="width:${grandTotalEffective>0?Math.round((elecTotal/grandTotalEffective)*100):0}%;background:var(--ac)"></div></div>
+        <div class="ec-sub">${grandTotalEffective>0?Math.round((elecTotal/grandTotalEffective)*100)+'% מסך הכל':''}</div>
+      </div>
+      <div class="sc ec-amber kpi-clickable" data-ekey="totalMonth" onclick="toggleExpChart('totalMonth')">
+        <div class="ec-label">📅 ממוצע לחודש</div>
+        <div class="ec-value" style="color:var(--ac3)">${fmtILS(grandTotalEffective/months,0)}</div>
+        <div class="ec-split">
+          <div class="ec-split-row">
+            <span class="ec-split-lbl">הוצאות</span>
+            <div class="ec-split-bar"><div class="ec-split-fill" style="width:${grandTotalEffective>0?Math.round((totalEffective/grandTotalEffective)*100):0}%;background:var(--er)"></div></div>
+            <span class="ec-split-val" style="color:var(--er)">${fmtILS(totalEffective/months,0)}</span>
+          </div>
+          <div class="ec-split-row">
+            <span class="ec-split-lbl">חשמל</span>
+            <div class="ec-split-bar"><div class="ec-split-fill" style="width:${grandTotalEffective>0?Math.round((elecTotal/grandTotalEffective)*100):0}%;background:var(--ac)"></div></div>
+            <span class="ec-split-val" style="color:var(--ac)">${fmtILS(elecPerMonth,0)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc ec-blue kpi-clickable" data-ekey="costKm" onclick="toggleExpChart('costKm')">
+        <div class="ec-label">🛣️ עלות לק"מ</div>
+        <div class="ec-value" style="color:var(--ac2)">${fmtILS(tkm>0?grandTotalEffective/tkm:0,3)}</div>
+        <div class="ec-split">
+          <div class="ec-split-row">
+            <span class="ec-split-lbl">כולל חשמל</span>
+            <div class="ec-split-bar"><div class="ec-split-fill" style="width:100%;background:var(--ac2)"></div></div>
+            <span class="ec-split-val" style="color:var(--ac2)">${fmtILS(tkm>0?grandTotalEffective/tkm:0,3)}</span>
+          </div>
+          <div class="ec-split-row">
+            <span class="ec-split-lbl">ללא חשמל</span>
+            <div class="ec-split-bar"><div class="ec-split-fill" style="width:${grandTotalEffective>0?Math.round((totalEffective/grandTotalEffective)*100):0}%;background:var(--ac3)"></div></div>
+            <span class="ec-split-val" style="color:var(--ac3)">${fmtILS(tkm>0?totalEffective/tkm:0,3)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc ec-green kpi-clickable" data-ekey="elecKm" onclick="toggleExpChart('elecKm')">
+        <div class="ec-inline">
+          <div class="ec-icon" style="background:rgba(0,200,150,.12);font-size:.9rem">⚡</div>
+          <div>
+            <div class="ec-label" style="margin-bottom:2px">חשמל לק"מ</div>
+            <div class="ec-value" style="color:var(--ac)">${fmtILS(elecPerKm,4)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="sc ec-green kpi-clickable" data-ekey="elecMonth" onclick="toggleExpChart('elecMonth')">
+        <div class="ec-inline">
+          <div class="ec-icon" style="background:rgba(0,200,150,.12);font-size:.9rem">🔋</div>
+          <div>
+            <div class="ec-label" style="margin-bottom:2px">חשמל לחודש</div>
+            <div class="ec-value" style="color:var(--ac)">${fmtILS(elecPerMonth,0)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="sc ec-blue ec-wide kpi-clickable" data-ekey="insTotal" onclick="toggleExpChart('insTotal')">${(()=>{
+        const insAll=expenses.filter(e=>e.cat==='ביטוח');
+        const insTotal=insAll.reduce((s,e)=>s+e.amt,0);
+        const insMandatory=insAll.filter(e=>/חובה/.test(e.desc||'')).reduce((s,e)=>s+e.amt,0);
+        const insComp=insAll.filter(e=>/מקיף/.test(e.desc||'')).reduce((s,e)=>s+e.amt,0);
+        const insOther=insTotal-insMandatory-insComp;
+        const maxV=Math.max(insMandatory,insComp,insOther,1);
+        return `<div class="ec-label">🛡️ סה"כ ביטוח</div>
+          <div class="ec-value" style="color:var(--ac2)">${fmtILS(insTotal,0)}</div>
+          <div class="ec-split">
+            ${insMandatory>0?`<div class="ec-split-row">
+              <span class="ec-split-lbl">חובה</span>
+              <div class="ec-split-bar"><div class="ec-split-fill" style="width:${Math.round((insMandatory/maxV)*100)}%;background:#f87171"></div></div>
+              <span class="ec-split-val" style="color:#f87171">${fmtILS(insMandatory,0)}</span>
+            </div>`:''}
+            ${insComp>0?`<div class="ec-split-row">
+              <span class="ec-split-lbl">מקיף</span>
+              <div class="ec-split-bar"><div class="ec-split-fill" style="width:${Math.round((insComp/maxV)*100)}%;background:var(--ac2)"></div></div>
+              <span class="ec-split-val" style="color:var(--ac2)">${fmtILS(insComp,0)}</span>
+            </div>`:''}
+            ${insOther>0?`<div class="ec-split-row">
+              <span class="ec-split-lbl">אחר</span>
+              <div class="ec-split-bar"><div class="ec-split-fill" style="width:${Math.round((insOther/maxV)*100)}%;background:var(--tx3)"></div></div>
+              <span class="ec-split-val" style="color:var(--tx3)">${fmtILS(insOther,0)}</span>
+            </div>`:''}
+          </div>`;
+      })()}</div>
+
+      ${(()=>{
+        // כרטיס עלות הרכב + תשלום חודשי + החזר השקעה
+        if(!st.carCost)return '';
+        const carPaid = st.monthly ? st.monthly*months : st.carCost; // אם אין תשלום חודשי — שולם הכל
+        const carPct  = Math.min(100,Math.round((carPaid/st.carCost)*100));
+        const remaining = Math.max(0,st.carCost-carPaid);
+        const monthsLeft = st.monthly&&st.monthly>0 ? Math.ceil(remaining/st.monthly) : 0;
+        const noMonthly = !st.monthly;
+        return `<div class="sc ec-red ec-wide">
+          <div class="ec-label">🚗 עלות הרכב</div>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <div class="ec-value" style="color:var(--er)">${fmtILS(st.carCost,0)}</div>
+            <div style="font-size:.75rem;font-weight:700;color:var(--tx3)">מחיר מלא</div>
+          </div>
+          <div class="ec-split">
+            <div class="ec-split-row">
+              <span class="ec-split-lbl">שולם</span>
+              <div class="ec-split-bar"><div class="ec-split-fill" style="width:${carPct}%;background:var(--er)"></div></div>
+              <span class="ec-split-val" style="color:var(--er)">${fmtILS(carPaid,0)}</span>
+            </div>
+            ${!noMonthly?`<div class="ec-split-row">
+              <span class="ec-split-lbl">נותר</span>
+              <div class="ec-split-bar"><div class="ec-split-fill" style="width:${100-carPct}%;background:var(--tx3)"></div></div>
+              <span class="ec-split-val" style="color:var(--tx3)">${fmtILS(remaining,0)}</span>
+            </div>`:''}
+          </div>
+          ${!noMonthly?`<div class="ec-sub" style="margin-bottom:6px">${carPct}% שולם · ${months} חודשים · ${monthsLeft>0?monthsLeft+' חודשים נותרים':'✅ הסתיים'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid rgba(255,255,255,.08)">
+            <span style="font-size:.65rem;color:var(--tx3)">📆 תשלום חודשי</span>
+            <span style="font-size:.82rem;font-weight:700;color:var(--ac3)">${fmtILS(st.monthly,0)}/חודש</span>
+          </div>`:`<div class="ec-sub">שולם במלואו</div>`}
+        </div>`;
+      })()}
+      ${(()=>{
+        // כרטיס "החזר השקעה"
+        if(!st.carCost||!recs.length)return '';
+        const byM={};
+        for(const r of recs){
+          const ym=r.date.slice(0,7);
+          if(!byM[ym])byM[ym]={cost:0,fuel:0};
+          byM[ym].cost+=(r.cost||0);
+          if(r.kmDriven>0)byM[ym].fuel+=r.kmDriven*(fuelPrice(r.date)/(stV('kpl')));
+        }
+        const mkeys=Object.keys(byM);
+        if(!mkeys.length)return '';
+        const totalSaving=Object.values(byM).reduce((s,m)=>s+(m.fuel-m.cost),0);
+        const avgSavingPerMonth=totalSaving/mkeys.length;
+        if(avgSavingPerMonth<=0)return '';
+        const roiMonths=Math.ceil(st.carCost/avgSavingPerMonth);
+        const roiYears=(roiMonths/12).toFixed(1);
+        const roiPct=Math.min(100,Math.round((months/roiMonths)*100));
+        const roiDone=months>=roiMonths;
+        return `<div class="sc ec-green ec-wide kpi-clickable" data-ekey="roiSaving" onclick="toggleExpChart('roiSaving')">
+          <div class="ec-label">📈 החזר השקעה</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+            <div class="ec-value" style="color:${roiDone?'var(--ok)':'var(--ac)'}">${roiDone?'✅ הושג!':roiYears+' שנים'}</div>
+            ${!roiDone?`<div style="font-size:.72rem;color:var(--tx3)">(${roiMonths} חודשים)</div>`:''}
+          </div>
+          <div class="ec-bar-track"><div class="ec-bar-fill" style="width:${roiPct}%;background:${roiDone?'var(--ok)':'var(--ac)'}"></div></div>
+          <div class="ec-sub">${roiPct}% מהדרך · חיסכון ממוצע ${fmtILS(avgSavingPerMonth,0)}/חודש</div>
+          ${roiDone?'<div style="font-size:.7rem;color:var(--ok);font-weight:700;margin-top:4px">🎉 הרכב החזיר את עצמו!</div>':
+          `<div style="font-size:.68rem;color:var(--tx3);margin-top:3px">נותרו ${roiMonths-months} חודשים להחזר מלא</div>`}
+        </div>`;
+      })()}
     </div>
     <div class="card" style="background:rgba(0,200,150,.06);border-color:rgba(0,200,150,.25);margin-bottom:12px">
       <div class="ct"><div class="ctb" style="background:var(--ac)"></div>מחיר חשמל כולל</div>
@@ -3771,6 +4515,7 @@ const EXP_CHART_META={
   totalAll:     {label:'סה"כ כולל חשמל',           color:'#f59e0b', fmt:v=>fmtILS(v,0), treeBar:true},
   totalElecPaid:{label:'סה"כ שולם על חשמל',        color:'#00c896', fmt:v=>fmtILS(v,0), treeBar:true},
   insTotal:     {label:'סה"כ ביטוח',                color:'#a78bfa', fmt:v=>fmtILS(v,0), treeBar:true},
+  roiSaving:    {label:'חיסכון חודשי מדלק',          color:'#22c55e', fmt:v=>fmtILS(v,0), invertedGood:false},
 };
 
 function calcExpChartData(key){
@@ -3795,63 +4540,42 @@ function calcExpChartData(key){
     if(key==='elecMonth'){
       if(d.elec>0)pts.push({ym,val:d.elec});
     } else if(key==='totalMonth'){
-      const monthEnd=ym+'-28';
-      const mElapsed=Math.max(1,Math.round((new Date(monthEnd)-new Date(firstDate))/(1000*60*60*24*30.44)));
-      pts.push({ym,val:(elecSoFar+expSoFar)/mElapsed});
+      // Normalized monthly cost: elec actual + monthly setting + annual expenses spread over 12
+      const annualSpread=expenses
+        .filter(e=>ANNUAL_CATS.has(e.cat)&&e.date.slice(0,7)===ym)
+        .reduce((s,e)=>s+e.amt,0)/12;
+      const regularExp=expenses
+        .filter(e=>!ANNUAL_CATS.has(e.cat)&&e.cat!=='תשלום חודשי'&&e.date.slice(0,7)===ym)
+        .reduce((s,e)=>s+e.amt,0);
+      const monthlySet=st.monthly||0;
+      const normalizedVal=d.elec+monthlySet+annualSpread+regularExp;
+      pts.push({ym,val:normalizedVal});
     } else if(key==='costKm'){
-      if(kmSoFar>0)pts.push({ym,val:(elecSoFar+expSoFar)/kmSoFar});
+      // monthly normalized: elec + spread annual + regular expenses + monthly setting, divided by km that month
+      if(d.km>0){
+        const annualSpreadM=expenses.filter(e=>ANNUAL_CATS.has(e.cat)&&e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0)/12;
+        const regularExpM=expenses.filter(e=>!ANNUAL_CATS.has(e.cat)&&e.cat!=='תשלום חודשי'&&e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0);
+        const monthlySetM=st.monthly||0;
+        pts.push({ym,val:(d.elec+monthlySetM+annualSpreadM+regularExpM)/d.km});
+      }
     } else if(key==='elecKm'){
-      if(kmSoFar>0)pts.push({ym,val:elecSoFar/kmSoFar});
+      if(d.km>0)pts.push({ym,val:d.elec/d.km});
     } else if(key==='expKm'){
-      if(kmSoFar>0)pts.push({ym,val:expSoFar/kmSoFar});
-    } else if(key==='totalExp'){
-      pts.push({ym,x:ym+'-15',val:expSoFar});
-    } else if(key==='totalAll'){
-      pts.push({ym,x:ym+'-15',val:elecSoFar+expSoFar});
-    } else if(key==='totalElecPaid'){
-      pts.push({ym,x:ym+'-15',val:elecSoFar});
-    }
-  }
-  return pts;
-}
-
-function calcExpChartData(key){
-  const byM={};
-  for(const r of recs){
-    const ym=r.date.slice(0,7);
-    if(!byM[ym])byM[ym]={elec:0,km:0};
-    byM[ym].elec+=(r.cost||0);
-    if(r.kmDriven>0)byM[ym].km+=r.kmDriven;
-  }
-  const sortedRecs=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
-  const firstDate=sortedRecs[0]?.date||today();
-  const oms=Object.keys(byM).sort();
-  if(!oms.length)return [];
-  const pts=[];
-  for(const ym of oms){
-    const d=byM[ym];
-    const elecSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.elec,0);
-    const kmSoFar=Object.entries(byM).filter(([m])=>m<=ym).reduce((s,[,v])=>s+v.km,0);
-    const expSoFar=expenses.filter(e=>e.date.slice(0,7)<=ym).reduce((s,e)=>s+e.amt,0);
-    const expMonth=expenses.filter(e=>e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0);
-    if(key==='elecMonth'){
-      if(d.elec>0)pts.push({ym,val:d.elec});
-    } else if(key==='totalMonth'){
-      const monthEnd=ym+'-28';
-      const mElapsed=Math.max(1,Math.round((new Date(monthEnd)-new Date(firstDate))/(1000*60*60*24*30.44)));
-      pts.push({ym,val:(elecSoFar+expSoFar)/mElapsed});
-    } else if(key==='costKm'){
-      if(kmSoFar>0)pts.push({ym,val:(elecSoFar+expSoFar)/kmSoFar});
-    } else if(key==='elecKm'){
-      if(kmSoFar>0)pts.push({ym,val:elecSoFar/kmSoFar});
-    } else if(key==='expKm'){
-      if(kmSoFar>0)pts.push({ym,val:expSoFar/kmSoFar});
+      if(d.km>0){
+        const annualSpreadE=expenses.filter(e=>ANNUAL_CATS.has(e.cat)&&e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0)/12;
+        const regularExpE=expenses.filter(e=>!ANNUAL_CATS.has(e.cat)&&e.cat!=='תשלום חודשי'&&e.date.slice(0,7)===ym).reduce((s,e)=>s+e.amt,0);
+        const monthlySetE=st.monthly||0;
+        pts.push({ym,val:(monthlySetE+annualSpreadE+regularExpE)/d.km});
+      }
     } else if(key==='totalExp'){
       if(expMonth>0)pts.push({ym,val:expMonth});
     } else if(key==='totalAll'){
       if(d.elec>0||expMonth>0)pts.push({ym,val:d.elec+expMonth});
     } else if(key==='totalElecPaid'){
       if(d.elec>0)pts.push({ym,val:d.elec});
+    } else if(key==='roiSaving'){
+      const fuelM=recs.filter(r=>r.date.slice(0,7)===ym&&r.kmDriven>0).reduce((s,r)=>s+r.kmDriven*(fuelPrice(r.date)/(stV('kpl'))),0);
+      if(d.elec>0||fuelM>0)pts.push({ym,val:fuelM-d.elec});
     }
   }
   return pts;
@@ -3945,20 +4669,50 @@ function _expTreeSum(key,days){
 function _buildExpTreeChart(key){
   const meta=EXP_CHART_META[key];
 
-  // ביטוח — שנים בלבד, ללא drilldown
+  // ביטוח — שנים עם חלוקה חובה/מקיף/אחר
   if(key==='insTotal'){
     const byY={};
     for(const e of expenses.filter(x=>x.cat==='ביטוח')){
       const y=e.date.slice(0,4);
-      byY[y]=(byY[y]||0)+e.amt;
+      if(!byY[y])byY[y]={mandatory:0,comp:0,other:0,total:0};
+      byY[y].total+=e.amt;
+      if(/חובה/.test(e.desc||''))byY[y].mandatory+=e.amt;
+      else if(/מקיף/.test(e.desc||''))byY[y].comp+=e.amt;
+      else byY[y].other+=e.amt;
     }
     const years=Object.keys(byY).sort();
-    const labels=years,vals=years.map(y=>byY[y]);
-    const tot=vals.reduce((s,v)=>s+v,0);
-    const totFmt=fmtILS(tot,0);
     const el=document.getElementById('expTree_'+key);if(!el)return;
-    el.innerHTML=`<div style="font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:6px">${meta.label} — לפי שנה — סה"כ: ${totFmt}</div><canvas id="expBarCanvas_${key}" height="150"></canvas>`;
-    requestAnimationFrame(()=>_drawExpTreeBar(key,labels,vals,meta,'years',{},false));
+    const tot=years.reduce((s,y)=>s+byY[y].total,0);
+    // build a grouped HTML display per year
+    const maxV=Math.max(...years.map(y=>byY[y].total),1);
+    const rows=years.reverse().map(y=>{
+      const d=byY[y];
+      const pctM=Math.round((d.mandatory/maxV)*100);
+      const pctC=Math.round((d.comp/maxV)*100);
+      const pctO=Math.round((d.other/maxV)*100);
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:.72rem;font-weight:700;color:var(--tx)">${y}</span>
+          <span style="font-size:.72rem;font-weight:700;color:#a78bfa">${fmtILS(d.total,0)}</span>
+        </div>
+        ${d.mandatory>0?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+          <span style="font-size:.6rem;color:var(--tx3);width:36px;text-align:right;flex-shrink:0">חובה</span>
+          <div style="flex:1;height:6px;background:var(--sf3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pctM}%;background:#f87171;border-radius:3px"></div></div>
+          <span style="font-size:.6rem;font-weight:700;color:#f87171;width:52px;text-align:left">${fmtILS(d.mandatory,0)}</span>
+        </div>`:''}
+        ${d.comp>0?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+          <span style="font-size:.6rem;color:var(--tx3);width:36px;text-align:right;flex-shrink:0">מקיף</span>
+          <div style="flex:1;height:6px;background:var(--sf3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pctC}%;background:var(--ac2);border-radius:3px"></div></div>
+          <span style="font-size:.6rem;font-weight:700;color:var(--ac2);width:52px;text-align:left">${fmtILS(d.comp,0)}</span>
+        </div>`:''}
+        ${d.other>0?`<div style="display:flex;align-items:center;gap:5px">
+          <span style="font-size:.6rem;color:var(--tx3);width:36px;text-align:right;flex-shrink:0">אחר</span>
+          <div style="flex:1;height:6px;background:var(--sf3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pctO}%;background:var(--tx3);border-radius:3px"></div></div>
+          <span style="font-size:.6rem;font-weight:700;color:var(--tx3);width:52px;text-align:left">${fmtILS(d.other,0)}</span>
+        </div>`:''}
+      </div>`;
+    }).join('');
+    el.innerHTML=`<div style="font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:10px">${meta.label} — לפי שנה — סה"כ: ${fmtILS(tot,0)}</div>${rows}`;
     return;
   }
 
@@ -4030,7 +4784,7 @@ function _drawExpTreeBar(key,labels,vals,meta,level,byY,canDrill){
     ctx.fillStyle=grad;
     if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
     else ctx.fillRect(x,y,bw,barH);
-    if(barH>14){ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';ctx.fillText(fmtBar(v),x+bw/2,v<0?y+barH-4:y+11);}
+    if(barH>14){ctx.fillStyle=chartBarLabelColor();ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';ctx.fillText(fmtBar(v),x+bw/2,v<0?y+barH-4:y+11);}
     ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
     ctx.fillText(labels[i],x+bw/2,H-4);
   });
@@ -4171,14 +4925,26 @@ function attachExpGestures(key,pts,meta){
 }
 
 function _insertExpRow(grid,row){
-  const allChildren=Array.from(grid.children).filter(el=>el.classList.contains('sc'));
-  allChildren.forEach((el,i)=>{el.style.order=String(i*2);});
-  const cardIdx=allChildren.findIndex(el=>el.dataset.ekey===_openExpKey);
+  const old=grid.querySelector('.kpi-chart-row');
+  if(old&&old!==row)old.remove();
+  const cards=Array.from(grid.children).filter(el=>el.classList.contains('sc'));
+  const clickedIdx=cards.findIndex(el=>el.dataset.ekey===_openExpKey);
+  if(clickedIdx<0){grid.appendChild(row);return;}
   const colsStr=getComputedStyle(grid).gridTemplateColumns;
   const cols=colsStr.trim().split(/\s+/).length||2;
-  const rowEnd=Math.min(allChildren.length-1,cardIdx+(cols-1-(cardIdx%cols)));
-  row.style.order=String(rowEnd*2+1);
-  grid.appendChild(row);
+  let col=0,rowEnd=clickedIdx;
+  for(let i=0;i<=clickedIdx;i++){
+    const span=cards[i].classList.contains('ec-wide')?2:1;
+    if(col+span>cols){col=span;}else{col+=span;}
+  }
+  let filledCol=col;
+  for(let j=clickedIdx+1;j<cards.length;j++){
+    const sp=cards[j].classList.contains('ec-wide')?2:1;
+    if(filledCol+sp>cols)break;
+    filledCol+=sp;
+    rowEnd=j;
+  }
+  cards[rowEnd].after(row);
 }
 
 function renderExpCharts(){_syncExpChart();}
