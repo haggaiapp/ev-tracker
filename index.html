@@ -5574,7 +5574,8 @@ function _doGdLogin(forceRedirect){
     if(useRedirect){
       // ── Redirect mode ──
       // בונה URL ידני ל-OAuth2 implicit flow ומנווט אליו
-      var redirectUri=window.location.href.split('?')[0].split('#')[0];
+      // URI חייב להיות זהה בדיוק למה שרשום ב-Google Console — ללא slash בסוף
+      var redirectUri='https://ev-tracker-lemon.vercel.app';
       var state=btoa(JSON.stringify({ts:Date.now()}));
       localStorage.setItem('ev4_oauth_state',state);
       var params=new URLSearchParams({
