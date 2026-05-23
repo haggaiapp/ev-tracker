@@ -5557,7 +5557,7 @@ function syncGdBtn(){
 function confirmAsync(msg){
   return new Promise(resolve=>{
     const modal=$('confirmModal');
-    $('confirmMsg').textContent=msg;
+    $('confirmMsg').innerHTML=msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
     modal.style.display='flex';
     const yes=$('confirmYes'),no=$('confirmNo');
     const done=(v)=>{modal.style.display='none';yes.onclick=null;no.onclick=null;resolve(v);};
@@ -5607,8 +5607,8 @@ function _doGdLogin(){
           $('confirmYes').textContent='טען מענן';
           $('confirmNo').textContent='גבה מקומי';
           $('confirmYes').style.background='var(--ac2)';
-const _doCloud=await confirmAsync('נמצאו נתונים מקומיים. מה לעשות❓\n\n✅ טען מענן — ידרוס נתונים מקומיים.\n📦 גבה מקומי — שמור נתונים מקומיים לענן.');
-// שחזר כפתורים
+          const _doCloud=await confirmAsync('נמצאו נתונים מקומיים. מה לעשות❓\n\n✅ טען מענן — ידרוס נתונים מקומיים.\n📦 גבה מקומי — שמור נתונים מקומיים לענן.');
+          // שחזר כפתורים
           $('confirmYes').textContent='אישור';
           $('confirmNo').textContent='ביטול';
           $('confirmYes').style.background='var(--er)';
