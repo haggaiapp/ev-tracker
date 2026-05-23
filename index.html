@@ -5865,7 +5865,7 @@ function gdAutoSave(){
 // ════════════════════════════════════════════════════════
 // § 21 · BACKUP HISTORY (היסטוריית גיבויים)
 // ════════════════════════════════════════════════════════
-const GD_MAX_BACKUPS=10;
+const GD_MAX_BACKUPS=100;
 const GD_BACKUP_PREFIX='ev4_backup_';
 
 async function gdSaveBackup(){
@@ -5892,7 +5892,7 @@ async function gdListBackups(){
   if(!gdToken)return[];
   try{
     const r=await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'${GD_BACKUP_PREFIX}'&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=50`,
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'${GD_BACKUP_PREFIX}'&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=100`,
       {headers:{'Authorization':'Bearer '+gdToken}});
     const j=await r.json();
     return(j.files||[]).map(f=>({
@@ -6024,22 +6024,18 @@ async function gdDeleteBackupUI(id){
 
 // בדיקת גיבוי ישן — התראה אם עברו יותר מ-7 ימים
 function gdCheckBackupAge(){
-  const lastBackup=LS.get('ev4_lastBackupCheck',0);
   const now=Date.now();
-  if(now-lastBackup<86400000)return; // בדוק פעם ביום
-  LS.set('ev4_lastBackupCheck',now);
-  if(!gdToken)return;
-  gdListBackups().then(list=>{
-    if(!list.length){
-      // אין גיבויים כלל
-      if(recs.length>0)toast('💡 טיפ: מומלץ לשמור גיבוי ראשון','w');
-      return;
-    }
-    const latest=list[0];
-    const ageMs=now-(latest.ts||0);
-    const ageDays=Math.floor(ageMs/86400000);
-    if(ageDays>7)toast(`⚠️ הגיבוי האחרון לפני ${ageDays} ימים — מומלץ לגבות`,'w');
-  });
+  const lastAutoBackup=LS.get('ev4_lastAutoBackup',0);
+  if(!gdToken||recs.length===0)return;
+  // גיבוי אוטומטי יומי — אם עברו 24 שעות מהגיבוי האחרון
+  if(now-lastAutoBackup>86400000){
+    LS.set('ev4_lastAutoBackup',now);
+    setTimeout(()=>{
+      gdSaveBackup().then(()=>{
+        toast('📦 גיבוי יומי נשמר אוטומטית');
+      });
+    },3000); // המתן 3 שניות אחרי הסנכרון
+  }
 }
 
 (function gdInit(){
