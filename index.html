@@ -318,6 +318,7 @@ thead th{padding:8px 8px;text-align:right;font-weight:700;color:var(--tx3);font-
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(42,53,71,.4);}
 .stat-row:last-child{border-bottom:none;}
 .stat-lbl{font-size:.88rem;color:var(--tx);display:flex;align-items:center;gap:5px;}
+@keyframes dirtypulse{0%,100%{opacity:1}50%{opacity:.3}}
 .tip-btn{background:rgba(42,53,71,.7);border:1px solid var(--bd);border-radius:50%;width:18px;height:18px;font-size:.68rem;color:var(--tx2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
 .tip-btn:hover{background:var(--ac2);color:#fff;border-color:var(--ac2);}
 body.light .tip-btn{background:var(--ac2);color:#fff;border-color:var(--ac2);}
@@ -518,6 +519,7 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
     <button class="tab" onclick="sw('exp2',this)">💸 הוצאות</button>
     <button class="tab" onclick="sw('set',this)">🚗 נתוני רכב</button>
     <button class="tab" onclick="sw('gd',this)">⚙️ הגדרות</button>
+    <button class="tab" onclick="sw('backup',this);renderBackupTab()">📦 גיבויים</button>
   </div>
 </div>
 
@@ -881,38 +883,6 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
 
 </div>
 
-<div class="tc" id="tab-set">
-  <div class="card">
-    <div class="ct"><div class="ctb"></div>נתוני רכב מוצהרים</div>
-    <div class="f"><label>🚗 שם הרכב</label><input type="text" id="sCarName" placeholder="Geely Geometry C" oninput="saveSt()"></div>
-    <div class="fr">
-      <div class="f"><label>💰 עלות רכב ₪</label><input type="number" id="sCarCost" placeholder="150000" inputmode="numeric" oninput="saveSt()"><div class="hint">מחיר הרכב בקנייה</div></div>
-      <div class="f"><label>💳 תשלום חודשי ₪</label><input type="number" id="sMonthly" placeholder="3000" inputmode="numeric" oninput="saveSt()"><div class="hint">ליסינג / הלוואה חודשית</div></div>
-    </div>
-    <div class="fr">
-      <div class="f"><label>🔋 קיבולת סוללה (קו"ש)</label><input type="number" id="sBatt" placeholder="70" oninput="saveSt()"></div>
-      <div class="f"><label>🛣️ טווח מוצהר (ק"מ)</label><input type="number" id="sRange" placeholder="485" oninput="saveSt()"></div>
-    </div>
-    <div class="fr">
-      <div class="f"><label>⚡ קו"ש טעינה בפועל</label><input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()"><div class="hint">בטעינה מלאה (לדוג': 80)</div></div>
-      <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="אוטומטי" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= סוללה ÷ טווח × 100</div></div>
-    </div>
-    <div class="fr">
-      <div class="f"><label>⛽ ק"מ לליטר (שקילות)</label><input type="number" id="sKpl" placeholder="12.125" step="0.001" oninput="saveSt()"></div>
-      <div class="f">
-        <label>💰 מחיר ליטר דלק</label>
-        <input type="number" id="sFuel" placeholder="7.20" step="0.01" oninput="saveSt()">
-        <div class="hint" id="sFuelHint" style="cursor:pointer;color:var(--ac)" onclick="setAvgFuel()">⟳ חשב ממוצע מהיסטוריה</div>
-      </div>
-    </div>
-    <div id="sDeclared" style="margin-top:10px;background:var(--sf2);border-radius:var(--rs);padding:10px;font-size:.75rem;display:none">
-      <div style="color:var(--tx3);font-size:.65rem;font-weight:700;text-transform:uppercase;margin-bottom:6px">נתונים מוצהרים מחושבים</div>
-      <div id="sDeclCalc"></div>
-    </div>
-  </div>
-  <input type="checkbox" id="sShowCost" checked style="display:none">
-</div>
-
 <!-- ═══ הגדרות (דסקטופ) ═══ -->
 <div class="tc" id="tab-gd">
   <div class="card">
@@ -925,7 +895,8 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
   <div class="card">
     <div class="ct"><div class="ctb" style="background:var(--ac2)"></div>☁️ גיבוי ענן</div>
     <div id="gdStatusTab" style="font-size:.85rem;color:var(--tx3);margin-bottom:12px;line-height:1.6;">☁️ לא מחובר</div>
-    <button id="gdBtnTab" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:.88rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+    <button onclick="gdSaveBackup()" style="width:100%;background:var(--sf2);color:var(--tx2);border:1px solid var(--bd);border-radius:8px;padding:9px 14px;font-size:.85rem;cursor:pointer;font-family:var(--fn);margin-bottom:8px;">📦 שמור גיבוי עכשיו</button>
+      <button id="gdBtnTab" onclick="gdLogin()" style="background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:.88rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
   </div>
   <div class="card">
     <div class="ct"><div class="ctb" style="background:var(--er)"></div>🗂️ ניהול נתונים</div>
@@ -989,6 +960,50 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
     </div>
   </div>
 </div>
+
+<!-- ═══ גיבויים ═══ -->
+<div class="tc" id="tab-backup">
+  <div class="card">
+    <div class="ct"><div class="ctb" style="background:var(--ac2)"></div>📦 היסטוריית גיבויים</div>
+    <div id="backupTabContent" style="margin:-4px -4px 0">
+      <div style="text-align:center;padding:30px;color:var(--tx3)">טוען...</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="tc" id="tab-set">
+  <div class="card">
+    <div class="ct"><div class="ctb"></div>נתוני רכב מוצהרים</div>
+    <div class="f"><label>🚗 שם הרכב</label><input type="text" id="sCarName" placeholder="Geely Geometry C" oninput="saveSt()"></div>
+    <div class="fr">
+      <div class="f"><label>💰 עלות רכב ₪</label><input type="number" id="sCarCost" placeholder="150000" inputmode="numeric" oninput="saveSt()"><div class="hint">מחיר הרכב בקנייה</div></div>
+      <div class="f"><label>💳 תשלום חודשי ₪</label><input type="number" id="sMonthly" placeholder="3000" inputmode="numeric" oninput="saveSt()"><div class="hint">ליסינג / הלוואה חודשית</div></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>🔋 קיבולת סוללה (קו"ש)</label><input type="number" id="sBatt" placeholder="70" oninput="saveSt()"></div>
+      <div class="f"><label>🛣️ טווח מוצהר (ק"מ)</label><input type="number" id="sRange" placeholder="485" oninput="saveSt()"></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>⚡ קו"ש טעינה בפועל</label><input type="number" id="sChargeKwh" placeholder="70" step="0.1" inputmode="decimal" oninput="saveSt()"><div class="hint">בטעינה מלאה (לדוג': 80)</div></div>
+      <div class="f"><label>⚡ קו"ש ל-100 ק"מ</label><input type="number" id="sDeclKwh100" placeholder="אוטומטי" step="0.01" readonly style="background:var(--sf3);color:var(--tx2);cursor:default;opacity:.8"><div class="hint" id="sDeclKwhCalc" style="color:var(--tx3)">= סוללה ÷ טווח × 100</div></div>
+    </div>
+    <div class="fr">
+      <div class="f"><label>⛽ ק"מ לליטר (שקילות)</label><input type="number" id="sKpl" placeholder="12.125" step="0.001" oninput="saveSt()"></div>
+      <div class="f">
+        <label>💰 מחיר ליטר דלק</label>
+        <input type="number" id="sFuel" placeholder="7.20" step="0.01" oninput="saveSt()">
+        <div class="hint" id="sFuelHint" style="cursor:pointer;color:var(--ac)" onclick="setAvgFuel()">⟳ חשב ממוצע מהיסטוריה</div>
+      </div>
+    </div>
+    <div id="sDeclared" style="margin-top:10px;background:var(--sf2);border-radius:var(--rs);padding:10px;font-size:.75rem;display:none">
+      <div style="color:var(--tx3);font-size:.65rem;font-weight:700;text-transform:uppercase;margin-bottom:6px">נתונים מוצהרים מחושבים</div>
+      <div id="sDeclCalc"></div>
+    </div>
+  </div>
+  <input type="checkbox" id="sShowCost" checked style="display:none">
+</div>
+
 
 </div><!-- /wrap -->
 
@@ -1149,6 +1164,7 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
       <button class="menu-item" id="mi-cos" onclick="swMobile('cos')"><span class="menu-item-icon">🏢</span>חברות</button>
       <button class="menu-item" id="mi-exp2" onclick="swMobile('exp2')"><span class="menu-item-icon">💸</span>הוצאות</button>
       <button class="menu-item" id="mi-set" onclick="swMobile('set')"><span class="menu-item-icon">🚗</span>נתוני רכב</button>
+      <button class="menu-item" id="mi-backup" onclick="swMobile('backup');renderBackupTab()"><span class="menu-item-icon">📦</span>גיבויים</button>
     </div>
   </div>
 </div>
@@ -1246,7 +1262,8 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
 
 <script>
 // ══════════════════════════════════════════
-// STORAGE & STATE
+// ══════════════════════════════════════════
+// § 1 · STORAGE & STATE
 // ══════════════════════════════════════════
 const LS={
   _uid:null,
@@ -1287,7 +1304,8 @@ let expandedRow=null; // id of expanded row
 let tblExpandY=LS.get('ev4_tblY',{}),tblExpandM=LS.get('ev4_tblM',{}); // מצב קיפול טבלה ראשית
 
 // ══════════════════════════════════════════
-// FORMAT HELPERS
+// ══════════════════════════════════════════
+// § 2 · FORMAT HELPERS
 // ══════════════════════════════════════════
 
 // פורמט מספר עם פסיקי אלפים
@@ -1322,7 +1340,8 @@ function today(){return new Date().toISOString().slice(0,10)}
 function dl(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 
 // ══════════════════════════════════════════
-// RATE LOOKUPS
+// ══════════════════════════════════════════
+// § 3 · RATE LOOKUPS
 // ══════════════════════════════════════════
 function homeRate(ds){
   if(!homeRates.length)return 0;
@@ -1345,7 +1364,8 @@ function fuelPrice(ds){
 }
 
 // ══════════════════════════════════════════
-// RATE FIELD UX
+// ══════════════════════════════════════════
+// § 4 · RATE FIELD UX
 // ══════════════════════════════════════════
 function updateRatePlaceholder(){
   const def=lastCoRate(selCo);
@@ -1503,7 +1523,8 @@ function lastCoRate(cid){
 }
 
 // ══════════════════════════════════════════
-// COMPANY BUTTONS
+// ══════════════════════════════════════════
+// § 5 · COMPANY BUTTONS
 // ══════════════════════════════════════════
 function renderCoBtns(){
   const g=$('coBtns'),ac=$('inAddCo');
@@ -1520,7 +1541,8 @@ function renderCoBtns(){
 }
 
 // ══════════════════════════════════════════
-// SAVE RECORD
+// ══════════════════════════════════════════
+// § 6 · SAVE / DELETE / CLEAR RECORDS
 // ══════════════════════════════════════════
 function saveRec(){
   const ds=$('inDate').value,kl=parseFloat($('inKmLeft').value),kt=parseFloat($('inKmTotal').value);
@@ -1572,6 +1594,7 @@ async function delRec(id,e){
   recs=recs.filter(r=>r.id!==id);recalc();LS.set('ev4_recs',recs);renderAll();toast('🗑️ נמחק');gdAutoSave();
 }
 const DATA_KEYS=['ev4_recs','ev4_expenses','ev4_cos','ev4_hr','ev4_fuel','ev4_st','ev4_savedAt','ev4_bat','ev4_eff','ev4_hr_init','ev4_tblY','ev4_tblM','ev4_openYears','ev4_openMonths','ev4_openCos','ev4_insYearOpen'];
+const DATA_VERSION=2; // גרסת פורמט נתונים — הגדל בכל שינוי מבני
 function lsClearAll(){
   DATA_KEYS.forEach(k=>{
     localStorage.removeItem(k);
@@ -1684,7 +1707,8 @@ let coBtnsOpen=true;
 function togCoBtns(){coBtnsOpen=!coBtnsOpen;$('coBtns').style.display=coBtnsOpen?'':'none';$('coBtnsToggle').textContent=coBtnsOpen?'▾ הסתר':'▸ הצג';}
 
 // ══════════════════════════════════════════
-// SEARCH
+// ══════════════════════════════════════════
+// § 7 · SEARCH & LOG FILTERS
 // ══════════════════════════════════════════
 function getSearchQ(){return ($('searchQ').value||'').trim().toLowerCase();}
 function clearSearch(){$('searchQ').value='';$('searchClear').style.display='none';renderTable();}
@@ -1825,7 +1849,8 @@ function filterRecs(){
 }
 
 // ══════════════════════════════════════════
-// RENDER TABLE — עם פרטים בלחיצה
+// ══════════════════════════════════════════
+// § 8 · RENDER TABLE
 // ══════════════════════════════════════════
 function _clearLogSort(){_sortState['log']={col:null,dir:1};renderTable();}
 function renderTable(hl=false){
@@ -2031,7 +2056,8 @@ function buildDetail(r){
 // ══════════════════════════════════════════
 
 // ══════════════════════════════════════════
-// MONTHLY BREAKDOWN
+// ══════════════════════════════════════════
+// § 9 · MONTHLY BREAKDOWN
 // ══════════════════════════════════════════
 let _monthlyCoOnly=false;
 function toggleMonthlyCoOnly(){
@@ -2358,7 +2384,8 @@ function renderHdr(){
 function renderMini(){ renderDashboard(); }
 
 // ══════════════════════════════════════════
-// DASHBOARD
+// ══════════════════════════════════════════
+// § 10 · DASHBOARD
 // ══════════════════════════════════════════
 let kmOffset=0;
 let kmOffsetDirty=false; // true = המשתמש גלל ידנית
@@ -3698,7 +3725,8 @@ function drawKmChart(){
 }
 
 // ══════════════════════════════════════════
-// STATISTICS — חישוב מדויק
+// ══════════════════════════════════════════
+// § 11 · STATISTICS
 // ══════════════════════════════════════════
 function renderStats(){
   const sm=$('stMain'),sc=$('stCo'),sk=$('stKm'),sf=$('stFuel');
@@ -3970,7 +3998,8 @@ function toggleRY(y){
 
 
 // ══════════════════════════════════════════
-// FUEL RATES
+// ══════════════════════════════════════════
+// § 12 · FUEL RATES
 // ══════════════════════════════════════════
 function renderFuelHist(){
   const el=$('fuelHist'),em=$('fuelEmpty');
@@ -4010,7 +4039,8 @@ function saveFuel(){
 async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
 
 // ══════════════════════════════════════════
-// COMPANIES
+// ══════════════════════════════════════════
+// § 13 · COMPANIES
 // ══════════════════════════════════════════
 function renderCoList(){
   $('coList').innerHTML=cos.map((c,i)=>{
@@ -4039,7 +4069,8 @@ function saveCo(){
 async function rmCo(i){if(!await confirmAsync('למחוק?'))return;cos.splice(i,1);if(!cos.some(c=>c.isDefault)&&cos.length)cos[0].isDefault=true;LS.set('ev4_cos',cos);renderCoBtns();renderCoList();}
 
 // ══════════════════════════════════════════
-// SETTINGS
+// ══════════════════════════════════════════
+// § 14 · SETTINGS
 // ══════════════════════════════════════════
 function calcAvgFuel(){
   return fuelRates.length>0?fuelRates.reduce((s,r)=>s+r.price,0)/fuelRates.length:7.2;
@@ -4139,7 +4170,8 @@ function saveSt(){
 }
 
 // ══════════════════════════════════════════
-// EXPORT
+// ══════════════════════════════════════════
+// § 15 · EXPORT
 // ══════════════════════════════════════════
 function expCSV(){
   if(!recs.length){toast('⚠️ אין נתונים','e');return;}
@@ -4260,7 +4292,8 @@ async function delSelected(cloud){
 }
 
 // ══════════════════════════════════════════
-// IMPORT JSON
+// ══════════════════════════════════════════
+// § 16 · IMPORT
 // ══════════════════════════════════════════
 function impJSON(e){
   const f=e.target.files[0];if(!f)return;
@@ -4469,7 +4502,8 @@ function saveEdit(){
 }
 
 // ══════════════════════════════════════════
-// UI HELPERS
+// ══════════════════════════════════════════
+// § 17 · UI HELPERS
 // ══════════════════════════════════════════
 function openModal(id){$(id).classList.add('open');}
 function closeModal(id){$(id).classList.remove('open');}
@@ -4494,7 +4528,8 @@ function toast(msg,type=''){
 }
 
 // ══════════════════════════════════════════
-// INIT
+// ══════════════════════════════════════════
+// § 18 · INIT & TIPS
 // ══════════════════════════════════════════
 let tipTimer=null;
 function showTip(e,txt){
@@ -4513,7 +4548,8 @@ function showTip(e,txt){
 document.addEventListener('click',()=>{const p=$('tipPopup');if(p)p.style.display='none';});
 
 // ══════════════════════════════════════════
-// BOTTOM NAV & DRAWERS
+// ══════════════════════════════════════════
+// § 21 · BOTTOM NAV & DRAWERS
 // ══════════════════════════════════════════
 
 function openMenuDrawer(){
@@ -4598,7 +4634,8 @@ function syncThemeBtns(){
 })();
 
 // ══════════════════════════════════════════
-// EXPENSES (הוצאות)
+// ══════════════════════════════════════════
+// § 19 · EXPENSES
 // ══════════════════════════════════════════
 let expenses=LS.get('ev4_expenses',[]);
 
@@ -5499,7 +5536,8 @@ selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
 populateLogCoFilter();
 
 // ══════════════════════════════════════════
-// GOOGLE DRIVE SYNC — הגדרת משתנים (לפני renderAll)
+// ══════════════════════════════════════════
+// § 20 · GOOGLE DRIVE SYNC
 // ══════════════════════════════════════════
 const GD_CLIENT_ID='339596166863-fmdletmdvd5lm3uavrreltdhvjunt80p.apps.googleusercontent.com';
 const GD_SCOPE='https://www.googleapis.com/auth/drive.appdata';
@@ -5645,11 +5683,11 @@ function gdLogout(){
 function gdCollectData(){
   const _savedAt=Date.now();
   LS.set('ev4_savedAt',_savedAt);
-  return {recs,cos,homeRates,fuelRates,st,expenses,_savedAt,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
+  return {recs,cos,homeRates,fuelRates,st,expenses,_savedAt,_version:DATA_VERSION,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
 }
 
 // שמירת JSON לדרייב
-async function gdSaveData(){
+async function gdSaveData(retryCount=0){
   if(!gdToken)return;
   // מנע דריסת ענן עם נתונים ריקים (מצב לאחר התנתקות לפני טעינה מענן)
   if(recs.length===0 && gdDataFileId){gdDirty=false;return;}
@@ -5676,12 +5714,21 @@ async function gdSaveData(){
     }
     // שמירת HTML
     await gdSaveHTML();
+    gdClearDirty();
     const now=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
   } catch(e){
     const is401=e&&(e.status===401||String(e).includes('401'));
     if(is401){gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');}
-    else gdSetStatus('❌ שגיאת שמירה','var(--er)');
+    else if(retryCount<3){
+      gdSyncing=false;
+      gdSetStatus(`⚠️ מנסה שוב... (${retryCount+1}/3)`,'var(--ac3)');
+      setTimeout(()=>gdSaveData(retryCount+1),3000*(retryCount+1));
+      return;
+    } else {
+      gdSetStatus('❌ שגיאת שמירה — נסה ידנית','var(--er)');
+      gdMarkDirty();
+    }
   }
   gdSyncing=false;
   if(gdDirty)gdSaveData();
@@ -5759,12 +5806,12 @@ async function gdSync(){
       if(cloudTs>localTs){
         // ענן חדש יותר — טען ממנו
         const loaded=await gdLoadData();
-        if(loaded){toast('☁️ נתונים נטענו מהענן');{const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`נטען מהענן: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}}
+        if(loaded){toast('☁️ נתונים נטענו מהענן');gdCheckBackupAge();{const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`נטען מהענן: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}}
         else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
       } else {
         // מקומי חדש יותר (או שווה) — שמור לענן
         await gdSaveData();
-        {const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`שמור: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}
+        {const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`שמור: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');gdCheckBackupAge();}
       }
     } else {
       // אין קובץ ענן
@@ -5794,13 +5841,207 @@ async function gdSync(){
 }
 
 // שמירה אוטומטית — מופעלת אחרי כל שינוי
+function gdMarkDirty(){
+  gdDirty=true;
+  // הצג אינדיקטור "שינויים לא שמורים"
+  const h=$('gdStatusHdr');
+  if(h&&gdToken){
+    const s=h.querySelector('.dirty-dot');
+    if(!s){const d=document.createElement('span');d.className='dirty-dot';d.title='יש שינויים לא שמורים';d.style.cssText='display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ac3);margin-right:4px;animation:dirtypulse 1.2s ease-in-out infinite';h.prepend(d);}
+  }
+}
+function gdClearDirty(){
+  gdDirty=false;
+  const d=document.querySelector('.dirty-dot');if(d)d.remove();
+}
 function gdAutoSave(){
   if(!gdToken)return;
+  gdMarkDirty();
   clearTimeout(gdAutoSaveTimer);
   gdAutoSaveTimer=setTimeout(gdSaveData,2000);
 }
 
 // אתחול בטעינה
+// ════════════════════════════════════════════════════════
+// § 21 · BACKUP HISTORY (היסטוריית גיבויים)
+// ════════════════════════════════════════════════════════
+const GD_MAX_BACKUPS=10;
+const GD_BACKUP_PREFIX='ev4_backup_';
+
+async function gdSaveBackup(){
+  // שמור גיבוי עם timestamp בשם הקובץ
+  if(!gdToken||recs.length===0)return;
+  const ts=Date.now();
+  const name=GD_BACKUP_PREFIX+ts+'.json';
+  const data={...gdCollectData(),_backupTs:ts,_backupLabel:new Date(ts).toLocaleString('he-IL')};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const meta={name,parents:['appDataFolder']};
+  const form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+  form.append('file',blob);
+  try{
+    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',headers:{'Authorization':'Bearer '+gdToken},body:form});
+    // מחק גיבויים ישנים (שמור רק GD_MAX_BACKUPS)
+    await gdCleanOldBackups();
+    toast('📦 גיבוי נשמר');
+  }catch(e){toast('⚠️ שגיאה בשמירת גיבוי','w');}
+}
+
+async function gdListBackups(){
+  if(!gdToken)return[];
+  try{
+    const r=await fetch(
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'${GD_BACKUP_PREFIX}'&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=50`,
+      {headers:{'Authorization':'Bearer '+gdToken}});
+    const j=await r.json();
+    return(j.files||[]).map(f=>({
+      id:f.id,
+      name:f.name,
+      ts:parseInt(f.name.replace(GD_BACKUP_PREFIX,'').replace('.json','')||'0'),
+      modified:f.modifiedTime,
+      size:f.size,
+    }));
+  }catch{return[];}
+}
+
+async function gdCleanOldBackups(){
+  const list=await gdListBackups();
+  if(list.length<=GD_MAX_BACKUPS)return;
+  // מחק הישנים ביותר
+  const toDelete=list.slice(GD_MAX_BACKUPS);
+  for(const b of toDelete){
+    try{await fetch(`https://www.googleapis.com/drive/v3/files/${b.id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});}catch{}
+  }
+}
+
+async function gdLoadBackup(id){
+  if(!gdToken)return null;
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`,{headers:{'Authorization':'Bearer '+gdToken}});
+    return await r.json();
+  }catch{return null;}
+}
+
+async function gdDeleteBackup(id){
+  if(!gdToken)return;
+  await fetch(`https://www.googleapis.com/drive/v3/files/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+gdToken}});
+}
+
+function _diffData(a,b){
+  // השוואה בין שתי גרסאות — מחזיר תיאור הבדלים
+  const diffs=[];
+  const ar=a.recs||[],br=b.recs||[];
+  if(ar.length!==br.length)diffs.push(`טעינות: ${ar.length} ← ${br.length}`);
+  const ae=a.expenses||[],be=b.expenses||[];
+  if(ae.length!==be.length)diffs.push(`הוצאות: ${ae.length} ← ${be.length}`);
+  const aKwh=ar.reduce((s,r)=>s+(r.kwh||0),0),bKwh=br.reduce((s,r)=>s+(r.kwh||0),0);
+  if(Math.abs(aKwh-bKwh)>0.1)diffs.push(`קו"ש: ${aKwh.toFixed(1)} ← ${bKwh.toFixed(1)}`);
+  const aCost=ar.reduce((s,r)=>s+(r.cost||0),0),bCost=br.reduce((s,r)=>s+(r.cost||0),0);
+  if(Math.abs(aCost-bCost)>0.1)diffs.push(`עלות: ₪${aCost.toFixed(0)} ← ₪${bCost.toFixed(0)}`);
+  return diffs.length?diffs.join(' | '):'זהה לגרסה הנוכחית';
+}
+
+async function renderBackupTab(){
+  const el=$('backupTabContent');
+  if(!el)return;
+  if(!gdToken){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">יש להתחבר ל-Google Drive לצפייה בגיבויים</div>';return;}
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)">⏳ טוען גיבויים...</div>';
+  const backups=await gdListBackups();
+  if(!backups.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">אין גיבויים שמורים</div>';
+    return;
+  }
+  const current=gdCollectData();
+  let html=`
+    <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd)">
+      <span style="font-size:.82rem;color:var(--tx3)">${backups.length} גיבויים שמורים (מקסימום ${GD_MAX_BACKUPS})</span>
+      <button class="gbtn g" onclick="gdSaveBackup().then(()=>renderBackupTab())" style="font-size:.75rem;padding:5px 10px">📦 גבה עכשיו</button>
+    </div>`;
+  for(const b of backups){
+    const dt=new Date(b.ts||b.modified).toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const kb=b.size?Math.round(b.size/1024)+'KB':'';
+    html+=`
+    <div style="border-bottom:1px solid var(--bd);padding:12px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-size:.85rem;font-weight:700;color:var(--tx)">${dt}</div>
+          <div style="font-size:.72rem;color:var(--tx3);margin-top:2px" id="bdiff_${b.id}">⏳ בודק...</div>
+        </div>
+        <span style="font-size:.68rem;color:var(--tx3)">${kb}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="gbtn" onclick="gdRestoreBackup('${b.id}')" style="font-size:.72rem;padding:4px 10px">⏪ שחזר</button>
+        <button class="gbtn" onclick="gdExportBackup('${b.id}')" style="font-size:.72rem;padding:4px 10px">⬇️ ייצא</button>
+        <button class="gbtn d" onclick="gdDeleteBackupUI('${b.id}')" style="font-size:.72rem;padding:4px 10px">🗑️ מחק</button>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html;
+  // חשב diff לכל גיבוי ברקע
+  for(const b of backups){
+    gdLoadBackup(b.id).then(data=>{
+      const el2=$('bdiff_'+b.id);
+      if(el2&&data)el2.textContent=_diffData(current,data);
+    });
+  }
+}
+
+async function gdRestoreBackup(id){
+  if(!await confirmAsync('שחזר גיבוי זה?\nהנתונים הנוכחיים יידרסו.'))return;
+  const data=await gdLoadBackup(id);
+  if(!data){toast('❌ שגיאה בטעינת גיבוי','e');return;}
+  // שמור גיבוי מהמצב הנוכחי לפני שחזור
+  await gdSaveBackup();
+  // שחזר
+  if(data.recs)recs=data.recs;
+  if(data.cos)cos=data.cos;
+  if(data.homeRates)homeRates=data.homeRates;
+  if(data.fuelRates)fuelRates=data.fuelRates;
+  if(data.expenses)expenses=data.expenses;
+  if(data.st)st=data.st;
+  LS.set('ev4_recs',recs);LS.set('ev4_cos',cos);LS.set('ev4_hr',homeRates);
+  LS.set('ev4_fuel',fuelRates);LS.set('ev4_expenses',expenses);LS.set('ev4_st',st);
+  recalc();renderAll();renderExp();
+  await gdSaveData();
+  toast('✅ גיבוי שוחזר');
+  renderBackupTab();
+}
+
+async function gdExportBackup(id){
+  const data=await gdLoadBackup(id);
+  if(!data){toast('❌ שגיאה','e');return;}
+  const ts=new Date(data._backupTs||Date.now()).toISOString().slice(0,10);
+  dl(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),`ev_backup_${ts}.json`);
+}
+
+async function gdDeleteBackupUI(id){
+  if(!await confirmAsync('מחק גיבוי זה?'))return;
+  await gdDeleteBackup(id);
+  toast('🗑️ גיבוי נמחק');
+  renderBackupTab();
+}
+
+// בדיקת גיבוי ישן — התראה אם עברו יותר מ-7 ימים
+function gdCheckBackupAge(){
+  const lastBackup=LS.get('ev4_lastBackupCheck',0);
+  const now=Date.now();
+  if(now-lastBackup<86400000)return; // בדוק פעם ביום
+  LS.set('ev4_lastBackupCheck',now);
+  if(!gdToken)return;
+  gdListBackups().then(list=>{
+    if(!list.length){
+      // אין גיבויים כלל
+      if(recs.length>0)toast('💡 טיפ: מומלץ לשמור גיבוי ראשון','w');
+      return;
+    }
+    const latest=list[0];
+    const ageMs=now-(latest.ts||0);
+    const ageDays=Math.floor(ageMs/86400000);
+    if(ageDays>7)toast(`⚠️ הגיבוי האחרון לפני ${ageDays} ימים — מומלץ לגבות`,'w');
+  });
+}
+
 (function gdInit(){
   gdShowBar();
   // אם זה reload אחרי clearAll — אל תסנכרן מהענן
