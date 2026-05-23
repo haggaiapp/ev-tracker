@@ -5601,9 +5601,8 @@ function _doGdLogin(){
         gdSetStatus('✅ מחובר','var(--ac)');
         gdSetHdrStatus('✅ מחובר');
         gdSetBtn('התנתק',gdLogout,'var(--er)');
-        // התחברות מחדש — בדוק אם יש נתונים מקומיים
-        const _localRecsOnLogin=LS.get('ev4_recs',[]);
-        if(_localRecsOnLogin.length>0){
+        // התחברות מחדש — בדוק אם יש נתונים בזיכרון (לא localStorage — הוא נמחק בהתנתקות)
+        if(recs.length>0){
           // הצג דיאלוג מעוצב עם טקסט מותאם לכפתורים
           $('confirmYes').textContent='טען מענן';
           $('confirmNo').textContent='גבה מקומי';
@@ -5652,6 +5651,8 @@ function gdCollectData(){
 // שמירת JSON לדרייב
 async function gdSaveData(){
   if(!gdToken)return;
+  // מנע דריסת ענן עם נתונים ריקים (מצב לאחר התנתקות לפני טעינה מענן)
+  if(recs.length===0 && gdDataFileId){gdDirty=false;return;}
   if(gdSyncing){gdDirty=true;return;}
   gdSyncing=true;gdDirty=false;
   gdSetStatus('💾 שומר...','var(--ac3)');gdSetHdrStatus('💾 שומר...');
