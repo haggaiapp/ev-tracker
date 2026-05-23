@@ -3435,10 +3435,12 @@ function _trendVal(kwh,km){
 }
 
 function _trendAvg(recs_list){
-  const cost=recs_list.reduce((s,r)=>s+(r.cost||0),0);
+  const batKwh=st.chargeKwh||80;
+  const range=st.range||485;
+  const kwh=recs_list.reduce((s,r)=>s+(r.kwh||0),0);
   const km=recs_list.filter(r=>r.kmDriven>0).reduce((s,r)=>s+r.kmDriven,0);
-  if(!km)return null;
-  return cost/km;
+  if(!kwh||!km)return null;
+  return ((kwh/batKwh)/(km/range)-1)*100;
 }
 
 function drawTrendChart(){
@@ -3466,7 +3468,7 @@ function drawTrendChart(){
       labels.push(y);vals.push(_trendAvg(byY[y]));
     }
     const allAvg=_trendAvg(recs);
-    title=`מגמת הוצאה — לפי שנה — ממוצע: ${allAvg!=null?fmtILS(allAvg,4)+'/ק"מ':'—'}`;canDrill=true;
+    title=`מגמת הוצאה — לפי שנה — ממוצע: ${allAvg!=null?allAvg.toFixed(1)+'%':'—'}`;canDrill=true;
   } else if(level==='months'){
     const y=_trendLevel.key;backLevel='years';
     const byM={};
@@ -3484,7 +3486,7 @@ function drawTrendChart(){
       const [,mo]=ym.split('-');
       labels.push(mo+'/'+y.slice(2));vals.push(_trendAvg(byM[ym]));
     }
-    title=`${y} — לפי חודש — ממוצע: ${yearAvg!=null?fmtILS(yearAvg,4)+'/ק"מ':'—'}`;canDrill=true;
+    title=`${y} — לפי חודש — ממוצע: ${yearAvg!=null?yearAvg.toFixed(1)+'%':'—'}`;canDrill=true;
   } else if(level==='days'){
     const ym=_trendLevel.key;const [y,mo]=ym.split('-');
     backLevel='months';
@@ -3500,14 +3502,14 @@ function drawTrendChart(){
     for(const d of days){
       labels.push(d.slice(8));vals.push(_trendAvg(byD[d]));
     }
-    title=`${mo}/${y} — לפי יום — ממוצע: ${monthAvg!=null?fmtILS(monthAvg,4)+'/ק"מ':'—'}`;
+    title=`${mo}/${y} — לפי יום — ממוצע: ${monthAvg!=null?monthAvg.toFixed(1)+'%':'—'}`;
   }
 
   if(!labels.length){el.style.display='none';return;}
 
   const backBtn=backLevel?`<button onclick="_trendUp('${backLevel}')" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.72rem;padding:4px 10px;cursor:pointer">◀ חזרה</button>`:'';
   const hint=canDrill?'<div style="font-size:.6rem;color:var(--tx3);text-align:center;margin-top:3px">לחץ על עמוד לפירוט</div>':'';
-  el.innerHTML=`<div class="ct"><div class="ctb" style="background:var(--ac3)"></div>מגמת הוצאה — עלות לק"מ לפי שנה <button class="tip-btn" onclick="showTip(event,'עלות לק\"מ = סה\"כ עלות חשמל לתקופה ÷ סה\"כ ק\"מ שנסעו בתקופה. ירידה = עלות ק\"מ זולה יותר.')">?</button></div>
+  el.innerHTML=`<div class="ct" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:7px"><div class="ctb" style="background:var(--ac3)"></div>מגמת הוצאה — פער בפועל לבין מוצהר</div><button class="tip-btn" onclick="showTip(event,'פער בין צריכת קו\"ש בפועל לבין הצריכה ממנה נגזר הטווח המוצהר. ירוק = צורך פחות = טווח ממשי גבוה מהמוצהר. אדום = צורך יותר = טווח ממשי נמוך.')">?</button></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-size:.72rem;font-weight:700;color:var(--tx2)">${title}</div>
       ${backBtn}
@@ -3542,7 +3544,7 @@ function _drawTrendBars(labels,vals,canDrill){
   vals.forEach((v,i)=>{
     if(v==null||!isFinite(v))return;
     const x=PAD.l+spacing*i+(spacing-bw)/2;
-    const col='#f59e0b';
+    const col=v>=0?'#ef4444':'#00c896';
     const barH=Math.max(2,Math.abs(v)/range*ch);
     const y=v>=0?zeroY-barH:zeroY;
     const grad=ctx.createLinearGradient(0,y,0,y+barH);
@@ -3552,7 +3554,7 @@ function _drawTrendBars(labels,vals,canDrill){
     else ctx.fillRect(x,y,bw,barH);
     if(barH>14){
       ctx.fillStyle=chartBarLabelColor();ctx.font='bold 7.5px Heebo,sans-serif';ctx.textAlign='center';
-      ctx.fillText('₪'+v.toFixed(2),x+bw/2,v>=0?y+11:y+barH-4);
+      ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%',x+bw/2,v>=0?y+11:y+barH-4);
     }
     ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='center';
     ctx.fillText(labels[i],x+bw/2,H-4);
@@ -3561,7 +3563,7 @@ function _drawTrendBars(labels,vals,canDrill){
   ctx.fillStyle=chartLabelColor();ctx.font='9px Heebo,sans-serif';ctx.textAlign='right';
   for(let i=0;i<=3;i++){
     const v=negMin+(range/3)*i;
-    ctx.fillText('₪'+v.toFixed(2),PAD.l-3,PAD.t+ch-(ch/3)*i+4);
+    ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%',PAD.l-3,PAD.t+ch-(ch/3)*i+4);
   }
 
   if(canDrill){
@@ -5594,15 +5596,20 @@ function _doGdLogin(){
         gdSetStatus('✅ מחובר','var(--ac)');
         gdSetHdrStatus('✅ מחובר');
         gdSetBtn('התנתק',gdLogout,'var(--er)');
-        // התחברות חדשה — בדוק אם יש נתונים מקומיים לפני סנכרון
+        // התחברות מחדש — בדוק אם יש נתונים מקומיים
         const _localRecsOnLogin=LS.get('ev4_recs',[]);
         if(_localRecsOnLogin.length>0){
-          if(confirm('נמצאו נתונים מקומיים.\nאישור = טען מהענן (ידרוס נתונים מקומיים).\nביטול = גבה נתונים מקומיים לענן.')){
-            gdSync();
-          } else {
-            gdSaveData();
-            toast('☁️ נתונים מקומיים גובו לענן');
-          }
+          // הצג דיאלוג מעוצב עם טקסט מותאם לכפתורים
+          $('confirmYes').textContent='טען מענן';
+          $('confirmNo').textContent='גבה מקומי';
+          $('confirmYes').style.background='var(--ac2)';
+          const _doCloud=await confirmAsync('נמצאו נתונים מקומיים.\nמה לעשות?\n\n✅ טען מענן — ידרוס נתונים מקומיים\n📦 גבה מקומי — שמור נתונים מקומיים לענן');
+          // שחזר כפתורים
+          $('confirmYes').textContent='אישור';
+          $('confirmNo').textContent='ביטול';
+          $('confirmYes').style.background='var(--er)';
+          if(_doCloud){gdSync();}
+          else{gdSaveData();toast('☁️ נתונים מקומיים גובו לענן');}
         } else {
           gdSync();
         }
