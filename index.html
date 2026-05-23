@@ -5631,8 +5631,6 @@ function _doGdLogin(){
         if(resp.error){gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');gdSetStatus('❌ שגיאת התחברות','var(--er)');return;}
         gdToken=resp.access_token;
         gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
-        localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
-        localStorage.setItem('ev4_gd_expiry',String(gdTokenExpiry));
         try{
           const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
           const u=await r.json();
@@ -5888,8 +5886,6 @@ async function gdEnsureToken(){
           if(resp.error){resolve(false);return;}
           gdToken=resp.access_token;
           gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
-          localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
-          localStorage.setItem('ev4_gd_expiry',String(gdTokenExpiry));
           resolve(true);
         }
       });
@@ -5977,11 +5973,12 @@ function _diffData(a,b){
   if(Math.abs(aKwh-bKwh)>0.1)diffs.push(`קו"ש: ${bKwh.toFixed(1)}→${aKwh.toFixed(1)}`);
   const aCost=ar.reduce((s,r)=>s+(r.cost||0),0),bCost=br.reduce((s,r)=>s+(r.cost||0),0);
   if(Math.abs(aCost-bCost)>0.1)diffs.push(`עלות: ₪${bCost.toFixed(0)}→₪${aCost.toFixed(0)}`);
-  // אודומטר
+  // אודומטר — תמיד מוצג
   const aKm=ar.length?Math.max(...ar.map(r=>r.odo||0)):0;
   const bKm=br.length?Math.max(...br.map(r=>r.odo||0)):0;
-  if(Math.abs(aKm-bKm)>0)diffs.push(`אודומטר: ${bKm.toLocaleString()}→${aKm.toLocaleString()} ק"מ`);
-  return diffs.length?diffs.join(' · '):'זהה לגרסה הנוכחית';
+  const odoStr=`אודומטר: ${aKm.toLocaleString()} ק"מ`;
+  const changeStr=diffs.length?diffs.join(' · '):'ללא שינויים';
+  return odoStr+(diffs.length?' · '+changeStr:'');
 }
 
 async function renderBackupTab(){
@@ -6100,16 +6097,25 @@ function gdCheckBackupAge(){
     const savedUid=localStorage.getItem('ev4_gd_uid');
     const token=savedToken?JSON.parse(savedToken):null;
     const uid=savedUid?JSON.parse(savedUid):null;
-    const savedExpiry=localStorage.getItem('ev4_gd_expiry');
-    gdTokenExpiry=savedExpiry?parseInt(savedExpiry):0;
     if(token&&uid){
-      gdToken=token;gdUserId=uid;LS._uid=uid;
+      gdUserId=uid;LS._uid=uid;
       gdLoadUserIds();
-      gdSetStatus('✅ מחובר — נתונים נוקו','var(--ok)');
-      gdSetHdrStatus('✅ מחובר');
-      gdSetBtn('התנתק',gdLogout,'var(--er)');
-      // שמור ריק לענן (דרוס ענן עם מצב ריק)
-      gdSaveData();
+      gdSetStatus('⏳ מתחבר...','var(--ac3)');
+      gdSetHdrStatus('⏳ מתחבר...');
+      // בקש טוקן חדש בשקט (ללא prompt)
+      try{
+        const _sc=google.accounts.oauth2.initTokenClient({
+          client_id:GD_CLIENT_ID,scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
+          prompt:'',hint:uid,
+          callback:async(resp)=>{
+            if(resp.error){gdSetStatus('❌ יש להתחבר מחדש','var(--er)');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');return;}
+            gdToken=resp.access_token;gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
+            gdSetBtn('התנתק',gdLogout,'var(--er)');
+            gdSync();
+          }
+        });
+        _sc.requestAccessToken();
+      }catch{gdSetStatus('❌ יש להתחבר מחדש','var(--er)');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');}
     } else {
       gdSetStatus('☁️ לא מחובר','var(--tx2)');
       gdSetHdrStatus('☁️ לא מחובר');
