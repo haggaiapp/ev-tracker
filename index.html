@@ -1183,6 +1183,7 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
       <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">☁️ גיבוי ענן</div>
       <div id="gdStatus" style="font-size:.8rem;color:var(--tx3);margin-bottom:10px;">☁️ לא מחובר</div>
       <button id="gdBtn" onclick="gdLogin()" style="width:100%;background:var(--ac2);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:.85rem;cursor:pointer;font-family:var(--fn);font-weight:700;">התחבר ל-Google</button>
+      <button id="gdBackupBtnMobile" onclick="gdSaveBackup().then(()=>toast('📦 גיבוי נשמר'))" style="width:100%;background:var(--sf2);color:var(--tx2);border:1px solid var(--bd);border-radius:8px;padding:9px 14px;font-size:.85rem;cursor:pointer;font-family:var(--fn);margin-top:8px;display:none;">📦 שמור גיבוי עכשיו</button>
     </div>
     <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;">
       <div style="font-size:.78rem;color:var(--tx2);margin-bottom:10px;font-weight:600;">🗂️ ניהול נתונים</div>
@@ -5579,6 +5580,7 @@ function gdSetHdrStatus(line1,line2){
     +(line2?`<span style="font-size:.62rem;color:var(--tx3);white-space:nowrap">${line2}</span>`:'');
 }
 function gdSetBtn(label,fn,color){
+  const mbk=$('gdBackupBtnMobile');if(mbk)mbk.style.display=(label==='התנתק'?'block':'none');
   const b=$('gdBtn');if(b){b.textContent=label;b.onclick=fn;b.style.background=color||'var(--ac2)';}
   const bt=$('gdBtnTab');if(bt){bt.textContent=label;bt.onclick=fn;bt.style.background=color||'var(--ac2)';}
 }
@@ -5715,6 +5717,7 @@ async function gdSaveData(retryCount=0){
     // שמירת HTML
     await gdSaveHTML();
     gdClearDirty();
+    gdAutoBackupOnChange();
     const now=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
   } catch(e){
@@ -5865,7 +5868,7 @@ function gdAutoSave(){
 // ════════════════════════════════════════════════════════
 // § 21 · BACKUP HISTORY (היסטוריית גיבויים)
 // ════════════════════════════════════════════════════════
-const GD_MAX_BACKUPS=100;
+const GD_MAX_BACKUPS=365;
 const GD_BACKUP_PREFIX='ev4_backup_';
 
 async function gdSaveBackup(){
@@ -5892,7 +5895,7 @@ async function gdListBackups(){
   if(!gdToken)return[];
   try{
     const r=await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'${GD_BACKUP_PREFIX}'&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=100`,
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name+contains+'${GD_BACKUP_PREFIX}'&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=365`,
       {headers:{'Authorization':'Bearer '+gdToken}});
     const j=await r.json();
     return(j.files||[]).map(f=>({
@@ -5929,17 +5932,20 @@ async function gdDeleteBackup(id){
 }
 
 function _diffData(a,b){
-  // השוואה בין שתי גרסאות — מחזיר תיאור הבדלים
   const diffs=[];
   const ar=a.recs||[],br=b.recs||[];
-  if(ar.length!==br.length)diffs.push(`טעינות: ${ar.length} ← ${br.length}`);
+  if(ar.length!==br.length)diffs.push(`טעינות: ${br.length}→${ar.length}`);
   const ae=a.expenses||[],be=b.expenses||[];
-  if(ae.length!==be.length)diffs.push(`הוצאות: ${ae.length} ← ${be.length}`);
+  if(ae.length!==be.length)diffs.push(`הוצאות: ${be.length}→${ae.length}`);
   const aKwh=ar.reduce((s,r)=>s+(r.kwh||0),0),bKwh=br.reduce((s,r)=>s+(r.kwh||0),0);
-  if(Math.abs(aKwh-bKwh)>0.1)diffs.push(`קו"ש: ${aKwh.toFixed(1)} ← ${bKwh.toFixed(1)}`);
+  if(Math.abs(aKwh-bKwh)>0.1)diffs.push(`קו"ש: ${bKwh.toFixed(1)}→${aKwh.toFixed(1)}`);
   const aCost=ar.reduce((s,r)=>s+(r.cost||0),0),bCost=br.reduce((s,r)=>s+(r.cost||0),0);
-  if(Math.abs(aCost-bCost)>0.1)diffs.push(`עלות: ₪${aCost.toFixed(0)} ← ₪${bCost.toFixed(0)}`);
-  return diffs.length?diffs.join(' | '):'זהה לגרסה הנוכחית';
+  if(Math.abs(aCost-bCost)>0.1)diffs.push(`עלות: ₪${bCost.toFixed(0)}→₪${aCost.toFixed(0)}`);
+  // אודומטר
+  const aKm=ar.length?Math.max(...ar.map(r=>r.odo||0)):0;
+  const bKm=br.length?Math.max(...br.map(r=>r.odo||0)):0;
+  if(Math.abs(aKm-bKm)>0)diffs.push(`אודומטר: ${bKm.toLocaleString()}→${aKm.toLocaleString()} ק"מ`);
+  return diffs.length?diffs.join(' · '):'זהה לגרסה הנוכחית';
 }
 
 async function renderBackupTab(){
@@ -5949,7 +5955,7 @@ async function renderBackupTab(){
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)">⏳ טוען גיבויים...</div>';
   const backups=await gdListBackups();
   if(!backups.length){
-    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">אין גיבויים שמורים</div>';
+    el.innerHTML=`<div style="padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:flex-start"><button class="gbtn g" onclick="gdSaveBackup().then(()=>renderBackupTab())" style="font-size:.75rem;padding:5px 10px">📦 גבה עכשיו</button></div><div style="text-align:center;padding:30px;color:var(--tx3)">אין גיבויים שמורים עדיין</div>`;
     return;
   }
   const current=gdCollectData();
@@ -6023,6 +6029,16 @@ async function gdDeleteBackupUI(id){
 }
 
 // בדיקת גיבוי ישן — התראה אם עברו יותר מ-7 ימים
+// גיבוי אוטומטי אחרי כל שינוי — debounced 30 שניות
+let _autoBackupTimer=null;
+function gdAutoBackupOnChange(){
+  if(!gdToken||recs.length===0)return;
+  clearTimeout(_autoBackupTimer);
+  _autoBackupTimer=setTimeout(async()=>{
+    await gdSaveBackup();
+  },2000);
+}
+
 function gdCheckBackupAge(){
   const now=Date.now();
   const lastAutoBackup=LS.get('ev4_lastAutoBackup',0);
