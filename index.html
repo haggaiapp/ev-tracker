@@ -3509,14 +3509,19 @@ function drawTrendChart(){
 
   const backBtn=backLevel?`<button onclick="_trendUp('${backLevel}')" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.72rem;padding:4px 10px;cursor:pointer">◀ חזרה</button>`:'';
   const hint=canDrill?'<div style="font-size:.6rem;color:var(--tx3);text-align:center;margin-top:3px">לחץ על עמוד לפירוט</div>':'';
-  el.innerHTML=`<div class="ct" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:7px"><div class="ctb" style="background:var(--ac3)"></div>מגמת הוצאה — פער בפועל לבין מוצהר</div><button class="tip-btn" onclick="showTip(event,'פער בין צריכת קו\"ש בפועל לבין הצריכה ממנה נגזר הטווח המוצהר. ירוק = צורך פחות = טווח ממשי גבוה מהמוצהר. אדום = צורך יותר = טווח ממשי נמוך.')">?</button></div>
+const _trendTip='פער בין צריכת קו"ש בפועל לבין המוצהר.\nירוק = צורך פחות = טווח ממשי גבוה.\nאדום = צורך יותר = טווח ממשי נמוך.\n(צריכה בפועל ÷ צריכה מוצהרת − 1) × 100%';
+el.innerHTML=`<div class="ct" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:7px"><div class="ctb" style="background:var(--ac3)"></div>מגמת הוצאה — פער בפועל לבין מוצהר</div><button class="tip-btn" id="trendTipBtn">?</button></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-size:.72rem;font-weight:700;color:var(--tx2)">${title}</div>
       ${backBtn}
     </div>
     <canvas id="cTrend" height="140"></canvas>${hint}`;
 
-  requestAnimationFrame(()=>_drawTrendBars(labels,vals,canDrill));
+  requestAnimationFrame(()=>{
+    const tb=document.getElementById('trendTipBtn');
+    if(tb)tb.onclick=e=>showTip(e,_trendTip);
+    _drawTrendBars(labels,vals,canDrill);
+  });
 }
 
 function _drawTrendBars(labels,vals,canDrill){
@@ -4497,7 +4502,7 @@ function showTip(e,txt){
   let pop=$('tipPopup');
   if(!pop){pop=document.createElement('div');pop.id='tipPopup';pop.className='tip-popup';document.body.appendChild(pop);}
   if(pop._txt===txt&&pop.style.display!=='none'){pop.style.display='none';pop._txt='';return;}
-  pop._txt=txt;pop.textContent=txt;pop.style.display='block';
+  pop._txt=txt;pop.innerHTML=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');pop.style.display='block';
   const r=e.target.getBoundingClientRect(),pw=Math.min(260,window.innerWidth-20);
   pop.style.maxWidth=pw+'px';
   let left=r.left-pw-8;if(left<8)left=r.right+8;
