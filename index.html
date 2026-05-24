@@ -6186,16 +6186,35 @@ function gdCheckBackupAge(){
   }
   const savedToken=localStorage.getItem('ev4_gd_token');
   const savedUid=localStorage.getItem('ev4_gd_uid');
-  const token=savedToken?JSON.parse(savedToken):null;
   const uid=savedUid?JSON.parse(savedUid):null;
-  if(token&&uid){
-    // משתמש מחובר — הגדר uid ב-LS לפני הכל
-    gdToken=token;gdUserId=uid;LS._uid=uid;
+  if(uid){
+    gdUserId=uid;LS._uid=uid;
     gdLoadUserIds();
-    gdSetStatus('🔄 מתחבר...','var(--ac2)');gdSetHdrStatus('🔄 מתחבר...');
-    gdSetBtn('התנתק',gdLogout,'var(--er)');
-    // טען מהענן — אם אין קובץ ענן, השתמש במה שב-localStorage
-    gdSync();
+    gdSetStatus('⏳ מתחבר...','var(--ac3)');gdSetHdrStatus('⏳ מתחבר...');
+    try{
+      const _sc=google.accounts.oauth2.initTokenClient({
+        client_id:GD_CLIENT_ID,
+        scope:GD_SCOPE+' https://www.googleapis.com/auth/userinfo.profile',
+        prompt:'none',
+        login_hint:uid,
+        callback:(resp)=>{
+          if(resp.error||!resp.access_token){
+            gdSetStatus('❌ יש להתחבר מחדש','var(--er)');
+            gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+            return;
+          }
+          gdToken=resp.access_token;
+          gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
+          gdSetStatus('✅ מחובר','var(--ac)');gdSetHdrStatus('✅ מחובר');
+          gdSetBtn('התנתק',gdLogout,'var(--er)');
+          gdSync();
+        }
+      });
+      _sc.requestAccessToken();
+    }catch(e){
+      gdSetStatus('❌ יש להתחבר מחדש','var(--er)');
+      gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    }
   } else {
     // לא מחובר — הצג כפתור התחברות
     gdSetStatus('☁️ לא מחובר','var(--tx2)');
