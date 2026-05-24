@@ -5692,8 +5692,8 @@ function gdCollectData(){
 // שמירת JSON לדרייב
 async function gdSaveData(retryCount=0){
   if(!gdToken)return;
-  // מנע דריסת ענן עם נתונים ריקים (מצב לאחר התנתקות לפני טעינה מענן)
-  if(recs.length===0 && gdDataFileId){gdDirty=false;return;}
+  // מנע דריסת ענן עם נתונים ריקים
+  if(recs.length===0){gdDirty=false;return;}
   if(gdSyncing){gdDirty=true;return;}
   gdSyncing=true;gdDirty=false;
   gdSetStatus('💾 שומר...','var(--ac3)');gdSetHdrStatus('💾 שומר...');
@@ -5813,8 +5813,9 @@ async function gdSync(){
         if(loaded){toast('☁️ נתונים נטענו מהענן');gdCheckBackupAge();{const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`נטען מהענן: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');}}
         else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
       } else {
-        // מקומי חדש יותר (או שווה) — שמור לענן
-        await gdSaveData();
+        // מקומי חדש יותר (או שווה) — שמור לענן (רק אם יש נתונים)
+        if(recs.length>0) await gdSaveData();
+        else {gdSetStatus('✅ מחובר','var(--ac)');gdSetHdrStatus('✅ מחובר');gdSetBtn('התנתק',gdLogout,'var(--er)');return;}
         {const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`שמור: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');gdCheckBackupAge();}
       }
     } else {
@@ -6037,7 +6038,7 @@ async function renderBackupTab(){
     <div style="border-bottom:1px solid var(--bd);padding:10px 16px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div style="display:flex;align-items:flex-start;gap:8px">
-          <input type="checkbox" class="bk-cb" data-id="${b.id}" onchange="gdUpdateDelBtn()" style="margin-top:3px;width:16px;height:16px;cursor:pointer;accent-color:var(--er)">
+          <input type="checkbox" class="bk-cb" data-id="${b.id}" onchange="gdUpdateDelBtn()" style="margin-top:3px;width:18px;height:18px;cursor:pointer;accent-color:var(--ac);border-radius:4px;">
           <div>
             <div style="font-size:.85rem;font-weight:700;color:var(--tx)">${dt}</div>
             <div style="font-size:.72rem;color:var(--tx3);margin-top:2px" id="bdiff_${b.id}">⏳ בודק...</div>
@@ -6150,8 +6151,7 @@ function gdCheckBackupAge(){
     if(uid){
       gdUserId=uid;LS._uid=uid;
       gdLoadUserIds();
-      gdSetStatus('⏳ מתחבר...','var(--ac3)');
-      gdSetHdrStatus('⏳ מתחבר...');
+      gdSetStatus('☁️','var(--tx3)');
       try{
         const _sc=google.accounts.oauth2.initTokenClient({
           client_id:GD_CLIENT_ID,
@@ -6190,7 +6190,7 @@ function gdCheckBackupAge(){
   if(uid){
     gdUserId=uid;LS._uid=uid;
     gdLoadUserIds();
-    gdSetStatus('⏳ מתחבר...','var(--ac3)');gdSetHdrStatus('⏳ מתחבר...');
+    gdSetStatus('☁️ מחובר','var(--tx3)');
     try{
       const _sc=google.accounts.oauth2.initTokenClient({
         client_id:GD_CLIENT_ID,
