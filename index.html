@@ -5726,7 +5726,14 @@ async function gdSaveData(retryCount=0){
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
   } catch(e){
     const is401=e&&(e.status===401||String(e).includes('401'));
-    if(is401){gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');}
+    if(is401){
+      // טוקן פג — נסה לרענן בשקט
+      const ok=await gdRefreshToken();
+      if(ok){gdSync();return;} // נסה שוב עם טוקן חדש
+      // נכשל — בקש התחברות ידנית
+      gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));
+      gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+    }
     else if(retryCount<3){
       gdSyncing=false;
       gdSetStatus(`⚠️ מנסה שוב... (${retryCount+1}/3)`,'var(--ac3)');
@@ -5835,6 +5842,8 @@ async function gdSync(){
     // בדוק אם הטוקן פג תוקף (401)
     const is401=e&&(e.status===401||String(e).includes('401')||(e.message&&e.message.includes('401')));
     if(is401||!gdToken){
+      const ok=await gdRefreshToken();
+      if(ok){gdSyncing=false;gdSaveData(retryCount);return;}
       gdToken=null;
       localStorage.setItem('ev4_gd_token',JSON.stringify(null));
       gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');
@@ -5986,10 +5995,10 @@ async function gdListBackups(){
       `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=365`,
       {headers:{'Authorization':'Bearer '+gdToken}});
     if(r.status===401){
-      // טוקן פג — בקש חדש ונסה שוב
-      const ok=await gdRefreshToken();
-      if(!ok)return[];
-      return gdListBackups();
+      // טוקן פג — אפס ואל תנסה שוב (gdSync יחדש)
+      gdToken=null;
+      localStorage.removeItem('ev4_gd_token');
+      return [];
     }
     const j=await r.json();
     if(j.error){console.warn('gdListBackups error:',j.error);return[];}
@@ -6046,7 +6055,10 @@ function _diffData(a,b){
 async function renderBackupTab(){
   const el=$('backupTabContent');
   if(!el)return;
-  if(!gdToken){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">יש להתחבר ל-Google Drive לצפייה בגיבויים</div>';return;}
+  if(!gdToken){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">הטוקן פג — <a href="javascript:gdLogin()" style="color:var(--ac2)">התחבר מחדש</a></div>';
+    return;
+  }
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)">⏳ טוען גיבויים...</div>';
   const backups=await gdListBackups();
   if(!backups.length){
@@ -6105,6 +6117,7 @@ async function gdDeleteSelected(){
   if(!checked.length)return;
   if(!await confirmAsync(`מחק ${checked.length} גיבויים נבחרים?`))return;
   for(const id of checked) await gdDeleteBackup(id);
+  LS.set('ev4_lastAutoBackup',0); // אפס כדי שגיבוי חדש ייווצר בסנכרון הבא
   toast(`🗑️ ${checked.length} גיבויים נמחקו`);
   renderBackupTab();
 }
@@ -6140,6 +6153,7 @@ async function gdExportBackup(id){
 async function gdDeleteBackupUI(id){
   if(!await confirmAsync('מחק גיבוי זה?'))return;
   await gdDeleteBackup(id);
+  LS.set('ev4_lastAutoBackup',0);
   toast('🗑️ גיבוי נמחק');
   renderBackupTab();
 }
@@ -6158,18 +6172,15 @@ function gdAutoBackupOnChange(){
 
 function gdCheckBackupAge(){
   const now=Date.now();
-  const lastEntry=LS.get('ev4_lastEntry',0); // זמן כניסה אחרונה
-  const lastAutoBackup=LS.get('ev4_lastAutoBackup',0);
   if(!gdToken||recs.length===0)return;
-  // גיבוי יומי — רק אם לא הייתה כניסה 24 שעות
-  if(now-lastEntry>86400000){
+  const lastAutoBackup=LS.get('ev4_lastAutoBackup',0);
+  // גיבוי יומי — אם עברו 24 שעות מהגיבוי האחרון
+  if(now-lastAutoBackup>86400000){
     LS.set('ev4_lastAutoBackup',now);
     setTimeout(()=>{
       gdSaveBackup().then(()=>toast('📦 גיבוי יומי נשמר אוטומטית'));
     },3000);
   }
-  // עדכן זמן כניסה
-  LS.set('ev4_lastEntry',now);
 }
 
 (function gdInit(){
