@@ -5634,6 +5634,7 @@ function _doGdLogin(){
         gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
         localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
         localStorage.setItem('ev4_gd_expiry',String(gdTokenExpiry));
+        gdScheduleRefresh();
         try{
           const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+gdToken}});
           const u=await r.json();
@@ -5729,10 +5730,9 @@ async function gdSaveData(retryCount=0){
     if(is401){
       // טוקן פג — נסה לרענן בשקט
       const ok=await gdRefreshToken();
-      if(ok){gdSync();return;} // נסה שוב עם טוקן חדש
-      // נכשל — בקש התחברות ידנית
-      gdToken=null;localStorage.setItem('ev4_gd_token',JSON.stringify(null));
-      gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');gdSetHdrStatus('⚠️ פג תוקף');gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+      if(ok){gdSync();return;}
+      // נכשל — נשאר מחובר, ננסה שוב בפעם הבאה
+      gdSetStatus('✅ מחובר','var(--ac)');
     }
     else if(retryCount<3){
       gdSyncing=false;
@@ -5844,11 +5844,9 @@ async function gdSync(){
     if(is401||!gdToken){
       const ok=await gdRefreshToken();
       if(ok){gdSyncing=false;gdSaveData(retryCount);return;}
-      gdToken=null;
-      localStorage.setItem('ev4_gd_token',JSON.stringify(null));
-      gdSetStatus('⚠️ פג תוקף — התחבר מחדש','var(--er)');
-      gdSetHdrStatus('⚠️ פג תוקף');
-      gdSetBtn('התחבר ל-Google',gdLogin,'var(--ac2)');
+      // נכשל — שמור dirty לניסיון הבא
+      gdDirty=true;
+      gdSetStatus('✅ מחובר','var(--ac)');
     } else {
       gdSetStatus('❌ שגיאת סנכרון','var(--er)');
       gdSetHdrStatus('❌ שגיאת סנכרון');
@@ -5903,6 +5901,7 @@ async function gdEnsureToken(){
           gdTokenExpiry=Date.now()+(resp.expires_in||3600)*1000;
           localStorage.setItem('ev4_gd_token',JSON.stringify(gdToken));
           localStorage.setItem('ev4_gd_expiry',String(gdTokenExpiry));
+          gdScheduleRefresh();
           resolve(true);
         }
       });
@@ -5995,9 +5994,9 @@ async function gdListBackups(){
       `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime+desc&pageSize=365`,
       {headers:{'Authorization':'Bearer '+gdToken}});
     if(r.status===401){
-      // טוקן פג — אפס ואל תנסה שוב (gdSync יחדש)
-      gdToken=null;
-      localStorage.removeItem('ev4_gd_token');
+      // טוקן פג — נסה לרענן ונסה שוב פעם אחת
+      const ok=await gdRefreshToken();
+      if(ok)return gdListBackups();
       return [];
     }
     const j=await r.json();
@@ -6055,10 +6054,7 @@ function _diffData(a,b){
 async function renderBackupTab(){
   const el=$('backupTabContent');
   if(!el)return;
-  if(!gdToken){
-    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">הטוקן פג — <a href="javascript:gdLogin()" style="color:var(--ac2)">התחבר מחדש</a></div>';
-    return;
-  }
+  if(!gdToken){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3)">יש להתחבר ל-Google Drive לצפייה בגיבויים</div>';return;}
   el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)">⏳ טוען גיבויים...</div>';
   const backups=await gdListBackups();
   if(!backups.length){
@@ -6162,6 +6158,14 @@ async function gdDeleteBackupUI(id){
 // גיבוי אוטומטי אחרי כל שינוי — debounced 30 שניות
 let _autoBackupTimer=null;
 let gdSkipAutoBackup=false;
+let gdRefreshTimer=null;
+function gdScheduleRefresh(){
+  clearTimeout(gdRefreshTimer);
+  if(!gdToken||!gdTokenExpiry)return;
+  const msLeft=gdTokenExpiry-Date.now()-300000; // 5 דק' לפני תפוגה
+  if(msLeft<=0){gdRefreshToken();return;}
+  gdRefreshTimer=setTimeout(()=>gdRefreshToken(),msLeft);
+}
 function gdAutoBackupOnChange(){
   if(!gdToken||recs.length===0||gdSkipAutoBackup)return;
   clearTimeout(_autoBackupTimer);
@@ -6239,6 +6243,7 @@ function gdCheckBackupAge(){
     gdSetStatus('✅ מחובר','var(--ac)');
     gdSetHdrStatus('✅ מחובר');
     gdSetBtn('התנתק',gdLogout,'var(--er)');
+    gdScheduleRefresh();
     gdSync();
   } else {
     // לא מחובר — הצג כפתור התחברות
