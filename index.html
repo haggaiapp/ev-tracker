@@ -4501,7 +4501,7 @@ function saveEdit(){
     companyName:cos.find(c=>c.id===$('editCo').value)?.name||'',
     cost:kw*rate,note:$('editNote').value.trim()};
   recalc();LS.set('ev4_recs',recs);
-  closeModal('mEdit');renderAll();toast('✅ רשומה עודכנה');
+  closeModal('mEdit');renderAll();toast('✅ רשומה עודכנה');gdAutoSave();
 }
 
 // ══════════════════════════════════════════
@@ -5723,7 +5723,6 @@ async function gdSaveData(retryCount=0){
     // שמירת HTML
     await gdSaveHTML();
     gdClearDirty();
-    alert(`gdSaveData הצליח, skip=${gdSkipAutoBackup}, קורא gdAutoBackupOnChange`);
     gdAutoBackupOnChange();
     const now=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
@@ -6169,8 +6168,7 @@ function gdScheduleRefresh(){
   gdRefreshTimer=setTimeout(()=>gdRefreshToken(),msLeft);
 }
 function gdAutoBackupOnChange(){
-  const _msg=`גיבוי: token=${!!gdToken} recs=${recs.length} skip=${gdSkipAutoBackup}`;
-  if(!gdToken||recs.length===0||gdSkipAutoBackup){alert(_msg+' → לא גיבה');return;}
+  if(!gdToken||recs.length===0||gdSkipAutoBackup)return;
   clearTimeout(_autoBackupTimer);
   _autoBackupTimer=setTimeout(async()=>{
     await gdSaveBackup();
