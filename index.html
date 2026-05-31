@@ -5825,7 +5825,7 @@ async function gdSync(){
         else gdSetStatus('⚠️ שגיאה בטעינה','var(--er)');
       } else {
         // מקומי חדש יותר (או שווה) — שמור לענן (רק אם יש נתונים)
-        if(recs.length>0){gdSkipAutoBackup=true;await gdSaveData();gdSkipAutoBackup=false;}
+        if(recs.length>0){gdSkipAutoBackup=true;try{await gdSaveData();}finally{gdSkipAutoBackup=false;}}
         else {gdSetStatus('✅ מחובר','var(--ac)');gdSetHdrStatus('✅ מחובר');gdSetBtn('התנתק',gdLogout,'var(--er)');return;}
         {const _t=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});gdSetStatus(`✅ סונכרן ${_t}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`שמור: ${_t}`);gdSetBtn('התנתק',gdLogout,'var(--er)');gdCheckBackupAge();}
       }
