@@ -6239,29 +6239,13 @@ function gdCheckBackupAge(){
   const uid=savedUid?JSON.parse(savedUid):null;
   gdTokenExpiry=savedExpiry?parseInt(savedExpiry):0;
   if(token&&uid){
-    gdUserId=uid;LS._uid=uid;
+    gdToken=token;gdUserId=uid;LS._uid=uid;
     gdLoadUserIds();
+    gdSetStatus('✅ מחובר','var(--ac)');
+    gdSetHdrStatus('✅ מחובר');
     gdSetBtn('התנתק',gdLogout,'var(--er)');
-    // בדוק אם הטוקן עדיין תקף
-    const expiry=gdTokenExpiry||0;
-    const needsRefresh=!token||expiry===0||Date.now()>expiry-300000;
-    if(!needsRefresh){
-      // טוקן תקף — השתמש ישירות
-      gdToken=token;
-      gdSetStatus('✅ מחובר','var(--ac)');
-      gdSetHdrStatus('✅ מחובר');
-      gdScheduleRefresh();
-      gdSync();
-    } else {
-      // טוקן פג/קרוב לפוג — רענן בשקט
-      gdToken=token; // שמור זמנית בזמן הרענון
-      gdSetStatus('✅ מחובר','var(--ac)');
-      gdSetHdrStatus('✅ מחובר');
-      gdRefreshToken().then(ok=>{
-        if(ok){gdScheduleRefresh();}
-        gdSync();
-      });
-    }
+    gdScheduleRefresh();
+    gdSync();
   } else {
     // לא מחובר — הצג כפתור התחברות
     gdSetStatus('☁️ לא מחובר','var(--tx2)');
