@@ -5723,7 +5723,7 @@ async function gdSaveData(retryCount=0){
     // שמירת HTML
     await gdSaveHTML();
     gdClearDirty();
-    toast(`[גיבוי] clearDirty skip=${gdSkipAutoBackup}`,'w');
+    alert(`gdSaveData הצליח, skip=${gdSkipAutoBackup}, קורא gdAutoBackupOnChange`);
     gdAutoBackupOnChange();
     const now=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     gdSetStatus(`✅ סונכרן ${now}`,'var(--ac)');gdSetHdrStatus('✅ מחובר',`סנכרון: ${now}`);
@@ -6169,11 +6169,10 @@ function gdScheduleRefresh(){
   gdRefreshTimer=setTimeout(()=>gdRefreshToken(),msLeft);
 }
 function gdAutoBackupOnChange(){
-  toast(`[גיבוי] token=${!!gdToken} recs=${recs.length} skip=${gdSkipAutoBackup}`,'w');
-  if(!gdToken||recs.length===0||gdSkipAutoBackup)return;
+  const _msg=`גיבוי: token=${!!gdToken} recs=${recs.length} skip=${gdSkipAutoBackup}`;
+  if(!gdToken||recs.length===0||gdSkipAutoBackup){alert(_msg+' → לא גיבה');return;}
   clearTimeout(_autoBackupTimer);
   _autoBackupTimer=setTimeout(async()=>{
-    toast('[גיבוי] שומר...','w');
     await gdSaveBackup();
   },2000);
 }
