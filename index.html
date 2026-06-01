@@ -6305,5 +6305,79 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<div id="dbgPanel" style="display:none;position:fixed;bottom:0;left:0;right:0;height:40vh;background:#000;color:#0f0;font-size:11px;font-family:monospace;overflow-y:auto;z-index:99999;padding:6px;border-top:2px solid #0f0;">
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+    <span style="color:#ff0;font-weight:bold;">🔍 DEBUG LOG</span>
+    <span onclick="document.getElementById('dbgPanel').style.display='none'" style="color:#f00;cursor:pointer;padding:0 6px;">✕</span>
+    <span onclick="document.getElementById('dbgLog').innerHTML=''" style="color:#888;cursor:pointer;padding:0 6px;">נקה</span>
+  </div>
+  <div id="dbgLog"></div>
+</div>
+<button onclick="document.getElementById('dbgPanel').style.display='block'" style="position:fixed;bottom:10px;left:10px;z-index:99998;background:#333;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:4px 8px;font-size:10px;font-family:monospace;opacity:0.7;">DEBUG</button>
+
+<script>
+(function(){
+  var log = function(msg, color){
+    var el = document.getElementById('dbgLog');
+    if(!el) return;
+    var t = new Date().toTimeString().split(' ')[0];
+    var div = document.createElement('div');
+    div.style.color = color||'#0f0';
+    div.style.borderBottom = '1px solid #222';
+    div.style.padding = '2px 0';
+    div.textContent = '['+t+'] '+msg;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  };
+
+  window.dbg = log;
+
+  // לכוד שגיאות JavaScript
+  window.addEventListener('error', function(e){
+    log('❌ JS ERROR: '+e.message+' ('+e.filename+':'+e.lineno+')', '#f55');
+  });
+
+  window.addEventListener('unhandledrejection', function(e){
+    log('❌ PROMISE ERROR: '+(e.reason&&e.reason.message||e.reason), '#f55');
+  });
+
+  // בדיקת manifest
+  var manifestLink = document.querySelector('link[rel="manifest"]');
+  if(manifestLink){
+    log('📋 Manifest href: '+manifestLink.href, '#ff0');
+    fetch(manifestLink.href)
+      .then(function(r){ log('📋 Manifest status: '+r.status+(r.ok?' ✅':' ❌'), r.ok?'#0f0':'#f55'); return r.json(); })
+      .then(function(d){ log('📋 start_url: '+d.start_url+' | display: '+d.display, '#0ff'); })
+      .catch(function(e){ log('📋 Manifest fetch error: '+e.message, '#f55'); });
+  } else {
+    log('📋 אין manifest link!', '#f55');
+  }
+
+  // בדיקת Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      if(regs.length===0){
+        log('⚙️ Service Worker: לא רשום', '#f55');
+      } else {
+        regs.forEach(function(r){
+          log('⚙️ SW scope: '+r.scope+' | state: '+(r.active?r.active.state:'none'), '#0f0');
+        });
+      }
+    });
+  } else {
+    log('⚙️ serviceWorker לא נתמך!', '#f55');
+  }
+
+  // בדיקת beforeinstallprompt
+  window.addEventListener('beforeinstallprompt', function(e){
+    log('🎉 beforeinstallprompt נורה! PWA ניתן להתקנה', '#ff0');
+  });
+
+  // URL ומידע כללי
+  log('🌐 URL: '+location.href, '#0ff');
+  log('🌐 hostname: '+location.hostname, '#0ff');
+  log('📱 standalone: '+(window.matchMedia('(display-mode: standalone)').matches?'כן (מותקן)':'לא'), '#ff0');
+})();
+</script>
 </body>
 </html>
