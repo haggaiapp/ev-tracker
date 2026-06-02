@@ -502,20 +502,8 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
 <script>
 // ── Service Worker — נדרש להתקנה כ-PWA ──
 if('serviceWorker' in navigator){
-  const swCode=`
-const CACHE='ev-tracker-v1';
-const ASSETS=[self.location.pathname.replace(/sw\\.js$/,'')];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.add(ASSETS[0])).catch(()=>{}));self.skipWaiting();});
-self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});
-self.addEventListener('fetch',e=>{
-  if(e.request.mode==='navigate'){
-    e.respondWith(fetch(e.request).catch(()=>caches.match(ASSETS[0])));
-  }
-});
-`;
-  const swBlob=new Blob([swCode],{type:'application/javascript'});
-  const swUrl=URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl,{scope:location.pathname.replace(/[^/]+$/,'')}).catch(()=>{});
+  const scope=location.pathname.replace(/[^/]+$/,'');
+  navigator.serviceWorker.register(scope+'sw.js',{scope}).catch(()=>{});
 }
 </script>
 </head>
