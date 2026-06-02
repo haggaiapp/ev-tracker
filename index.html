@@ -495,10 +495,13 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
 // manifest נטען מקובץ חיצוני — ראה manifest.json
 </script><script>
 // ── Service Worker — נדרש להתקנה כ-PWA ──
-if('serviceWorker' in navigator){
-  const scope=location.pathname.replace(/[^/]+$/,'');
-  navigator.serviceWorker.register(scope+'sw.js',{scope}).catch(()=>{});
-}
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/ev-tracker/sw.js')
+        .then(reg => console.log('Service Worker registered!', reg))
+        .catch(err => console.log('Service Worker registration failed: ', err));
+    });
+  }
 </script>
 </head>
 <body>
