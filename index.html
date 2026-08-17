@@ -250,6 +250,16 @@ thead th{padding:8px 8px;text-align:right;font-weight:700;color:var(--tx3);font-
 .mpty{text-align:center;padding:36px 20px;color:var(--tx3);}
 .mpty-i{font-size:2.5rem;margin-bottom:10px;opacity:.35;}
 .rcnt{font-size:.72rem;background:rgba(0,200,150,.1);color:var(--ac);border-radius:20px;padding:2px 9px;font-weight:700;}
+.rsel-cb{appearance:auto;-webkit-appearance:checkbox;width:15px!important;height:15px!important;min-width:15px;cursor:pointer;accent-color:var(--ac);margin:0;vertical-align:middle;}
+tr.rec-row-sel{background:rgba(0,200,150,.07);}
+.rsc-table{width:100%;border-collapse:collapse;font-size:.72rem;}
+.rsc-table th{text-align:center;color:var(--tx3);font-weight:700;font-size:.6rem;text-transform:uppercase;letter-spacing:.3px;padding:3px 4px;border-bottom:1px solid var(--bd);}
+.rsc-table td{padding:4px 4px;text-align:center;border-bottom:1px solid rgba(42,53,71,.35);white-space:nowrap;}
+.rsc-table tr:last-child td{border-bottom:none;}
+.rsc-lbl{text-align:right!important;color:var(--tx2);font-weight:600;font-size:.68rem;}
+.rsc-sum{font-weight:800;color:var(--tx);}
+.rsc-sum.g{color:var(--ok);}.rsc-sum.r{color:var(--er);}
+.rsc-avg{color:var(--tx3);}
 /* search bar */
 .search-wrap{position:relative;margin-bottom:10px;}
 .search-wrap input{padding-right:36px;background:var(--sf2);}
@@ -534,7 +544,7 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
     <!-- שורה: גרף חיסכון מצטבר + מד יעילות -->
   <div class="dash-row">
     <div class="card dash-card" id="dashSavingCard">
-      <div class="ct"><div class="ctb" style="background:var(--ok)"></div>חיסכון מצטבר מדלק</div>
+      <div class="ct"><div class="ctb" style="background:var(--ok)"></div>חיסכון מצטבר מדלק<span id="dashSavingTotal" style="margin-right:auto;font-weight:800;font-size:.92rem"></span></div>
       <canvas id="cSaving" height="150"></canvas>
     </div>
     <div class="card dash-card" id="dashGaugeCard">
@@ -731,9 +741,11 @@ body.light .bat-tip{background:rgba(0,0,0,.18);}
         <button class="gbtn d" onclick="clearRecs()">🗑️ נקה</button>
       </div>
     </div>
+    <div id="recSelBar" style="display:none"></div>
     <div class="tw">
       <table id="mainTbl">
         <thead><tr>
+          <th style="padding:8px 3px;width:26px;text-align:center"><input type="checkbox" class="rsel-cb" id="selAllChk" onchange="toggleSelectAllRecs()" title="בחר הכל"></th>
           <th data-sort-tbl="log" data-sort-col="num" class="sort-th" onclick="sortClick('log','num')">#<span class="sort-icon"></span></th>
           <th data-sort-tbl="log" data-sort-col="date" class="sort-th" onclick="sortClick('log','date')">תאריך<span class="sort-icon"></span></th>
           <th data-sort-tbl="log" data-sort-col="km" class="sort-th" onclick="sortClick('log','km')">נסע<span class="sort-icon"></span></th>
@@ -1304,6 +1316,7 @@ let editCoIdx=null;
 let selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
 let expandedRow=null; // id of expanded row
 let tblExpandY=LS.get('ev4_tblY',{}),tblExpandM=LS.get('ev4_tblM',{}); // מצב קיפול טבלה ראשית
+let selectedRecIds=new Set(); // רשומות נבחרות לסיכום/ממוצע
 
 // ══════════════════════════════════════════
 // ══════════════════════════════════════════
@@ -1860,7 +1873,7 @@ function renderTable(hl=false){
   const tb=$('mainTbl'),em=$('emptyState'),cn=$('rcnt');
   $('thCost').style.display='';
   cn.textContent=`${fmtNum(recs.length,0)} חיבורים`;
-  if(!recs.length){tb.style.display='none';em.style.display='block';return;}
+  if(!recs.length){tb.style.display='none';em.style.display='block';selectedRecIds.clear();renderRecSelSummary();return;}
   tb.style.display='table';em.style.display='none';
   const filtered=filterRecs();
   const hasFilter=hasLogFilter();
@@ -1879,15 +1892,21 @@ function renderTable(hl=false){
   $('searchInfo').innerHTML=(hasFilter?`${sortedFiltered.length} תוצאות מתוך ${recs.length}`:(
     _ls.col?`${sortedFiltered.length} חיבורים`:'לחץ על שורה לפרטים'))+resetBtn;
   setTimeout(()=>_syncSortTh('log'),0);
-  const colSpan=6;
+  const colSpan=7;
+
+  // הסרת בחירה של רשומות שנמחקו
+  for(const id of [...selectedRecIds]){ if(!recs.find(x=>x.id===id)) selectedRecIds.delete(id); }
 
   if(!sortedFiltered.length){
     $('mainBody').innerHTML=`<tr><td colspan="${colSpan}" class="mpty" style="padding:28px 16px;text-align:center;color:var(--tx3)"><div style="font-size:1.5rem;margin-bottom:8px;opacity:.4">🔍</div><div>לא נמצאו נתונים</div></td></tr>`;
+    renderRecSelSummary();_syncSelAllChk();
     return;
   }
 
   function buildRow(r,co,kw,isNew,num){
-    return `<tr class="${isNew?'nr':''}" onclick="toggleRow(${r.id})">
+    const sel=selectedRecIds.has(r.id);
+    return `<tr class="${isNew?'nr':''}${sel?' rec-row-sel':''}" onclick="toggleRow(${r.id})">
+      <td class="cd" style="padding:8px 3px;text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="rsel-cb" data-id="${r.id}" ${sel?'checked':''} onchange="toggleRecSelect(${r.id})"></td>
       <td class="cd" style="color:var(--tx3);font-size:.65rem">${num}</td>
       <td class="cd">${fd(r.date)}</td>
       <td class="ckm">${r.kmDriven!=null?fmtNum(r.kmDriven,0):'—'}</td>
@@ -1905,7 +1924,7 @@ function renderTable(hl=false){
       html+=buildRow(r,co,kw,hl&&i===0,recs.findIndex(x=>x.id===r.id)+1);
       if(isExp)html+=`<tr><td colspan="${colSpan}" style="padding:0">${buildDetail(r)}</td></tr>`;
     }
-    $('mainBody').innerHTML=html;return;
+    $('mainBody').innerHTML=html;renderRecSelSummary();_syncSelAllChk();return;
   }
 
   // ללא מיון + ללא סינון: קיפול לפי שנה > חודש > ימים
@@ -1925,6 +1944,7 @@ function renderTable(hl=false){
     const yd=byYear[y];const nM=Object.keys(yd.months).length;
     const yOpen=tblExpandY[y]!==false;
     html+=`<tr style="background:rgba(59,130,246,.1);cursor:pointer;border-bottom:1px solid rgba(59,130,246,.3)" onclick="tblToggleYear('${y}')">
+      <td></td>
       <td style="padding:7px 10px;font-weight:700;color:var(--ac2)" colspan="2">
         <span id="tya_${y}" style="margin-left:5px">${yOpen?'▾':'▸'}</span>${y}
         <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nM} חודשים</span>
@@ -1940,6 +1960,7 @@ function renderTable(hl=false){
       const md=yd.months[ym];const [,mo]=ym.split('-');const mLabel=mo+'/'+y;
       const nD=Object.keys(md.days).length;const mKey=ym.replace('-','_');const mOpen=tblExpandM[ym]!==false;
       html+=`<tr style="background:var(--sf2);cursor:pointer;border-bottom:1px solid var(--bd)" onclick="tblToggleMonth('${ym}')">
+        <td></td>
         <td style="padding:6px 10px;padding-right:22px;font-weight:600;color:var(--tx2)" colspan="2">
           <span id="tma_${mKey}" style="margin-left:5px">${mOpen?'▾':'▸'}</span>${mLabel}
           <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nD} ימים</span>
@@ -1961,8 +1982,94 @@ function renderTable(hl=false){
     }
   }
   $('mainBody').innerHTML=html;
+  renderRecSelSummary();_syncSelAllChk();
 }
 
+function toggleRecSelect(id){
+  if(selectedRecIds.has(id))selectedRecIds.delete(id);else selectedRecIds.add(id);
+  const row=document.querySelector(`input.rsel-cb[data-id="${id}"]`)?.closest('tr');
+  if(row)row.classList.toggle('rec-row-sel',selectedRecIds.has(id));
+  renderRecSelSummary();_syncSelAllChk();
+}
+function toggleSelectAllRecs(){
+  const filtered=filterRecs();
+  const allSel=filtered.length>0&&filtered.every(r=>selectedRecIds.has(r.id));
+  if(allSel){for(const r of filtered)selectedRecIds.delete(r.id);}
+  else{for(const r of filtered)selectedRecIds.add(r.id);}
+  renderTable();
+}
+function clearRecSelection(){selectedRecIds.clear();renderTable();}
+function _syncSelAllChk(){
+  const chk=$('selAllChk');if(!chk)return;
+  const filtered=filterRecs();
+  const allSel=filtered.length>0&&filtered.every(r=>selectedRecIds.has(r.id));
+  chk.checked=allSel;
+  chk.indeterminate=!allSel&&filtered.some(r=>selectedRecIds.has(r.id));
+}
+function renderRecSelSummary(){
+  const bar=$('recSelBar');if(!bar)return;
+  const selRecs=recs.filter(r=>selectedRecIds.has(r.id));
+  if(!selRecs.length){bar.style.display='none';bar.innerHTML='';return;}
+  let totKwh=0,totCost=0,totKm=0,totSaved=0,totFuelCost=0,nKm=0;
+  let minD=null,maxD=null;
+  let sumRate=0,nRate=0,sumFuelKm=0,nFuelKm=0,sumPer100=0,nPer100=0;
+  let sumBattPct=0,nBattPct=0,sumKmLeftPct=0,nKmLeftPct=0,sumMissingKm=0,nMissingKm=0;
+  const declRange=stV("range"),chargeCap=st.chargeKwh||stV("batt");
+  for(const r of selRecs){
+    const kw=r.kwh||0;
+    totKwh+=kw;totCost+=r.cost||0;
+    if(!minD||r.date<minD)minD=r.date;
+    if(!maxD||r.date>maxD)maxD=r.date;
+    if(r.kmDriven>0){
+      totKm+=r.kmDriven;nKm++;
+      const fk=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));
+      totFuelCost+=fk;totSaved+=fk-(r.cost||0);
+    }
+    if(r.rate){sumRate+=r.rate;nRate++;}
+    const fuelKmR=fuelPrice(r.date)/(stV("kpl"));
+    sumFuelKm+=fuelKmR;nFuelKm++;
+    const kwhPerKmR=r.kmDriven>0?kw/r.kmDriven:null;
+    const elecRateR=r.rate||homeRate(r.date);
+    if(kwhPerKmR!=null&&elecRateR>0){sumPer100+=(1/kwhPerKmR)*(fuelKmR*stV("kpl")/elecRateR);nPer100++;}
+    const kmLeftActual=r.kmLeft||0;
+    const battPctR=(r.kmDriven>0&&declRange>0)?(r.kmDriven+kmLeftActual)/declRange*100:(kw>0&&chargeCap>0?Math.min(kw/chargeCap*100,100):null);
+    if(battPctR!=null){sumBattPct+=battPctR;nBattPct++;}
+    if(declRange>0){sumKmLeftPct+=(kmLeftActual/declRange*100);nKmLeftPct++;}
+    if(r.kmDriven!=null){sumMissingKm+=Math.max(0,declRange-r.kmDriven-kmLeftActual);nMissingKm++;}
+  }
+  const n=selRecs.length;
+  const avgKwh=totKwh/n,avgCost=totCost/n;
+  const avgKm=nKm>0?totKm/nKm:0,avgSaved=nKm>0?totSaved/nKm:0;
+  const avgRateW=totKwh>0?totCost/totKwh:0;
+  const costPerKm=totKm>0?totCost/totKm:0;
+  const kwhPer100=totKm>0?(totKwh/totKm)*100:0;
+  function row(lbl,sum,avg){
+    return `<tr><td class="rsc-lbl">${lbl}</td><td class="rsc-sum">${sum}</td><td class="rsc-avg">${avg}</td></tr>`;
+  }
+  bar.style.display='';
+  bar.innerHTML=`<div class="card" style="margin-bottom:8px;border:1px solid var(--ac);padding:10px 10px">
+    <div class="ct" style="margin-bottom:6px"><div class="ctb" style="background:var(--ac)"></div>נבחרו ${n} רשומות
+      <button class="gbtn d" style="margin-right:auto;font-size:.68rem;padding:3px 8px" onclick="clearRecSelection()">✕ נקה בחירה</button>
+    </div>
+    ${minD?`<div style="font-size:.65rem;color:var(--tx3);margin-bottom:6px">📅 ${fd(minD)} – ${fd(maxD)}</div>`:''}
+    <table class="rsc-table"><thead><tr><th></th><th>סה"כ</th><th>ממוצע</th></tr></thead><tbody>
+      ${row('⚡ קו"ש',fmtNum(totKwh,2),fmtNum(avgKwh,2))}
+      ${row('💰 עלות',fmtILS(totCost,2),fmtILS(avgCost,2))}
+      ${nKm>0?row('🛣️ ק"מ',fmtNum(totKm,0),fmtNum(avgKm,1)):''}
+      ${nRate>0?row('💰 תעריף',(sumRate/nRate).toFixed(3),(sumRate/nRate).toFixed(3)):''}
+      ${totKwh>0?row('₪/קו"ש (משוקלל)',avgRateW.toFixed(3),avgRateW.toFixed(3)):''}
+      ${nKm>0?row('₪/ק"מ',fmtILS(costPerKm,4),fmtILS(costPerKm,4)):''}
+      ${nKm>0?row('⚡ צריכת חשמל',fmtNum(kwhPer100,2),fmtNum(kwhPer100,2)):''}
+      ${nPer100>0?row('🚗 1 ל-100 (שקילות)',fmtNum(sumPer100/nPer100,1),fmtNum(sumPer100/nPer100,1)):''}
+      ${nFuelKm>0?row('⛽ מחיר דלק לק"מ',fmtILS(sumFuelKm/nFuelKm,4),fmtILS(sumFuelKm/nFuelKm,4)):''}
+      ${nKm>0?row('⛽ דלק שקילה',fmtILS(totFuelCost,0),fmtILS(totFuelCost/nKm,2)):''}
+      ${nKm>0?`<tr><td class="rsc-lbl">💚 חיסכון מדלק</td><td class="rsc-sum ${totSaved>=0?'g':'r'}">${fmtILS(totSaved,0)}</td><td class="rsc-avg">${fmtILS(avgSaved,2)}</td></tr>`:''}
+      ${nBattPct>0?row('🔋 אחוז ניצול סוללה',fmtNum(sumBattPct/nBattPct,1)+'%',fmtNum(sumBattPct/nBattPct,1)+'%'):''}
+      ${nKmLeftPct>0?row('🔋 ק"מ נשאר %',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%'):''}
+      ${nMissingKm>0?row('🛣️ חוסר בק"מ',fmtNum(sumMissingKm,0),fmtNum(sumMissingKm/nMissingKm,0)):''}
+    </tbody></table>
+  </div>`;
+}
 function toggleRow(id){expandedRow=expandedRow===id?null:id;renderTable();}
 function tblToggleYear(y){tblExpandY[y]=tblExpandY[y]===false?true:false;LS.set('ev4_tblY',tblExpandY);renderTable();}
 function tblToggleMonth(ym){tblExpandM[ym]=tblExpandM[ym]===false?true:false;LS.set('ev4_tblM',tblExpandM);renderTable();}
@@ -2928,6 +3035,15 @@ function renderDashboard(){
   const qkm=tkm>0?tkw/tkm:0;
   let fuelTotal=0;for(const r of dr)fuelTotal+=r.kmDriven*(fuelPrice(r.date)/(stV("kpl")));
   const saved=fuelTotal-tco;
+  {
+    const _dst=$('dashSavingTotal');
+    if(_dst){
+      const savPct=fuelTotal>0?Math.round((1-(tco/fuelTotal))*100):null;
+      const pctTxt=savPct!=null?` <span style="font-size:.8rem">(${savPct>0?'חסכת '+savPct+'%':'הפסד '+Math.abs(savPct)+'%'})</span>`:'';
+      _dst.innerHTML=fuelTotal>0?(fmtILS(saved,0)+pctTxt):'';
+      _dst.style.color=saved>=0?'var(--ok)':'var(--er)';
+    }
+  }
   const chargeCap=stV("chargeKwh")||stV("batt");
   const avgRange=tkm>0&&tkw>0?(tkm/tkw)*chargeCap:0;
   const effPct=st.range>0&&avgRange>0?(avgRange/st.range*100):null;
@@ -2987,27 +3103,28 @@ function renderDashboard(){
       const w=16+i*6;
       coinHtml+=`<div class="sv-coin" style="width:${w}px;background:${i<coins?color:'rgba(255,255,255,.08)'}"></div>`;
     }
+    const savPct1=fuelTotal>0?Math.round((1-(tco/fuelTotal))*100):null;
     s1=_kpiWrap(saved>=0?'ok':'red','saving','kpi-wide2',`
       <div class="kv-label">חיסכון מצטבר מדלק</div>
       <div class="sv-body">
         <div style="flex:1">
-          <div class="kv-value kv-${saved>=0?'ok':'red'}" style="font-size:1.6rem">${fuelTotal>0?fmtILS(saved,0):'₪0'}</div>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <div class="kv-value kv-${saved>=0?'ok':'red'}" style="font-size:1.6rem">${fuelTotal>0?fmtILS(saved,0):'₪0'}</div>
+            ${savPct1!=null?`<div style="font-size:.8rem;font-weight:800;color:${savPct1>0?accentOk:accentRed}">${savPct1>0?'חסכת '+savPct1+'%':'הפסד '+Math.abs(savPct1)+'%'}</div>`:''}
+          </div>
           <div class="kv-sub">לעומת רכב דלק שקילה</div>
         </div>
         <div class="sv-coins">${coinHtml}</div>
       </div>`);
   })();
 
-  // ── s2: עלות כוללת — burn bar + אחוז חיסכון ──
+  // ── s2: עלות כוללת — burn bar ──
   (function(){
     const pct=fuelTotal>0?Math.min(100,(tco/fuelTotal)*100):50;
-    const savPct=fuelTotal>0?Math.round((1-(tco/fuelTotal))*100):null;
-    const savColor=savPct!=null&&savPct>0?accentOk:accentRed;
     s2=_kpiWrap('red','cost','kpi-wide2',`
       <div class="kv-label">סה"כ עלות חשמל</div>
       <div style="display:flex;align-items:baseline;gap:10px">
         <div class="kv-value kv-red" style="font-size:1.6rem">${fmtILS(tco,0)}</div>
-        ${savPct!=null?`<div style="font-size:.85rem;font-weight:800;color:${savColor}">${savPct>0?'חסכת '+savPct+'%':'הפסד '+Math.abs(savPct)+'%'}</div>`:''}
       </div>
       <div class="kv-sub">מתחילת המעקב · ${fuelTotal>0?'דלק שקילה: '+fmtILS(fuelTotal,0):''}</div>
       <div class="cb-track"><div class="cb-fill" style="width:${pct.toFixed(1)}%"></div></div>
