@@ -258,7 +258,11 @@ tr.rec-row-sel{background:rgba(0,200,150,.07);}
 .rsc-table tr:last-child td{border-bottom:none;}
 .rsc-lbl{text-align:right!important;color:var(--tx2);font-weight:600;font-size:.68rem;}
 .rsc-sum{font-weight:800;color:var(--tx);}
-.rsc-sum.g{color:var(--ok);}.rsc-sum.r{color:var(--er);}
+.rsc-sum.g,.rsc-avg.g{color:var(--ac);}
+.rsc-sum.b,.rsc-avg.b{color:var(--ac2);}
+.rsc-sum.y,.rsc-avg.y{color:var(--ac3);}
+.rsc-sum.r,.rsc-avg.r{color:var(--er);}
+.rsc-sum.ok,.rsc-avg.ok{color:var(--ok);}
 .rsc-avg{color:var(--tx3);}
 /* search bar */
 .search-wrap{position:relative;margin-bottom:10px;}
@@ -1317,6 +1321,7 @@ let selCo=cos.find(c=>c.isDefault)?.id||cos[0]?.id;
 let expandedRow=null; // id of expanded row
 let tblExpandY=LS.get('ev4_tblY',{}),tblExpandM=LS.get('ev4_tblM',{}); // מצב קיפול טבלה ראשית
 let selectedRecIds=new Set(); // רשומות נבחרות לסיכום/ממוצע
+let _yearIdsMap={}, _monthIdsMap={}; // ids לכל קבוצת שנה/חודש, לבחירה מרוכזת
 
 // ══════════════════════════════════════════
 // ══════════════════════════════════════════
@@ -1929,6 +1934,7 @@ function renderTable(hl=false){
 
   // ללא מיון + ללא סינון: קיפול לפי שנה > חודש > ימים
   const byYear={};
+  _yearIdsMap={};_monthIdsMap={};
   for(const r of sortedFiltered){
     const y=r.date.slice(0,4);const ym=r.date.slice(0,7);
     if(!byYear[y])byYear[y]={kwh:0,cost:0,km:0,months:{}};
@@ -1937,14 +1943,21 @@ function renderTable(hl=false){
     byYear[y].months[ym].days[r.date].recs.push(r);
     byYear[y].kwh+=(r.kwh||0);byYear[y].cost+=(r.cost||0);byYear[y].km+=(r.kmDriven>0?r.kmDriven:0);
     byYear[y].months[ym].kwh+=(r.kwh||0);byYear[y].months[ym].cost+=(r.cost||0);byYear[y].months[ym].km+=(r.kmDriven>0?r.kmDriven:0);
+    (_yearIdsMap[y]=_yearIdsMap[y]||[]).push(r.id);
+    (_monthIdsMap[ym]=_monthIdsMap[ym]||[]).push(r.id);
   }
   const years=Object.keys(byYear).sort().reverse();
   let html='';
+  const _partialGrp=[];
   for(const y of years){
     const yd=byYear[y];const nM=Object.keys(yd.months).length;
     const yOpen=tblExpandY[y]!==false;
+    const yIds=_yearIdsMap[y]||[];
+    const yAllSel=yIds.length>0&&yIds.every(id=>selectedRecIds.has(id));
+    const yAnySel=yIds.some(id=>selectedRecIds.has(id));
+    if(yAnySel&&!yAllSel)_partialGrp.push(`y_${y}`);
     html+=`<tr style="background:rgba(59,130,246,.1);cursor:pointer;border-bottom:1px solid rgba(59,130,246,.3)" onclick="tblToggleYear('${y}')">
-      <td></td>
+      <td style="padding:7px 3px;text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="rsel-cb" data-grp="y_${y}" ${yAllSel?'checked':''} onchange="toggleGroupSelect('y','${y}')"></td>
       <td style="padding:7px 10px;font-weight:700;color:var(--ac2)" colspan="2">
         <span id="tya_${y}" style="margin-left:5px">${yOpen?'▾':'▸'}</span>${y}
         <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nM} חודשים</span>
@@ -1959,8 +1972,12 @@ function renderTable(hl=false){
     for(const ym of months){
       const md=yd.months[ym];const [,mo]=ym.split('-');const mLabel=mo+'/'+y;
       const nD=Object.keys(md.days).length;const mKey=ym.replace('-','_');const mOpen=tblExpandM[ym]!==false;
+      const mIds=_monthIdsMap[ym]||[];
+      const mAllSel=mIds.length>0&&mIds.every(id=>selectedRecIds.has(id));
+      const mAnySel=mIds.some(id=>selectedRecIds.has(id));
+      if(mAnySel&&!mAllSel)_partialGrp.push(`m_${ym}`);
       html+=`<tr style="background:var(--sf2);cursor:pointer;border-bottom:1px solid var(--bd)" onclick="tblToggleMonth('${ym}')">
-        <td></td>
+        <td style="padding:6px 3px;text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="rsel-cb" data-grp="m_${ym}" ${mAllSel?'checked':''} onchange="toggleGroupSelect('m','${ym}')"></td>
         <td style="padding:6px 10px;padding-right:22px;font-weight:600;color:var(--tx2)" colspan="2">
           <span id="tma_${mKey}" style="margin-left:5px">${mOpen?'▾':'▸'}</span>${mLabel}
           <span style="font-size:.62rem;color:var(--tx3);font-weight:400;margin-right:6px">${nD} ימים</span>
@@ -1982,9 +1999,17 @@ function renderTable(hl=false){
     }
   }
   $('mainBody').innerHTML=html;
+  for(const grp of _partialGrp){const el=document.querySelector(`input[data-grp="${grp}"]`);if(el)el.indeterminate=true;}
   renderRecSelSummary();_syncSelAllChk();
 }
 
+function toggleGroupSelect(type,key){
+  const ids=type==='y'?(_yearIdsMap[key]||[]):(_monthIdsMap[key]||[]);
+  const allSel=ids.length>0&&ids.every(id=>selectedRecIds.has(id));
+  if(allSel){for(const id of ids)selectedRecIds.delete(id);}
+  else{for(const id of ids)selectedRecIds.add(id);}
+  renderTable();
+}
 function toggleRecSelect(id){
   if(selectedRecIds.has(id))selectedRecIds.delete(id);else selectedRecIds.add(id);
   const row=document.querySelector(`input.rsel-cb[data-id="${id}"]`)?.closest('tr');
@@ -2043,8 +2068,8 @@ function renderRecSelSummary(){
   const avgRateW=totKwh>0?totCost/totKwh:0;
   const costPerKm=totKm>0?totCost/totKm:0;
   const kwhPer100=totKm>0?(totKwh/totKm)*100:0;
-  function row(lbl,sum,avg){
-    return `<tr><td class="rsc-lbl">${lbl}</td><td class="rsc-sum">${sum}</td><td class="rsc-avg">${avg}</td></tr>`;
+  function row(lbl,sum,avg,cls=''){
+    return `<tr><td class="rsc-lbl">${lbl}</td><td class="rsc-sum ${cls}">${sum}</td><td class="rsc-avg ${cls}">${avg}</td></tr>`;
   }
   bar.style.display='';
   bar.innerHTML=`<div class="card" style="margin-bottom:8px;border:1px solid var(--ac);padding:10px 10px">
@@ -2053,20 +2078,20 @@ function renderRecSelSummary(){
     </div>
     ${minD?`<div style="font-size:.65rem;color:var(--tx3);margin-bottom:6px">📅 ${fd(minD)} – ${fd(maxD)}</div>`:''}
     <table class="rsc-table"><thead><tr><th></th><th>סה"כ</th><th>ממוצע</th></tr></thead><tbody>
-      ${row('⚡ קו"ש',fmtNum(totKwh,2),fmtNum(avgKwh,2))}
-      ${row('💰 עלות',fmtILS(totCost,2),fmtILS(avgCost,2))}
-      ${nKm>0?row('🛣️ ק"מ',fmtNum(totKm,0),fmtNum(avgKm,1)):''}
-      ${nRate>0?row('💰 תעריף',(sumRate/nRate).toFixed(3),(sumRate/nRate).toFixed(3)):''}
-      ${totKwh>0?row('₪/קו"ש (משוקלל)',avgRateW.toFixed(3),avgRateW.toFixed(3)):''}
-      ${nKm>0?row('₪/ק"מ',fmtILS(costPerKm,4),fmtILS(costPerKm,4)):''}
-      ${nKm>0?row('⚡ צריכת חשמל',fmtNum(kwhPer100,2),fmtNum(kwhPer100,2)):''}
-      ${nPer100>0?row('🚗 1 ל-100 (שקילות)',fmtNum(sumPer100/nPer100,1),fmtNum(sumPer100/nPer100,1)):''}
-      ${nFuelKm>0?row('⛽ מחיר דלק לק"מ',fmtILS(sumFuelKm/nFuelKm,4),fmtILS(sumFuelKm/nFuelKm,4)):''}
-      ${nKm>0?row('⛽ דלק שקילה',fmtILS(totFuelCost,0),fmtILS(totFuelCost/nKm,2)):''}
-      ${nKm>0?`<tr><td class="rsc-lbl">💚 חיסכון מדלק</td><td class="rsc-sum ${totSaved>=0?'g':'r'}">${fmtILS(totSaved,0)}</td><td class="rsc-avg">${fmtILS(avgSaved,2)}</td></tr>`:''}
-      ${nBattPct>0?row('🔋 אחוז ניצול סוללה',fmtNum(sumBattPct/nBattPct,1)+'%',fmtNum(sumBattPct/nBattPct,1)+'%'):''}
-      ${nKmLeftPct>0?row('🔋 ק"מ נשאר %',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%'):''}
-      ${nMissingKm>0?row('🛣️ חוסר בק"מ',fmtNum(sumMissingKm,0),fmtNum(sumMissingKm/nMissingKm,0)):''}
+      ${row('⚡ קו"ש',fmtNum(totKwh,2),fmtNum(avgKwh,2),'g')}
+      ${row('💰 עלות',fmtILS(totCost,2),fmtILS(avgCost,2),'y')}
+      ${nKm>0?row('🛣️ ק"מ',fmtNum(totKm,0),fmtNum(avgKm,1),'b'):''}
+      ${nRate>0?row('💰 תעריף',(sumRate/nRate).toFixed(3),(sumRate/nRate).toFixed(3),'y'):''}
+      ${totKwh>0?row('₪/קו"ש (משוקלל)',avgRateW.toFixed(3),avgRateW.toFixed(3),'y'):''}
+      ${nKm>0?row('₪/ק"מ',fmtILS(costPerKm,4),fmtILS(costPerKm,4),'y'):''}
+      ${nKm>0?row('⚡ צריכת חשמל',fmtNum(kwhPer100,2),fmtNum(kwhPer100,2),'b'):''}
+      ${nPer100>0?row('🚗 1 ל-100 (שקילות)',fmtNum(sumPer100/nPer100,1),fmtNum(sumPer100/nPer100,1),'b'):''}
+      ${nFuelKm>0?row('⛽ מחיר דלק לק"מ',fmtILS(sumFuelKm/nFuelKm,4),fmtILS(sumFuelKm/nFuelKm,4),'r'):''}
+      ${nKm>0?row('⛽ דלק שקילה',fmtILS(totFuelCost,0),fmtILS(totFuelCost/nKm,2),'r'):''}
+      ${nKm>0?`<tr><td class="rsc-lbl">💚 חיסכון מדלק</td><td class="rsc-sum ${totSaved>=0?'ok':'r'}">${fmtILS(totSaved,0)}</td><td class="rsc-avg ${totSaved>=0?'ok':'r'}">${fmtILS(avgSaved,2)}</td></tr>`:''}
+      ${nBattPct>0?row('🔋 אחוז ניצול סוללה',fmtNum(sumBattPct/nBattPct,1)+'%',fmtNum(sumBattPct/nBattPct,1)+'%','b'):''}
+      ${nKmLeftPct>0?row('🔋 ק"מ נשאר %',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%',fmtNum(sumKmLeftPct/nKmLeftPct,1)+'%','g'):''}
+      ${nMissingKm>0?row('🛣️ חוסר בק"מ',fmtNum(sumMissingKm,0),fmtNum(sumMissingKm/nMissingKm,0),'r'):''}
     </tbody></table>
   </div>`;
 }
