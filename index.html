@@ -1356,7 +1356,7 @@ function fmtKwh(n, dec=1) { return n==null?'—': fmtNum(n,dec)+' קו"ש'; }
 function fmtKm(n, dec=0) { return n==null?'—': fmtNum(n,dec)+' ק"מ'; }
 
 function fd(iso){return iso?iso.split('-').reverse().join('/'):''}
-function today(){return new Date().toISOString().slice(0,10)}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function dl(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 
 // ══════════════════════════════════════════
@@ -4182,6 +4182,7 @@ function saveFuel(){
   LS.set('ev4_fuel',fuelRates);closeModal('mFuel');renderFuelHist();toast('✅ מחיר דלק עודכן');
 }
 async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
+async function delHR(d){if(!await confirmAsync('מחק?'))return;homeRates=homeRates.filter(h=>h.date!==d);LS.set('ev4_hr',homeRates);renderRates();}
 
 // ══════════════════════════════════════════
 // ══════════════════════════════════════════
