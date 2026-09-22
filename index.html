@@ -6192,6 +6192,20 @@ function _diffData(a,b){
   const aKm=ar.length?Math.max(...ar.map(r=>r.kmTotal||0)):0;
   const bKm=br.length?Math.max(...br.map(r=>r.kmTotal||0)):0;
   if(aKm!==bKm)diffs.push(`אודומטר: ${bKm.toLocaleString()}→${aKm.toLocaleString()} ק"מ`);
+  // תעריף חשמל — לפי הרשומה העדכנית ביותר
+  const aHR=[...(a.homeRates||[])].sort((x,y)=>y.date.localeCompare(x.date));
+  const bHR=[...(b.homeRates||[])].sort((x,y)=>y.date.localeCompare(x.date));
+  const aHRL=aHR[0],bHRL=bHR[0];
+  if(aHR.length!==bHR.length||aHRL?.rate!==bHRL?.rate||aHRL?.date!==bHRL?.date){
+    diffs.push(aHRL&&bHRL?`תעריף חשמל: ₪${bHRL.rate.toFixed(3)}→₪${aHRL.rate.toFixed(3)}`:`תעריפי חשמל: ${bHR.length}→${aHR.length}`);
+  }
+  // מחיר דלק — לפי הרשומה העדכנית ביותר
+  const aFR=[...(a.fuelRates||[])].sort((x,y)=>y.date.localeCompare(x.date));
+  const bFR=[...(b.fuelRates||[])].sort((x,y)=>y.date.localeCompare(x.date));
+  const aFRL=aFR[0],bFRL=bFR[0];
+  if(aFR.length!==bFR.length||aFRL?.price!==bFRL?.price||aFRL?.date!==bFRL?.date){
+    diffs.push(aFRL&&bFRL?`מחיר דלק: ₪${bFRL.price.toFixed(2)}→₪${aFRL.price.toFixed(2)}`:`מחירי דלק: ${bFR.length}→${aFR.length}`);
+  }
   return diffs.length?diffs.join(' · '):'זהה לגרסה הנוכחית';
 }
 
