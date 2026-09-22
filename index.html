@@ -4181,8 +4181,8 @@ function saveFuel(){
   fuelRates.sort((a,b)=>a.date.localeCompare(b.date));
   LS.set('ev4_fuel',fuelRates);closeModal('mFuel');renderFuelHist();toast('✅ מחיר דלק עודכן');
 }
-async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();}
-async function delHR(d){if(!await confirmAsync('מחק?'))return;homeRates=homeRates.filter(h=>h.date!==d);LS.set('ev4_hr',homeRates);renderRates();}
+async function delFuel(d){if(!await confirmAsync('מחק?'))return;fuelRates=fuelRates.filter(h=>h.date!==d);LS.set('ev4_fuel',fuelRates);renderFuelHist();gdAutoSave();}
+async function delHR(d){if(!await confirmAsync('מחק?'))return;homeRates=homeRates.filter(h=>h.date!==d);LS.set('ev4_hr',homeRates);renderRates();gdAutoSave();}
 
 // ══════════════════════════════════════════
 // ══════════════════════════════════════════
