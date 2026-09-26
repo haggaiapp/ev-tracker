@@ -5833,7 +5833,6 @@ function gdLogout(){
 // איסוף כל הנתונים
 function gdCollectData(){
   const _savedAt=Date.now();
-  LS.set('ev4_savedAt',_savedAt);
   return {recs,cos,homeRates,fuelRates,st,expenses,_savedAt,_version:DATA_VERSION,carBattery:LS.get('ev4_bat',null),carEff:LS.get('ev4_eff',null),theme:LS.get('ev4_theme','dark')};
 }
 
@@ -5846,7 +5845,8 @@ async function gdSaveData(retryCount=0){
   gdSyncing=true;gdDirty=false;
   gdSetStatus('💾 שומר...','var(--ac3)');gdSetHdrStatus('💾 שומר...');
   try{
-    const body=JSON.stringify(gdCollectData(),null,2);
+    const collected=gdCollectData();
+    const body=JSON.stringify(collected,null,2);
     const blob=new Blob([body],{type:'application/json'});
     if(gdDataFileId){
       // עדכון קיים
@@ -5865,6 +5865,8 @@ async function gdSaveData(retryCount=0){
     }
     // שמירת HTML
     await gdSaveHTML();
+    // רק אחרי הצלחה בפועל — עדכן את חותמת הזמן המקומית
+    LS.set('ev4_savedAt',collected._savedAt);
     gdClearDirty();
     gdAutoBackupOnChange();
     const now=new Date().toLocaleString('he-IL',{year:'2-digit',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
